@@ -33,6 +33,12 @@ export const Navbar = () => {
               Home
             </Link>
             <Link 
+              to="/why-freightshare" 
+              className={`text-sm font-medium transition-colors ${isActive('/why-freightshare') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Why FreightShare
+            </Link>
+            <Link 
               to="/how-it-works" 
               className={`text-sm font-medium transition-colors ${isActive('/how-it-works') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
@@ -75,6 +81,13 @@ export const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Home
+              </Link>
+              <Link 
+                to="/why-freightshare" 
+                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                Why FreightShare
               </Link>
               <Link 
                 to="/how-it-works" 
