@@ -14,16 +14,452 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      loads: {
+        Row: {
+          cargo_type: Database["public"]["Enums"]["cargo_type"]
+          created_at: string
+          delivery_date_from: string
+          delivery_date_to: string
+          destination_city: string
+          destination_country: string
+          id: string
+          notes: string | null
+          origin_city: string
+          origin_country: string
+          pallets: number
+          pickup_date_from: string
+          pickup_date_to: string
+          price: number | null
+          pricing_type: Database["public"]["Enums"]["pricing_type"]
+          shipper_id: string
+          status: Database["public"]["Enums"]["shipment_status"]
+          updated_at: string
+        }
+        Insert: {
+          cargo_type?: Database["public"]["Enums"]["cargo_type"]
+          created_at?: string
+          delivery_date_from: string
+          delivery_date_to: string
+          destination_city: string
+          destination_country: string
+          id?: string
+          notes?: string | null
+          origin_city: string
+          origin_country: string
+          pallets: number
+          pickup_date_from: string
+          pickup_date_to: string
+          price?: number | null
+          pricing_type?: Database["public"]["Enums"]["pricing_type"]
+          shipper_id: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          updated_at?: string
+        }
+        Update: {
+          cargo_type?: Database["public"]["Enums"]["cargo_type"]
+          created_at?: string
+          delivery_date_from?: string
+          delivery_date_to?: string
+          destination_city?: string
+          destination_country?: string
+          id?: string
+          notes?: string | null
+          origin_city?: string
+          origin_country?: string
+          pallets?: number
+          pickup_date_from?: string
+          pickup_date_to?: string
+          price?: number | null
+          pricing_type?: Database["public"]["Enums"]["pricing_type"]
+          shipper_id?: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+          shipment_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          shipment_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          carrier_id: string
+          created_at: string
+          id: string
+          is_accepted: boolean
+          load_id: string
+          message: string | null
+          price: number
+          route_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          created_at?: string
+          id?: string
+          is_accepted?: boolean
+          load_id: string
+          message?: string | null
+          price: number
+          route_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          created_at?: string
+          id?: string
+          is_accepted?: boolean
+          load_id?: string
+          message?: string | null
+          price?: number
+          route_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_name: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rated_id: string
+          rater_id: string
+          score: number
+          shipment_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_id: string
+          rater_id: string
+          score: number
+          shipment_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_id?: string
+          rater_id?: string
+          score?: number
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          available_pallets: number
+          city: string
+          country: string
+          created_at: string
+          id: string
+          route_id: string
+          stop_order: number
+        }
+        Insert: {
+          available_pallets: number
+          city: string
+          country: string
+          created_at?: string
+          id?: string
+          route_id: string
+          stop_order: number
+        }
+        Update: {
+          available_pallets?: number
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          route_id?: string
+          stop_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          available_pallets: number
+          carrier_id: string
+          created_at: string
+          departure_date_from: string
+          departure_date_to: string
+          destination_city: string
+          destination_country: string
+          id: string
+          is_active: boolean
+          origin_city: string
+          origin_country: string
+          updated_at: string
+        }
+        Insert: {
+          available_pallets: number
+          carrier_id: string
+          created_at?: string
+          departure_date_from: string
+          departure_date_to: string
+          destination_city: string
+          destination_country: string
+          id?: string
+          is_active?: boolean
+          origin_city: string
+          origin_country: string
+          updated_at?: string
+        }
+        Update: {
+          available_pallets?: number
+          carrier_id?: string
+          created_at?: string
+          departure_date_from?: string
+          departure_date_to?: string
+          destination_city?: string
+          destination_country?: string
+          id?: string
+          is_active?: boolean
+          origin_city?: string
+          origin_country?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shipment_timestamps: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          shipment_id: string
+          status: Database["public"]["Enums"]["shipment_status"]
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shipment_id: string
+          status: Database["public"]["Enums"]["shipment_status"]
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shipment_id?: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_timestamps_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          carrier_id: string
+          created_at: string
+          final_price: number
+          id: string
+          load_id: string
+          offer_id: string
+          payment_reference: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          shipper_id: string
+          status: Database["public"]["Enums"]["shipment_status"]
+          terms_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          created_at?: string
+          final_price: number
+          id?: string
+          load_id: string
+          offer_id: string
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipper_id: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          terms_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          created_at?: string
+          final_price?: number
+          id?: string
+          load_id?: string
+          offer_id?: string
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipper_id?: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          terms_version?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "shipper" | "carrier" | "admin"
+      cargo_type:
+        | "general"
+        | "fragile"
+        | "refrigerated"
+        | "hazardous"
+        | "oversized"
+        | "livestock"
+        | "vehicles"
+        | "other"
+      payment_status: "pending" | "paid" | "completed" | "refunded"
+      pricing_type: "fixed" | "open_to_offers"
+      shipment_status:
+        | "posted"
+        | "accepted"
+        | "paid"
+        | "picked_up"
+        | "delivered"
+        | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +586,28 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["shipper", "carrier", "admin"],
+      cargo_type: [
+        "general",
+        "fragile",
+        "refrigerated",
+        "hazardous",
+        "oversized",
+        "livestock",
+        "vehicles",
+        "other",
+      ],
+      payment_status: ["pending", "paid", "completed", "refunded"],
+      pricing_type: ["fixed", "open_to_offers"],
+      shipment_status: [
+        "posted",
+        "accepted",
+        "paid",
+        "picked_up",
+        "delivered",
+        "completed",
+      ],
+    },
   },
 } as const
