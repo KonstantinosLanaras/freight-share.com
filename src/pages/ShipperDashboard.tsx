@@ -16,11 +16,14 @@ import {
   LogOut,
   Menu,
   X,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import { ShipperVerificationForm } from '@/components/verification/ShipperVerificationForm';
 
 interface Load {
   id: string;
@@ -39,6 +42,7 @@ interface Load {
 interface Profile {
   full_name: string | null;
   company_name: string | null;
+  verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -55,6 +59,7 @@ export default function ShipperDashboard() {
   const [loads, setLoads] = useState<Load[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -72,11 +77,11 @@ export default function ShipperDashboard() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, company_name')
+        .select('full_name, company_name, verification_status')
         .eq('id', user.id)
         .maybeSingle();
       
-      setProfile(profileData);
+      setProfile(profileData as Profile | null);
 
       // Fetch loads
       const { data: loadsData, error } = await supabase
@@ -257,6 +262,50 @@ export default function ShipperDashboard() {
                   </Link>
                 </Button>
               </div>
+
+              {/* Verification Prompt - shown when shipper needs to complete business details */}
+              {profile?.verification_status !== 'verified' && !showVerificationForm && (
+                <Card className="mb-8 border-l-4 border-l-primary bg-primary/5">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                          <ShieldCheck className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">
+                            Complete Business Details
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Add your business details to proceed with payments when you accept carrier offers.
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="default" onClick={() => setShowVerificationForm(true)}>
+                        <ShieldCheck className="h-4 w-4 mr-2" />
+                        Add Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Verification Form */}
+              {showVerificationForm && profile?.verification_status !== 'verified' && (
+                <div className="mb-8">
+                  <Button 
+                    variant="ghost" 
+                    className="mb-4"
+                    onClick={() => setShowVerificationForm(false)}
+                  >
+                    ← Back to Dashboard
+                  </Button>
+                  <ShipperVerificationForm onSuccess={() => {
+                    setShowVerificationForm(false);
+                    fetchData();
+                  }} />
+                </div>
+              )}
 
               {/* Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
