@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,6 @@ import {
   Package, 
   Plus, 
   TrendingUp, 
-  Clock, 
   CheckCircle, 
   Truck,
   ArrowRight,
@@ -17,66 +16,124 @@ import {
   Menu,
   X,
   MapPin,
-  Euro
+  Euro,
+  Loader2
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
-// Mock data for demo
-const mockRoutes = [
-  {
-    id: '1',
-    origin: 'Rotterdam, NL',
-    destination: 'Frankfurt, DE',
-    stops: ['Düsseldorf, DE'],
-    capacity: 18,
-    departure: 'Dec 19-20',
-    matches: 4,
-  },
-  {
-    id: '2',
-    origin: 'Amsterdam, NL',
-    destination: 'Milan, IT',
-    stops: ['Brussels, BE', 'Lyon, FR'],
-    capacity: 24,
-    departure: 'Dec 21-22',
-    matches: 7,
-  },
-];
+interface Route {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  destination_city: string;
+  destination_country: string;
+  available_pallets: number;
+  departure_date_from: string;
+  departure_date_to: string;
+  is_active: boolean;
+}
 
-const mockAvailableLoads = [
-  {
-    id: '1',
-    origin: 'Rotterdam, NL',
-    destination: 'Munich, DE',
-    pallets: 12,
-    price: 850,
-    pickupDate: 'Dec 20-22',
-    shipper: 'Acme Corp',
-    rating: 4.8,
-  },
-  {
-    id: '2',
-    origin: 'Amsterdam, NL',
-    destination: 'Paris, FR',
-    pallets: 8,
-    price: 620,
-    pickupDate: 'Dec 18-19',
-    shipper: 'Global Trade Ltd',
-    rating: 4.5,
-  },
-  {
-    id: '3',
-    origin: 'Brussels, BE',
-    destination: 'Frankfurt, DE',
-    pallets: 6,
-    price: 450,
-    pickupDate: 'Dec 19',
-    shipper: 'EuroShip GmbH',
-    rating: 4.9,
-  },
-];
+interface Load {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  destination_city: string;
+  destination_country: string;
+  pallets: number;
+  price: number | null;
+  pricing_type: string;
+  pickup_date_from: string;
+  pickup_date_to: string;
+  shipper_id: string;
+}
+
+interface Profile {
+  full_name: string | null;
+  company_name: string | null;
+}
 
 export default function CarrierDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [availableLoads, setAvailableLoads] = useState<Load[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0 });
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, company_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      setProfile(profileData);
+
+      // Fetch carrier's routes
+      const { data: routesData } = await supabase
+        .from('routes')
+        .select('*')
+        .eq('carrier_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      setRoutes(routesData || []);
+
+      // Fetch available loads (posted status, not by this user)
+      const { data: loadsData } = await supabase
+        .from('loads')
+        .select('*')
+        .eq('status', 'posted')
+        .neq('shipper_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      setAvailableLoads(loadsData || []);
+
+      // Calculate stats
+      setStats({
+        activeRoutes: routesData?.length || 0,
+        matchedLoads: loadsData?.length || 0,
+        completed: 0,
+        totalEarned: 0
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const formatDateRange = (from: string, to: string) => {
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    if (from === to) {
+      return format(fromDate, 'MMM d');
+    }
+    return `${format(fromDate, 'MMM d')}-${format(toDate, 'd')}`;
+  };
+
+  const firstName = profile?.full_name?.split(' ')[0] || profile?.company_name || 'there';
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,10 +223,19 @@ export default function CarrierDashboard() {
                 <User className="h-5 w-5 text-sidebar-accent-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-sidebar-foreground truncate">Transport Co</div>
-                <div className="text-xs text-sidebar-foreground/60 truncate">carrier@example.com</div>
+                <div className="text-sm font-medium text-sidebar-foreground truncate">
+                  {profile?.full_name || profile?.company_name || 'User'}
+                </div>
+                <div className="text-xs text-sidebar-foreground/60 truncate">
+                  {user?.email}
+                </div>
               </div>
-              <Button variant="ghost" size="icon" className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                onClick={handleSignOut}
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -188,165 +254,187 @@ export default function CarrierDashboard() {
       {/* Main Content */}
       <main className="lg:pl-64 pt-16 lg:pt-0">
         <div className="p-6 lg:p-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
-                Welcome back! 🚚
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Find loads that match your routes and grow your business.
-              </p>
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-            <Button variant="carrier" asChild>
-              <Link to="/dashboard/carrier/routes/new">
-                <Plus className="h-4 w-4" />
-                Post New Route
-              </Link>
-            </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-carrier/10 flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-carrier" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-foreground">2</div>
-                    <div className="text-sm text-muted-foreground">Active Routes</div>
-                  </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
+                    Welcome back, {firstName}! 🚚
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    Find loads that match your routes and grow your business.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                    <Package className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-foreground">11</div>
-                    <div className="text-sm text-muted-foreground">Matched Loads</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <CheckCircle className="h-6 w-6 text-success" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-foreground">24</div>
-                    <div className="text-sm text-muted-foreground">Completed</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Euro className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-foreground">€15.2k</div>
-                    <div className="text-sm text-muted-foreground">Total Earned</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* My Routes */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>My Routes</CardTitle>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard/carrier/routes">
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-1" />
+                <Button variant="carrier" asChild>
+                  <Link to="/dashboard/carrier/routes/new">
+                    <Plus className="h-4 w-4" />
+                    Post New Route
                   </Link>
                 </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockRoutes.map((route) => (
-                    <div 
-                      key={route.id}
-                      className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="font-medium text-foreground">
-                          {route.origin} → {route.destination}
-                        </div>
-                        <Badge variant="secondary">
-                          {route.matches} matches
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {route.stops.length > 0 && (
-                          <span>via {route.stops.join(', ')} · </span>
-                        )}
-                        {route.capacity} pallets · {route.departure}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Available Loads */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Available Loads</CardTitle>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard/carrier/loads">
-                    Browse All
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockAvailableLoads.map((load) => (
-                    <div 
-                      key={load.id}
-                      className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <div className="font-medium text-foreground">
-                            {load.origin} → {load.destination}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {load.pallets} pallets · {load.pickupDate}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-foreground">€{load.price}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {load.shipper} · {load.rating}★
-                          </div>
-                        </div>
+              {/* Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <Card>
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-carrier/10 flex items-center justify-center">
+                        <MapPin className="h-6 w-6 text-carrier" />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full mt-2">
-                        Make Offer
-                      </Button>
+                      <div>
+                        <div className="text-2xl font-bold text-foreground">{stats.activeRoutes}</div>
+                        <div className="text-sm text-muted-foreground">Active Routes</div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                        <Package className="h-6 w-6 text-accent" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-foreground">{stats.matchedLoads}</div>
+                        <div className="text-sm text-muted-foreground">Available Loads</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                        <CheckCircle className="h-6 w-6 text-success" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-foreground">{stats.completed}</div>
+                        <div className="text-sm text-muted-foreground">Completed</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Euro className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-foreground">€{stats.totalEarned.toLocaleString()}</div>
+                        <div className="text-sm text-muted-foreground">Total Earned</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* My Routes */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>My Routes</CardTitle>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/dashboard/carrier/routes">
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {routes.length === 0 ? (
+                      <div className="text-center py-8">
+                        <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-muted-foreground mb-3">No routes posted yet</p>
+                        <Button variant="carrier" size="sm" asChild>
+                          <Link to="/dashboard/carrier/routes/new">
+                            <Plus className="h-4 w-4" />
+                            Post Route
+                          </Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {routes.map((route) => (
+                          <div 
+                            key={route.id}
+                            className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="font-medium text-foreground">
+                                {route.origin_city}, {route.origin_country} → {route.destination_city}, {route.destination_country}
+                              </div>
+                              <Badge variant="secondary">Active</Badge>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {route.available_pallets} pallets · {formatDateRange(route.departure_date_from, route.departure_date_to)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Available Loads */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Available Loads</CardTitle>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/dashboard/carrier/loads">
+                        Browse All
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {availableLoads.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-muted-foreground">No loads available right now</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {availableLoads.map((load) => (
+                          <div 
+                            key={load.id}
+                            className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <div className="font-medium text-foreground">
+                                  {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {load.pallets} pallets · {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold text-foreground">
+                                  {load.price ? `€${load.price}` : 'Open'}
+                                </div>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm" className="w-full mt-2">
+                              Make Offer
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>
