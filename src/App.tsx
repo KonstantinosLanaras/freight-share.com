@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ShipperDashboard from "./pages/ShipperDashboard";
@@ -25,11 +26,31 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard/shipper" element={<ShipperDashboard />} />
-            <Route path="/dashboard/carrier" element={<CarrierDashboard />} />
-            <Route path="/dashboard/shipper/loads/new" element={<PostLoad />} />
-            <Route path="/dashboard/carrier/routes/new" element={<PostRoute />} />
-            <Route path="/shipment/:id" element={<ShipmentDetails />} />
+            <Route path="/dashboard/shipper" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <ShipperDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/loads/new" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <PostLoad />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/routes/new" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <PostRoute />
+              </ProtectedRoute>
+            } />
+            <Route path="/shipment/:id" element={
+              <ProtectedRoute>
+                <ShipmentDetails />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

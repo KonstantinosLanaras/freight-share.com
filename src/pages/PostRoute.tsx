@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RouteStop {
   id: string;
@@ -22,7 +24,9 @@ const countries = [
 
 export default function PostRoute() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stops, setStops] = useState<RouteStop[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
@@ -50,9 +54,65 @@ export default function PostRoute() {
     ));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info('Backend integration required. Enable Lovable Cloud to save routes.');
+    
+    if (!user) {
+      toast.error('You must be logged in to post a route');
+      return;
+    }
+
+    if (!formData.originCountry || !formData.destinationCountry) {
+      toast.error('Please select both origin and destination countries');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create the route
+      const { data: routeData, error: routeError } = await supabase
+        .from('routes')
+        .insert({
+          carrier_id: user.id,
+          origin_city: formData.originCity,
+          origin_country: formData.originCountry,
+          destination_city: formData.destinationCity,
+          destination_country: formData.destinationCountry,
+          departure_date_from: formData.departureStart,
+          departure_date_to: formData.departureEnd,
+          available_pallets: parseInt(formData.originPallets),
+        })
+        .select()
+        .single();
+
+      if (routeError) throw routeError;
+
+      // Create route stops if any
+      if (stops.length > 0) {
+        const stopsToInsert = stops.map((stop, index) => ({
+          route_id: routeData.id,
+          city: stop.city,
+          country: stop.country,
+          available_pallets: parseInt(stop.availablePallets) || 0,
+          stop_order: index + 1,
+        }));
+
+        const { error: stopsError } = await supabase
+          .from('route_stops')
+          .insert(stopsToInsert);
+
+        if (stopsError) throw stopsError;
+      }
+
+      toast.success('Route posted successfully!');
+      navigate('/dashboard/carrier');
+    } catch (error: any) {
+      console.error('Error posting route:', error);
+      toast.error(error.message || 'Failed to post route');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,6 +156,7 @@ export default function PostRoute() {
                     value={formData.originCity}
                     onChange={(e) => setFormData({ ...formData, originCity: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -103,6 +164,7 @@ export default function PostRoute() {
                   <Select
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select country" />
@@ -125,6 +187,7 @@ export default function PostRoute() {
                     value={formData.originPallets}
                     onChange={(e) => setFormData({ ...formData, originPallets: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -148,6 +211,7 @@ export default function PostRoute() {
                       type="button"
                       onClick={() => removeStop(stop.id)}
                       className="absolute top-2 right-2 p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      disabled={isSubmitting}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -161,6 +225,7 @@ export default function PostRoute() {
                           value={stop.city}
                           onChange={(e) => updateStop(stop.id, 'city', e.target.value)}
                           required
+                          disabled={isSubmitting}
                         />
                       </div>
                       <div>
@@ -168,6 +233,7 @@ export default function PostRoute() {
                         <Select
                           value={stop.country}
                           onValueChange={(value) => updateStop(stop.id, 'country', value)}
+                          disabled={isSubmitting}
                         >
                           <SelectTrigger className="mt-1">
                             <SelectValue placeholder="Select country" />
@@ -189,6 +255,7 @@ export default function PostRoute() {
                           value={stop.availablePallets}
                           onChange={(e) => updateStop(stop.id, 'availablePallets', e.target.value)}
                           required
+                          disabled={isSubmitting}
                         />
                       </div>
                     </div>
@@ -198,7 +265,7 @@ export default function PostRoute() {
             </Card>
           )}
 
-          <Button type="button" variant="outline" className="w-full" onClick={addStop}>
+          <Button type="button" variant="outline" className="w-full" onClick={addStop} disabled={isSubmitting}>
             <Plus className="h-4 w-4" />
             Add Stop
           </Button>
@@ -223,6 +290,7 @@ export default function PostRoute() {
                     value={formData.destinationCity}
                     onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -230,6 +298,7 @@ export default function PostRoute() {
                   <Select
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select country" />
@@ -265,6 +334,7 @@ export default function PostRoute() {
                     value={formData.departureStart}
                     onChange={(e) => setFormData({ ...formData, departureStart: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -276,6 +346,7 @@ export default function PostRoute() {
                     value={formData.departureEnd}
                     onChange={(e) => setFormData({ ...formData, departureEnd: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -284,12 +355,21 @@ export default function PostRoute() {
 
           {/* Submit */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)}>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" variant="carrier" className="flex-1">
-              <Truck className="h-4 w-4" />
-              Post Route
+            <Button type="submit" variant="carrier" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <Truck className="h-4 w-4" />
+                  Post Route
+                </>
+              )}
             </Button>
           </div>
         </form>

@@ -7,16 +7,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const cargoTypes = [
   { value: 'general', label: 'General Goods' },
   { value: 'fragile', label: 'Fragile' },
-  { value: 'perishable', label: 'Perishable' },
+  { value: 'refrigerated', label: 'Refrigerated' },
   { value: 'hazardous', label: 'Hazardous Materials' },
   { value: 'oversized', label: 'Oversized' },
   { value: 'livestock', label: 'Livestock' },
+  { value: 'vehicles', label: 'Vehicles' },
+  { value: 'other', label: 'Other' },
 ];
 
 const countries = [
@@ -26,7 +30,9 @@ const countries = [
 
 export default function PostLoad() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [openToOffers, setOpenToOffers] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
@@ -37,14 +43,54 @@ export default function PostLoad() {
     deliveryDateStart: '',
     deliveryDateEnd: '',
     pallets: '',
-    cargoType: '',
+    cargoType: 'general',
     fixedPrice: '',
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info('Backend integration required. Enable Lovable Cloud to save loads.');
+    
+    if (!user) {
+      toast.error('You must be logged in to post a load');
+      return;
+    }
+
+    if (!formData.originCountry || !formData.destinationCountry) {
+      toast.error('Please select both origin and destination countries');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.from('loads').insert({
+        shipper_id: user.id,
+        origin_city: formData.originCity,
+        origin_country: formData.originCountry,
+        destination_city: formData.destinationCity,
+        destination_country: formData.destinationCountry,
+        pickup_date_from: formData.pickupDateStart,
+        pickup_date_to: formData.pickupDateEnd,
+        delivery_date_from: formData.deliveryDateStart,
+        delivery_date_to: formData.deliveryDateEnd,
+        pallets: parseInt(formData.pallets),
+        cargo_type: formData.cargoType as any,
+        pricing_type: openToOffers ? 'open_to_offers' : 'fixed',
+        price: openToOffers ? null : parseFloat(formData.fixedPrice) || null,
+        notes: formData.notes || null,
+      });
+
+      if (error) throw error;
+
+      toast.success('Load posted successfully!');
+      navigate('/dashboard/shipper');
+    } catch (error: any) {
+      console.error('Error posting load:', error);
+      toast.error(error.message || 'Failed to post load');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -89,6 +135,7 @@ export default function PostLoad() {
                     value={formData.originCity}
                     onChange={(e) => setFormData({ ...formData, originCity: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -96,6 +143,7 @@ export default function PostLoad() {
                   <Select
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select country" />
@@ -120,6 +168,7 @@ export default function PostLoad() {
                     value={formData.destinationCity}
                     onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -127,6 +176,7 @@ export default function PostLoad() {
                   <Select
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select country" />
@@ -162,6 +212,7 @@ export default function PostLoad() {
                     value={formData.pickupDateStart}
                     onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -173,6 +224,7 @@ export default function PostLoad() {
                     value={formData.pickupDateEnd}
                     onChange={(e) => setFormData({ ...formData, pickupDateEnd: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -186,6 +238,7 @@ export default function PostLoad() {
                     value={formData.deliveryDateStart}
                     onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -197,6 +250,7 @@ export default function PostLoad() {
                     value={formData.deliveryDateEnd}
                     onChange={(e) => setFormData({ ...formData, deliveryDateEnd: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -225,6 +279,7 @@ export default function PostLoad() {
                     value={formData.pallets}
                     onChange={(e) => setFormData({ ...formData, pallets: e.target.value })}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -232,6 +287,7 @@ export default function PostLoad() {
                   <Select
                     value={formData.cargoType}
                     onValueChange={(value) => setFormData({ ...formData, cargoType: value })}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select type" />
@@ -267,6 +323,7 @@ export default function PostLoad() {
                 <Switch
                   checked={openToOffers}
                   onCheckedChange={setOpenToOffers}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -282,6 +339,7 @@ export default function PostLoad() {
                     className="mt-1"
                     value={formData.fixedPrice}
                     onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value })}
+                    disabled={isSubmitting}
                   />
                 </div>
               )}
@@ -303,17 +361,25 @@ export default function PostLoad() {
                 rows={4}
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                disabled={isSubmitting}
               />
             </CardContent>
           </Card>
 
           {/* Submit */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)}>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" variant="shipper" className="flex-1">
-              Post Load
+            <Button type="submit" variant="shipper" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                'Post Load'
+              )}
             </Button>
           </div>
         </form>
