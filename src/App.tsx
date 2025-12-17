@@ -12,6 +12,7 @@ import CarrierDashboard from "./pages/CarrierDashboard";
 import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
 import ShipmentDetails from "./pages/ShipmentDetails";
+import WhyFreightShare from "./pages/WhyFreightShare";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/why-freightshare" element={<WhyFreightShare />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
