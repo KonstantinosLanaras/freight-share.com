@@ -13,6 +13,7 @@ import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
 import ShipmentDetails from "./pages/ShipmentDetails";
 import WhyFreightShare from "./pages/WhyFreightShare";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,11 @@ const App = () => (
             <Route path="/shipment/:id" element={
               <ProtectedRoute>
                 <ShipmentDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminPanel />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

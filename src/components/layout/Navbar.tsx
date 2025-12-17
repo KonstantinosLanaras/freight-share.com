@@ -38,18 +38,6 @@ export const Navbar = () => {
             >
               Why FreightShare
             </Link>
-            <Link 
-              to="/how-it-works" 
-              className={`text-sm font-medium transition-colors ${isActive('/how-it-works') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              How It Works
-            </Link>
-            <Link 
-              to="/pricing" 
-              className={`text-sm font-medium transition-colors ${isActive('/pricing') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Pricing
-            </Link>
           </div>
 
           {/* Auth Buttons */}
@@ -88,20 +76,6 @@ export const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Why FreightShare
-              </Link>
-              <Link 
-                to="/how-it-works" 
-                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
-                onClick={() => setIsOpen(false)}
-              >
-                How It Works
-              </Link>
-              <Link 
-                to="/pricing" 
-                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
-                onClick={() => setIsOpen(false)}
-              >
-                Pricing
               </Link>
               <div className="flex gap-2 px-4 pt-2">
                 <Button variant="outline" className="flex-1" asChild>

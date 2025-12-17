@@ -17,11 +17,15 @@ import {
   X,
   MapPin,
   Euro,
-  Loader2
+  Loader2,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import { CarrierVerificationForm } from '@/components/verification/CarrierVerificationForm';
 
 interface Route {
   id: string;
@@ -52,6 +56,7 @@ interface Load {
 interface Profile {
   full_name: string | null;
   company_name: string | null;
+  verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
 }
 
 export default function CarrierDashboard() {
@@ -60,6 +65,7 @@ export default function CarrierDashboard() {
   const [availableLoads, setAvailableLoads] = useState<Load[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -77,11 +83,11 @@ export default function CarrierDashboard() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, company_name')
+        .select('full_name, company_name, verification_status')
         .eq('id', user.id)
         .maybeSingle();
       
-      setProfile(profileData);
+      setProfile(profileData as Profile | null);
 
       // Fetch carrier's routes
       const { data: routesData } = await supabase
@@ -277,6 +283,63 @@ export default function CarrierDashboard() {
                   </Link>
                 </Button>
               </div>
+
+              {/* Verification Banner */}
+              {profile?.verification_status !== 'verified' && !showVerificationForm && (
+                <Card className={`mb-8 border-l-4 ${profile?.verification_status === 'pending' ? 'border-l-warning bg-warning/5' : 'border-l-primary bg-primary/5'}`}>
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${profile?.verification_status === 'pending' ? 'bg-warning/20' : 'bg-primary/20'}`}>
+                          {profile?.verification_status === 'pending' ? (
+                            <ShieldCheck className="h-5 w-5 text-warning" />
+                          ) : (
+                            <ShieldAlert className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-foreground">
+                              {profile?.verification_status === 'pending' ? 'Verification in Progress' : 'Complete Business Verification'}
+                            </h3>
+                            {profile?.verification_status && (
+                              <VerificationBadge status={profile.verification_status} size="sm" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {profile?.verification_status === 'pending' 
+                              ? "We're reviewing your documents. You'll be notified once verification is complete."
+                              : 'Verify your business to accept paid shipments. This protects both you and your clients.'}
+                          </p>
+                        </div>
+                      </div>
+                      {profile?.verification_status !== 'pending' && (
+                        <Button variant="carrier" onClick={() => setShowVerificationForm(true)}>
+                          <ShieldCheck className="h-4 w-4 mr-2" />
+                          Get Verified
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Verification Form */}
+              {showVerificationForm && profile?.verification_status !== 'verified' && (
+                <div className="mb-8">
+                  <Button 
+                    variant="ghost" 
+                    className="mb-4"
+                    onClick={() => setShowVerificationForm(false)}
+                  >
+                    ← Back to Dashboard
+                  </Button>
+                  <CarrierVerificationForm onSuccess={() => {
+                    setShowVerificationForm(false);
+                    fetchData();
+                  }} />
+                </div>
+              )}
 
               {/* Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
