@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Package, ArrowLeft, Mail, Lock, User, Building } from 'lucide-react';
+import { Truck, Package, ArrowLeft, Mail, Lock, User, Building, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { z } from 'zod';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
 
+const emailSchema = z.string().email('Please enter a valid email address');
+const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user, role: userRole, signUp, signIn, loading: authLoading } = useAuth();
+  
   const [mode, setMode] = useState<AuthMode>('login');
   const [role, setRole] = useState<UserRole | null>(null);
   const [step, setStep] = useState<'role' | 'details'>('role');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -21,6 +31,14 @@ export default function Auth() {
     name: '',
     company: '',
   });
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (user && userRole) {
+      const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [user, userRole, navigate]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
@@ -40,11 +58,75 @@ export default function Auth() {
     setStep('details');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, show a message that backend is needed
-    toast.info('Backend integration required. Enable Lovable Cloud to continue.');
+    setIsSubmitting(true);
+
+    try {
+      // Validate inputs
+      emailSchema.parse(formData.email);
+      passwordSchema.parse(formData.password);
+      
+      if (mode === 'signup') {
+        nameSchema.parse(formData.name);
+        
+        if (!role) {
+          toast.error('Please select a role');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const { error } = await signUp(
+          formData.email, 
+          formData.password, 
+          formData.name, 
+          role, 
+          formData.company || undefined
+        );
+
+        if (error) {
+          if (error.message.includes('already registered')) {
+            toast.error('This email is already registered. Please log in instead.');
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success('Account created successfully!');
+          // Redirect will happen automatically via useEffect
+        }
+      } else {
+        const { error } = await signIn(formData.email, formData.password);
+        
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error('Invalid email or password. Please try again.');
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success('Welcome back!');
+          // Redirect will happen automatically via useEffect
+        }
+      }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast.error(err.errors[0].message);
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -201,6 +283,7 @@ export default function Auth() {
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
+                          disabled={isSubmitting}
                         />
                       </div>
                     </div>
@@ -216,6 +299,7 @@ export default function Auth() {
                           className="pl-10"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          disabled={isSubmitting}
                         />
                       </div>
                     </div>
@@ -234,6 +318,7 @@ export default function Auth() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -250,6 +335,7 @@ export default function Auth() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -259,8 +345,16 @@ export default function Auth() {
                   className="w-full" 
                   variant={role === 'carrier' ? 'carrier' : role === 'shipper' ? 'shipper' : 'default'}
                   size="lg"
+                  disabled={isSubmitting}
                 >
-                  {mode === 'login' ? 'Log In' : 'Create Account'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {mode === 'login' ? 'Logging in...' : 'Creating account...'}
+                    </>
+                  ) : (
+                    mode === 'login' ? 'Log In' : 'Create Account'
+                  )}
                 </Button>
               </form>
 
