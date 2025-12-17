@@ -3,7 +3,8 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Package, ArrowLeft, Mail, Lock, User, Building, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Truck, Package, ArrowLeft, Mail, Lock, User, Building, Loader2, Globe, ShieldCheck, Users, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
@@ -14,6 +15,14 @@ type UserRole = 'shipper' | 'carrier';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
+
+const EUROPEAN_COUNTRIES = [
+  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
+  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
+  'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
+  'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+  'Norway', 'Switzerland', 'United Kingdom'
+];
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -30,6 +39,7 @@ export default function Auth() {
     password: '',
     name: '',
     company: '',
+    country: '',
   });
 
   // Redirect authenticated users to their dashboard
@@ -76,12 +86,19 @@ export default function Auth() {
           return;
         }
 
+        if (!formData.country) {
+          toast.error('Please select your country');
+          setIsSubmitting(false);
+          return;
+        }
+
         const { error } = await signUp(
           formData.email, 
           formData.password, 
           formData.name, 
           role, 
-          formData.company || undefined
+          formData.company || undefined,
+          formData.country
         );
 
         if (error) {
@@ -150,23 +167,33 @@ export default function Auth() {
           </Link>
 
           <h1 className="text-4xl font-heading font-bold text-secondary-foreground mb-4">
-            The Trusted Third Party
+            Connect Directly.
             <br />
-            <span className="text-accent">for Freight</span>
+            <span className="text-accent">Ship Smarter.</span>
           </h1>
 
           <p className="text-secondary-foreground/70 text-lg max-w-md">
-            Join thousands of shippers and carriers who trust FreightShare for secure, transparent freight transactions.
+            The freight marketplace that connects shippers and carriers directly — with secure payments and transparent pricing.
           </p>
 
-          <div className="mt-12 grid grid-cols-2 gap-6">
-            <div className="bg-secondary-foreground/5 rounded-xl p-4">
-              <div className="text-2xl font-bold text-secondary-foreground">€2.5M+</div>
-              <div className="text-sm text-secondary-foreground/60">Secured Transactions</div>
+          <div className="mt-12 space-y-4">
+            <div className="flex items-center gap-3 text-secondary-foreground/80">
+              <div className="w-10 h-10 rounded-lg bg-secondary-foreground/10 flex items-center justify-center">
+                <Users className="h-5 w-5" />
+              </div>
+              <span>Direct shipper-carrier connections</span>
             </div>
-            <div className="bg-secondary-foreground/5 rounded-xl p-4">
-              <div className="text-2xl font-bold text-secondary-foreground">500+</div>
-              <div className="text-sm text-secondary-foreground/60">Active Companies</div>
+            <div className="flex items-center gap-3 text-secondary-foreground/80">
+              <div className="w-10 h-10 rounded-lg bg-secondary-foreground/10 flex items-center justify-center">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <span>Verified business partners</span>
+            </div>
+            <div className="flex items-center gap-3 text-secondary-foreground/80">
+              <div className="w-10 h-10 rounded-lg bg-secondary-foreground/10 flex items-center justify-center">
+                <Banknote className="h-5 w-5" />
+              </div>
+              <span>Secure in-platform payments</span>
             </div>
           </div>
         </div>
@@ -286,6 +313,27 @@ export default function Auth() {
                           disabled={isSubmitting}
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="country">Country <span className="text-destructive">*</span></Label>
+                      <Select
+                        value={formData.country}
+                        onValueChange={(value) => setFormData({ ...formData, country: value })}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <Globe className="h-4 w-4 text-muted-foreground mr-2" />
+                          <SelectValue placeholder="Select your country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {EUROPEAN_COUNTRIES.map((country) => (
+                            <SelectItem key={country} value={country}>
+                              {country}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div>

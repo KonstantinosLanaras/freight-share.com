@@ -9,7 +9,7 @@ interface AuthContextType {
   session: Session | null;
   role: AppRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: AppRole, companyName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role: AppRole, companyName?: string, country?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -71,7 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string, 
     fullName: string, 
     role: AppRole,
-    companyName?: string
+    companyName?: string,
+    country?: string
   ) => {
     const redirectUrl = `${window.location.origin}/`;
     
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           full_name: fullName,
           role: role,
           company_name: companyName,
+          country: country,
         }
       }
     });

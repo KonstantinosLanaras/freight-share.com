@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      carrier_verifications: {
+        Row: {
+          carrier_id: string
+          document_type: string
+          document_url: string
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_status"] | null
+          submitted_at: string | null
+        }
+        Insert: {
+          carrier_id: string
+          document_type: string
+          document_url: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"] | null
+          submitted_at?: string | null
+        }
+        Update: {
+          carrier_id?: string
+          document_type?: string
+          document_url?: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"] | null
+          submitted_at?: string | null
+        }
+        Relationships: []
+      }
       loads: {
         Row: {
           cargo_type: Database["public"]["Enums"]["cargo_type"]
@@ -163,33 +199,63 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          billing_address: string | null
           company_name: string | null
+          country: string | null
           created_at: string
           email: string
           full_name: string | null
           id: string
+          legal_company_name: string | null
           phone: string | null
+          registered_address: string | null
+          terms_accepted_at: string | null
+          terms_version: string | null
           updated_at: string
+          vat_number: string | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
         }
         Insert: {
           avatar_url?: string | null
+          billing_address?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
           email: string
           full_name?: string | null
           id: string
+          legal_company_name?: string | null
           phone?: string | null
+          registered_address?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
+          vat_number?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
         }
         Update: {
           avatar_url?: string | null
+          billing_address?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
           id?: string
+          legal_company_name?: string | null
           phone?: string | null
+          registered_address?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
+          vat_number?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
         }
         Relationships: []
       }
@@ -460,6 +526,7 @@ export type Database = {
         | "picked_up"
         | "delivered"
         | "completed"
+      verification_status: "unverified" | "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -608,6 +675,7 @@ export const Constants = {
         "delivered",
         "completed",
       ],
+      verification_status: ["unverified", "pending", "verified", "rejected"],
     },
   },
 } as const
