@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield, Zap, Users } from 'lucide-react';
+import { ArrowRight, Zap, Users, Route } from 'lucide-react';
 
 export const Hero = () => {
   return (
@@ -19,19 +19,18 @@ export const Hero = () => {
           {/* Left Content */}
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
-              <Shield className="h-4 w-4" />
-              Trusted by 500+ companies across Europe
+              <Route className="h-4 w-4" />
+              Direct Shipper-Carrier Matching
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground leading-tight animate-slide-up">
-              The Trusted{' '}
-              <span className="text-primary">Third Party</span>{' '}
-              for Freight
+              Connect Directly.{' '}
+              <span className="text-primary">Ship Smarter.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              FreightShare connects shippers with carriers through secure payments and transparent transactions. 
-              We handle the trust, so you can focus on moving freight.
+              FreightShare matches your loads directly with carriers on the right routes. 
+              Secure payments, transparent pricing, no middlemen.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
@@ -48,19 +47,19 @@ export const Hero = () => {
               </Button>
             </div>
 
-            {/* Trust Indicators */}
+            {/* Value Props */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-foreground">€2.5M+</div>
-                <div className="text-sm text-muted-foreground">Transactions Secured</div>
+                <div className="text-lg font-heading font-bold text-foreground">Direct Matching</div>
+                <div className="text-sm text-muted-foreground">No brokers or middlemen</div>
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-foreground">1,200+</div>
-                <div className="text-sm text-muted-foreground">Shipments Delivered</div>
+                <div className="text-lg font-heading font-bold text-foreground">Secure Escrow</div>
+                <div className="text-sm text-muted-foreground">Payment on delivery</div>
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-foreground">4.9★</div>
-                <div className="text-sm text-muted-foreground">Average Rating</div>
+                <div className="text-lg font-heading font-bold text-foreground">Fair Pricing</div>
+                <div className="text-sm text-muted-foreground">You set the terms</div>
               </div>
             </div>
           </div>
@@ -100,11 +99,11 @@ export const Hero = () => {
               <div className="absolute -top-4 -right-4 bg-card rounded-xl shadow-lg border border-border p-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                    <Shield className="h-4 w-4 text-success" />
+                    <Zap className="h-4 w-4 text-success" />
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium">Payment Secured</div>
-                    <div className="text-xs text-muted-foreground">Protected by FreightShare</div>
+                    <div className="font-medium">Route Match Found</div>
+                    <div className="text-xs text-muted-foreground">Carrier heading your way</div>
                   </div>
                 </div>
               </div>
@@ -112,11 +111,11 @@ export const Hero = () => {
               <div className="absolute -bottom-4 -left-4 bg-card rounded-xl shadow-lg border border-border p-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-accent" />
+                    <Route className="h-4 w-4 text-accent" />
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium">3 Carriers Matched</div>
-                    <div className="text-xs text-muted-foreground">Best routes available</div>
+                    <div className="font-medium">Direct Connection</div>
+                    <div className="text-xs text-muted-foreground">No middlemen involved</div>
                   </div>
                 </div>
               </div>

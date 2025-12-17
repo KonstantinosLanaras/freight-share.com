@@ -1,17 +1,17 @@
-import { Package, Search, CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { Package, Search, CreditCard, Truck, CheckCircle, Route } from 'lucide-react';
 
 const shipperSteps = [
-  { icon: Package, title: 'Post Your Load', description: 'Enter pickup & delivery details, pallets, and your price.' },
-  { icon: Search, title: 'Review Offers', description: 'Compare carrier offers and ratings.' },
-  { icon: CreditCard, title: 'Pay Securely', description: 'Payment held safely until delivery.' },
-  { icon: CheckCircle, title: 'Confirm Delivery', description: 'Release payment when goods arrive.' },
+  { icon: Package, title: 'Post Your Load', description: 'Enter route, dates, pallets, and set your price or accept offers.' },
+  { icon: Search, title: 'Get Matched', description: 'Carriers on matching routes see your load and make offers.' },
+  { icon: CreditCard, title: 'Pay to Confirm', description: 'Your payment is held in escrow until delivery.' },
+  { icon: CheckCircle, title: 'Confirm & Release', description: 'Confirm delivery and payment goes to the carrier.' },
 ];
 
 const carrierSteps = [
-  { icon: Truck, title: 'Post Your Route', description: 'Share your upcoming journeys and capacity.' },
-  { icon: Search, title: 'Find Loads', description: 'Get matched with loads on your route.' },
-  { icon: Package, title: 'Make Offers', description: 'Set your price and win contracts.' },
-  { icon: CreditCard, title: 'Get Paid', description: 'Receive payment after delivery confirmation.' },
+  { icon: Truck, title: 'Post Your Route', description: 'Share your upcoming journey and available pallet space.' },
+  { icon: Route, title: 'Get Load Matches', description: 'See loads that fit your route automatically.' },
+  { icon: Package, title: 'Make an Offer', description: 'Set your price and win the job.' },
+  { icon: CreditCard, title: 'Deliver & Get Paid', description: 'Complete delivery and receive your payment.' },
 ];
 
 export const HowItWorks = () => {
@@ -20,10 +20,10 @@ export const HowItWorks = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            How FreightShare Works
+            How It Works
           </h2>
           <p className="text-lg text-muted-foreground">
-            Simple, secure, and transparent — whether you're shipping or hauling.
+            Simple process, direct connections, secure transactions.
           </p>
         </div>
 
