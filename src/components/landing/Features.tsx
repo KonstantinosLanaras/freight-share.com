@@ -1,35 +1,35 @@
-import { Shield, Truck, CreditCard, MessageSquare, Star, Clock } from 'lucide-react';
+import { Route, Truck, CreditCard, MessageSquare, Star, FileText } from 'lucide-react';
 
 const features = [
   {
-    icon: Shield,
-    title: 'Secure Payments',
-    description: 'Full payment held in escrow until delivery confirmation. Your money is protected.',
+    icon: Route,
+    title: 'Direct Matching',
+    description: 'Our algorithm connects your loads with carriers already traveling your route.',
   },
   {
     icon: Truck,
-    title: 'Smart Matching',
-    description: 'Our algorithm matches your loads with available routes for optimal efficiency.',
+    title: 'Post Routes & Loads',
+    description: 'Carriers post routes with capacity, shippers post loads with requirements.',
   },
   {
     icon: CreditCard,
-    title: 'Instant Contracts',
-    description: 'Digital agreements generated automatically when payment is confirmed.',
+    title: 'Escrow Payments',
+    description: 'Payment held securely until delivery is confirmed by both parties.',
   },
   {
     icon: MessageSquare,
-    title: 'In-App Chat',
-    description: 'Communicate directly with shippers or carriers through our secure messaging.',
+    title: 'In-App Messaging',
+    description: 'Communicate directly with your shipper or carrier through the platform.',
   },
   {
     icon: Star,
-    title: 'Verified Ratings',
-    description: 'Make informed decisions with our transparent review system.',
+    title: 'Ratings & Reviews',
+    description: 'Build your reputation and choose partners based on real feedback.',
   },
   {
-    icon: Clock,
-    title: 'Real-Time Tracking',
-    description: 'Follow your shipment through every stage from pickup to delivery.',
+    icon: FileText,
+    title: 'Digital Contracts',
+    description: 'Automatic agreement generation when payment is confirmed.',
   },
 ];
 
@@ -39,11 +39,11 @@ export const Features = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            Everything You Need for{' '}
-            <span className="text-primary">Secure Shipping</span>
+            Built for{' '}
+            <span className="text-primary">Direct Connections</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            FreightShare handles the complexity so you can focus on your business.
+            Everything you need to find the right match and complete transactions smoothly.
           </p>
         </div>
 

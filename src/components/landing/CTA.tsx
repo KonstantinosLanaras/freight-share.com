@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield } from 'lucide-react';
+import { ArrowRight, Route } from 'lucide-react';
 
 export const CTA = () => {
   return (
@@ -17,18 +17,19 @@ export const CTA = () => {
 
           <div className="relative z-10 text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-6">
-              <Shield className="h-4 w-4" />
-              Join 500+ trusted companies
+              <Route className="h-4 w-4" />
+              Start shipping smarter today
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-white mb-6">
-              Ready to Move Freight
+              Ready to Connect
               <br />
-              <span className="text-accent">the Secure Way?</span>
+              <span className="text-accent">Directly?</span>
             </h2>
 
             <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto">
-              Join FreightShare today and experience hassle-free shipping with guaranteed payments and transparent transactions.
+              Join FreightShare and find the right carriers or loads for your business. 
+              No middlemen, secure payments, fair pricing.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -48,8 +49,8 @@ export const CTA = () => {
                 className="border-white/30 text-white bg-white/10 hover:bg-white/20"
                 asChild
               >
-                <Link to="/how-it-works">
-                  Learn More
+                <Link to="/#how-it-works">
+                  See How It Works
                 </Link>
               </Button>
             </div>
