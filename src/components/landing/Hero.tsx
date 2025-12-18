@@ -47,6 +47,13 @@ export const Hero = () => {
               </Button>
             </div>
 
+            <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.25s' }}>
+              Already have an account?{' '}
+              <Link to="/auth" className="text-primary hover:underline font-medium">
+                Log in
+              </Link>
+            </p>
+
             {/* Value Props */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <div>

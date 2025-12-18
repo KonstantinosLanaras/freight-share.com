@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 30%;
+    --primary: 142 76% 36%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 215 28% 17%;
@@ -32,7 +32,7 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 91% 30%;
+    --ring: 142 76% 36%;
 
     --radius: 0.625rem;
 
@@ -42,7 +42,7 @@
     --warning: 38 92% 50%;
     --warning-foreground: 222 47% 11%;
 
-    --shipper: 217 91% 30%;
+    --shipper: 142 76% 36%;
     --shipper-foreground: 210 40% 98%;
 
     --carrier: 142 76% 36%;
@@ -50,15 +50,15 @@
 
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 142 76% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 32% 20%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 32% 25%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 142 76% 46%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 30%) 0%, hsl(222, 47%, 11%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(142, 76%, 26%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(28, 92%, 45%) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(210, 20%, 98%) 0%, hsl(214, 32%, 91%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(210, 20%, 98%) 100%);
@@ -68,7 +68,7 @@
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
     --shadow-xl: 0 20px 25px -5px hsl(222 47% 11% / 0.1), 0 8px 10px -6px hsl(222 47% 11% / 0.1);
-    --shadow-glow: 0 0 40px hsl(217 91% 30% / 0.15);
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.15);
 
     /* Typography */
     --font-heading: 'Outfit', sans-serif;
@@ -85,7 +85,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 142 76% 46%;
     --primary-foreground: 222 47% 11%;
 
     --secondary: 215 28% 25%;
@@ -102,7 +102,7 @@
 
     --border: 217 32% 17%;
     --input: 217 32% 17%;
-    --ring: 217 91% 60%;
+    --ring: 142 76% 46%;
   }
 }
 
