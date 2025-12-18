@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2 } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +20,21 @@ interface RouteStop {
 
 const countries = [
   'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden'
+  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden',
+  'Portugal', 'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Croatia',
+  'Slovenia', 'Slovakia', 'Luxembourg', 'Ireland', 'Finland', 'Norway'
+];
+
+const vehicleTypes = [
+  'Standard Trailer (13.6m)',
+  'Mega Trailer (3m height)',
+  'Refrigerated (Reefer)',
+  'Curtainsider',
+  'Box Trailer',
+  'Flatbed',
+  'Tanker',
+  'Low Loader',
+  'Double Deck'
 ];
 
 export default function PostRoute() {
@@ -35,6 +50,10 @@ export default function PostRoute() {
     destinationCountry: '',
     departureStart: '',
     departureEnd: '',
+    arrivalStart: '',
+    arrivalEnd: '',
+    vehicleConstraints: '',
+    notes: '',
   });
 
   const addStop = () => {
@@ -67,10 +86,15 @@ export default function PostRoute() {
       return;
     }
 
+    if (!formData.originPallets || parseInt(formData.originPallets) < 1) {
+      toast.error('Please enter available pallet capacity');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Create the route
+      // Create the route with new fields
       const { data: routeData, error: routeError } = await supabase
         .from('routes')
         .insert({
@@ -81,7 +105,12 @@ export default function PostRoute() {
           destination_country: formData.destinationCountry,
           departure_date_from: formData.departureStart,
           departure_date_to: formData.departureEnd,
+          arrival_date_from: formData.arrivalStart || null,
+          arrival_date_to: formData.arrivalEnd || null,
           available_pallets: parseInt(formData.originPallets),
+          vehicle_constraints: formData.vehicleConstraints || null,
+          notes: formData.notes || null,
+          status: 'planned',
         })
         .select()
         .single();
@@ -106,7 +135,7 @@ export default function PostRoute() {
       }
 
       toast.success('Route posted successfully!');
-      navigate('/dashboard/carrier');
+      navigate('/dashboard/carrier/routes');
     } catch (error: any) {
       console.error('Error posting route:', error);
       toast.error(error.message || 'Failed to post route');
@@ -136,6 +165,15 @@ export default function PostRoute() {
 
       <main className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-6">
+          {/* Info Banner */}
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Routes represent real planned journeys</p>
+              <p>Post your actual planned trips to get matched with shippers who need to move cargo along your route. Keep your routes updated for accurate matching.</p>
+            </div>
+          </div>
+
           {/* Origin */}
           <Card>
             <CardHeader>
@@ -182,6 +220,7 @@ export default function PostRoute() {
                     id="originPallets"
                     type="number"
                     min="1"
+                    max="66"
                     placeholder="e.g., 24"
                     className="mt-1"
                     value={formData.originPallets}
@@ -202,7 +241,7 @@ export default function PostRoute() {
                   <Package className="h-5 w-5 text-carrier" />
                   Intermediate Stops
                 </CardTitle>
-                <CardDescription>Cities where you can load or unload cargo</CardDescription>
+                <CardDescription>Cities where you can load or unload cargo along the way</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {stops.map((stop, index) => (
@@ -246,7 +285,7 @@ export default function PostRoute() {
                         </Select>
                       </div>
                       <div>
-                        <Label>Available Pallets</Label>
+                        <Label>Capacity at Stop</Label>
                         <Input
                           type="number"
                           min="0"
@@ -267,7 +306,7 @@ export default function PostRoute() {
 
           <Button type="button" variant="outline" className="w-full" onClick={addStop} disabled={isSubmitting}>
             <Plus className="h-4 w-4" />
-            Add Stop
+            Add Intermediate Stop
           </Button>
 
           {/* Destination */}
@@ -319,36 +358,108 @@ export default function PostRoute() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-carrier" />
-                Departure Window
+                Schedule
               </CardTitle>
-              <CardDescription>When are you planning to depart?</CardDescription>
+              <CardDescription>When are you planning this journey?</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="departureStart">Earliest Departure</Label>
-                  <Input
-                    id="departureStart"
-                    type="date"
-                    className="mt-1"
-                    value={formData.departureStart}
-                    onChange={(e) => setFormData({ ...formData, departureStart: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+            <CardContent className="space-y-6">
+              <div>
+                <Label className="text-base font-medium">Departure Window</Label>
+                <div className="grid sm:grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="departureStart" className="text-sm text-muted-foreground">Earliest Departure</Label>
+                    <Input
+                      id="departureStart"
+                      type="date"
+                      className="mt-1"
+                      value={formData.departureStart}
+                      onChange={(e) => setFormData({ ...formData, departureStart: e.target.value })}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="departureEnd" className="text-sm text-muted-foreground">Latest Departure</Label>
+                    <Input
+                      id="departureEnd"
+                      type="date"
+                      className="mt-1"
+                      value={formData.departureEnd}
+                      onChange={(e) => setFormData({ ...formData, departureEnd: e.target.value })}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="departureEnd">Latest Departure</Label>
-                  <Input
-                    id="departureEnd"
-                    type="date"
-                    className="mt-1"
-                    value={formData.departureEnd}
-                    onChange={(e) => setFormData({ ...formData, departureEnd: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+              </div>
+
+              <div>
+                <Label className="text-base font-medium">Arrival Window (Optional)</Label>
+                <div className="grid sm:grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="arrivalStart" className="text-sm text-muted-foreground">Earliest Arrival</Label>
+                    <Input
+                      id="arrivalStart"
+                      type="date"
+                      className="mt-1"
+                      value={formData.arrivalStart}
+                      onChange={(e) => setFormData({ ...formData, arrivalStart: e.target.value })}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="arrivalEnd" className="text-sm text-muted-foreground">Latest Arrival</Label>
+                    <Input
+                      id="arrivalEnd"
+                      type="date"
+                      className="mt-1"
+                      value={formData.arrivalEnd}
+                      onChange={(e) => setFormData({ ...formData, arrivalEnd: e.target.value })}
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Vehicle & Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-carrier" />
+                Vehicle & Additional Info
+              </CardTitle>
+              <CardDescription>Optional details about your truck and any notes</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="vehicleConstraints">Vehicle Type</Label>
+                <Select
+                  value={formData.vehicleConstraints}
+                  onValueChange={(value) => setFormData({ ...formData, vehicleConstraints: value })}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select vehicle type (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Any additional information about this route (e.g., specific requirements, flexibility on dates, etc.)"
+                  className="mt-1 min-h-[100px]"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  disabled={isSubmitting}
+                />
               </div>
             </CardContent>
           </Card>
