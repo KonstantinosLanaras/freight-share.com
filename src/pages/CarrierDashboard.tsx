@@ -218,7 +218,7 @@ export default function CarrierDashboard() {
               My Routes
             </Link>
             <Link 
-              to="/dashboard/carrier/loads"
+              to="/dashboard/carrier/find-loads"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Package className="h-5 w-5" />

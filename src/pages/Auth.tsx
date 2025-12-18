@@ -27,12 +27,15 @@ const EUROPEAN_COUNTRIES = [
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, role: userRole, signUp, signIn, loading: authLoading } = useAuth();
+  const { user, role: userRole, signUp, signIn, signOut, loading: authLoading } = useAuth();
   
+  // Default to login mode - login is the primary entry point
   const [mode, setMode] = useState<AuthMode>('login');
   const [role, setRole] = useState<UserRole | null>(null);
   const [step, setStep] = useState<'role' | 'details'>('role');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRoleSwitchWarning, setShowRoleSwitchWarning] = useState(false);
+  const [intendedRole, setIntendedRole] = useState<UserRole | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -42,26 +45,41 @@ export default function Auth() {
     country: '',
   });
 
-  // Redirect authenticated users to their dashboard
+  // Handle role switching - if user is logged in and trying to access different role
   useEffect(() => {
     if (user && userRole) {
+      const roleParam = searchParams.get('role');
+      
+      // If user is trying to access a different role
+      if (roleParam && roleParam !== userRole) {
+        setShowRoleSwitchWarning(true);
+        setIntendedRole(roleParam as UserRole);
+        return;
+      }
+      
+      // Redirect to appropriate dashboard
       const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
       navigate(dashboardPath, { replace: true });
     }
-  }, [user, userRole, navigate]);
+  }, [user, userRole, navigate, searchParams]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
     const roleParam = searchParams.get('role');
     
-    if (modeParam === 'signup' || modeParam === 'login') {
-      setMode(modeParam);
+    // Only set mode if not showing role switch warning
+    if (!showRoleSwitchWarning) {
+      if (modeParam === 'signup' || modeParam === 'login') {
+        setMode(modeParam);
+      }
+      if (roleParam === 'shipper' || roleParam === 'carrier') {
+        setRole(roleParam);
+        if (modeParam === 'signup') {
+          setStep('details');
+        }
+      }
     }
-    if (roleParam === 'shipper' || roleParam === 'carrier') {
-      setRole(roleParam);
-      setStep('details');
-    }
-  }, [searchParams]);
+  }, [searchParams, showRoleSwitchWarning]);
 
   const handleRoleSelect = (selectedRole: UserRole) => {
     setRole(selectedRole);
@@ -136,11 +154,75 @@ export default function Auth() {
     }
   };
 
+  const handleContinueWithCurrentRole = () => {
+    const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
+    navigate(dashboardPath, { replace: true });
+  };
+
+  const handleSwitchRole = async () => {
+    await signOut();
+    setShowRoleSwitchWarning(false);
+    setMode('signup');
+    if (intendedRole) {
+      setRole(intendedRole);
+      setStep('details');
+    }
+  };
+
   // Show loading while checking auth state
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show role switch warning if user is logged in but trying to access different role
+  if (showRoleSwitchWarning && user && userRole) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="bg-card rounded-2xl border border-border p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center mx-auto mb-6">
+              {intendedRole === 'carrier' ? (
+                <Truck className="h-8 w-8 text-warning" />
+              ) : (
+                <Package className="h-8 w-8 text-warning" />
+              )}
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-foreground mb-3">
+              Switch to {intendedRole === 'carrier' ? 'Carrier' : 'Shipper'}?
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              You're currently logged in as a <strong className="text-foreground capitalize">{userRole}</strong>. 
+              To access the {intendedRole} side, you'll need to sign out and create a new account or log in with a different {intendedRole} account.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={handleContinueWithCurrentRole}
+              >
+                Continue as {userRole}
+              </Button>
+              <Button 
+                className="w-full" 
+                variant={intendedRole === 'carrier' ? 'carrier' : 'shipper'}
+                onClick={handleSwitchRole}
+              >
+                Sign out & switch to {intendedRole}
+              </Button>
+            </div>
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mt-6"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to home
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
