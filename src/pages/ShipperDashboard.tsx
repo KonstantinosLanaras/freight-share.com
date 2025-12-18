@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -198,6 +199,13 @@ export default function ShipperDashboard() {
             >
               <Truck className="h-5 w-5" />
               Shipments
+            </Link>
+            <Link 
+              to="/routes"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <MapPin className="h-5 w-5" />
+              Browse Routes
             </Link>
           </nav>
 

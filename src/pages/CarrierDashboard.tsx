@@ -27,6 +27,8 @@ import { format } from 'date-fns';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { CarrierVerificationForm } from '@/components/verification/CarrierVerificationForm';
 
+type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
+
 interface Route {
   id: string;
   origin_city: string;
@@ -36,7 +38,7 @@ interface Route {
   available_pallets: number;
   departure_date_from: string;
   departure_date_to: string;
-  is_active: boolean;
+  status: RouteStatus;
 }
 
 interface Load {
@@ -89,16 +91,16 @@ export default function CarrierDashboard() {
       
       setProfile(profileData as Profile | null);
 
-      // Fetch carrier's routes
+      // Fetch carrier's routes (active and planned only)
       const { data: routesData } = await supabase
         .from('routes')
         .select('*')
         .eq('carrier_id', user.id)
-        .eq('is_active', true)
+        .in('status', ['planned', 'active'])
         .order('created_at', { ascending: false })
         .limit(5);
 
-      setRoutes(routesData || []);
+      setRoutes((routesData as Route[]) || []);
 
       // Fetch available loads (posted status, not by this user)
       const { data: loadsData } = await supabase
@@ -435,7 +437,9 @@ export default function CarrierDashboard() {
                               <div className="font-medium text-foreground">
                                 {route.origin_city}, {route.origin_country} → {route.destination_city}, {route.destination_country}
                               </div>
-                              <Badge variant="secondary">Active</Badge>
+                              <Badge variant={route.status === 'active' ? 'default' : 'secondary'}>
+                                {route.status === 'active' ? 'Active' : 'Planned'}
+                              </Badge>
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {route.available_pallets} pallets · {formatDateRange(route.departure_date_from, route.departure_date_to)}

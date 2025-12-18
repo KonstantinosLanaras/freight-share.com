@@ -337,6 +337,8 @@ export type Database = {
       }
       routes: {
         Row: {
+          arrival_date_from: string | null
+          arrival_date_to: string | null
           available_pallets: number
           carrier_id: string
           created_at: string
@@ -346,11 +348,16 @@ export type Database = {
           destination_country: string
           id: string
           is_active: boolean
+          notes: string | null
           origin_city: string
           origin_country: string
+          status: Database["public"]["Enums"]["route_status"]
           updated_at: string
+          vehicle_constraints: string | null
         }
         Insert: {
+          arrival_date_from?: string | null
+          arrival_date_to?: string | null
           available_pallets: number
           carrier_id: string
           created_at?: string
@@ -360,11 +367,16 @@ export type Database = {
           destination_country: string
           id?: string
           is_active?: boolean
+          notes?: string | null
           origin_city: string
           origin_country: string
+          status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
+          vehicle_constraints?: string | null
         }
         Update: {
+          arrival_date_from?: string | null
+          arrival_date_to?: string | null
           available_pallets?: number
           carrier_id?: string
           created_at?: string
@@ -374,9 +386,12 @@ export type Database = {
           destination_country?: string
           id?: string
           is_active?: boolean
+          notes?: string | null
           origin_city?: string
           origin_country?: string
+          status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
+          vehicle_constraints?: string | null
         }
         Relationships: []
       }
@@ -498,6 +513,47 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_matching_loads_for_route: {
+        Args: { p_route_id: string }
+        Returns: {
+          destination_city: string
+          destination_country: string
+          load_id: string
+          match_type: string
+          origin_city: string
+          origin_country: string
+          pallets: number
+          pickup_date_from: string
+          pickup_date_to: string
+          price: number
+          pricing_type: string
+          shipper_id: string
+        }[]
+      }
+      get_matching_routes_for_load: {
+        Args: {
+          p_destination_city: string
+          p_destination_country: string
+          p_origin_city: string
+          p_origin_country: string
+          p_pallets: number
+          p_pickup_date_from: string
+          p_pickup_date_to: string
+        }
+        Returns: {
+          available_pallets: number
+          carrier_id: string
+          departure_date_from: string
+          departure_date_to: string
+          destination_city: string
+          destination_country: string
+          match_type: string
+          origin_city: string
+          origin_country: string
+          route_id: string
+          status: Database["public"]["Enums"]["route_status"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -519,6 +575,7 @@ export type Database = {
         | "other"
       payment_status: "pending" | "paid" | "completed" | "refunded"
       pricing_type: "fixed" | "open_to_offers"
+      route_status: "planned" | "active" | "completed" | "cancelled"
       shipment_status:
         | "posted"
         | "accepted"
@@ -667,6 +724,7 @@ export const Constants = {
       ],
       payment_status: ["pending", "paid", "completed", "refunded"],
       pricing_type: ["fixed", "open_to_offers"],
+      route_status: ["planned", "active", "completed", "cancelled"],
       shipment_status: [
         "posted",
         "accepted",

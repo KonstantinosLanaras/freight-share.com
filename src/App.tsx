@@ -11,6 +11,8 @@ import ShipperDashboard from "./pages/ShipperDashboard";
 import CarrierDashboard from "./pages/CarrierDashboard";
 import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
+import MyRoutes from "./pages/MyRoutes";
+import BrowseRoutes from "./pages/BrowseRoutes";
 import ShipmentDetails from "./pages/ShipmentDetails";
 import WhyFreightShare from "./pages/WhyFreightShare";
 import AdminPanel from "./pages/AdminPanel";
@@ -29,6 +31,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/why-freightshare" element={<WhyFreightShare />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <ShipperDashboard />
@@ -47,6 +50,11 @@ const App = () => (
             <Route path="/dashboard/carrier/routes/new" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <PostRoute />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/routes" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <MyRoutes />
               </ProtectedRoute>
             } />
             <Route path="/shipment/:id" element={
