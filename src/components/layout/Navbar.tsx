@@ -101,7 +101,7 @@ export const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link to="/auth?mode=login">Log In</Link>
+                  <Link to="/auth">Log In</Link>
                 </Button>
                 <Button variant="accent" asChild>
                   <Link to="/auth?mode=signup">Get Started</Link>
@@ -161,7 +161,7 @@ export const Navbar = () => {
                 ) : (
                   <>
                     <Button variant="outline" className="flex-1" asChild>
-                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>Log In</Link>
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>Log In</Link>
                     </Button>
                     <Button variant="accent" className="flex-1" asChild>
                       <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>

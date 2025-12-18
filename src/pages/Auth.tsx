@@ -69,14 +69,16 @@ export default function Auth() {
     
     // Only set mode if not showing role switch warning
     if (!showRoleSwitchWarning) {
-      if (modeParam === 'signup' || modeParam === 'login') {
-        setMode(modeParam);
-      }
-      if (roleParam === 'shipper' || roleParam === 'carrier') {
-        setRole(roleParam);
-        if (modeParam === 'signup') {
+      // Default to login - only go to signup if explicitly requested
+      if (modeParam === 'signup') {
+        setMode('signup');
+        if (roleParam === 'shipper' || roleParam === 'carrier') {
+          setRole(roleParam);
           setStep('details');
         }
+      } else {
+        // Default to login for any other case
+        setMode('login');
       }
     }
   }, [searchParams, showRoleSwitchWarning]);
