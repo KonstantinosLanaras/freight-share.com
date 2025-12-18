@@ -19,7 +19,8 @@ import {
   Euro,
   Loader2,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -147,15 +148,23 @@ export default function CarrierDashboard() {
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border h-16 flex items-center justify-between px-4">
-        <button onClick={() => setSidebarOpen(true)}>
-          <Menu className="h-6 w-6" />
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setSidebarOpen(true)}>
+            <Menu className="h-6 w-6" />
+          </button>
+          <Badge className="bg-carrier text-carrier-foreground text-xs">Carrier</Badge>
+        </div>
         <div className="flex items-center gap-2">
           <Truck className="h-6 w-6 text-primary" />
           <span className="font-heading font-bold">FreightShare</span>
         </div>
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleSignOut}
+          className="text-muted-foreground"
+        >
+          <LogOut className="h-4 w-4" />
         </Button>
       </header>
 
@@ -224,29 +233,22 @@ export default function CarrierDashboard() {
             </Link>
           </nav>
 
-          {/* User Section */}
-          <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 p-3">
-              <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center">
-                <User className="h-5 w-5 text-sidebar-accent-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-sidebar-foreground truncate">
-                  {profile?.full_name || profile?.company_name || 'User'}
-                </div>
-                <div className="text-xs text-sidebar-foreground/60 truncate">
-                  {user?.email}
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
+          {/* Help & Sign Out - Always Visible */}
+          <div className="p-4 border-t border-sidebar-border space-y-2">
+            <Link 
+              to="/help"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <HelpCircle className="h-5 w-5" />
+              Help & Resolution
+            </Link>
+            <button 
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-destructive/20 hover:text-destructive transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </button>
           </div>
         </div>
       </aside>

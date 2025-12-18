@@ -13,7 +13,10 @@ import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
 import MyRoutes from "./pages/MyRoutes";
 import BrowseRoutes from "./pages/BrowseRoutes";
+import ShipperLoads from "./pages/ShipperLoads";
+import ShipperShipments from "./pages/ShipperShipments";
 import ShipmentDetails from "./pages/ShipmentDetails";
+import HelpCenter from "./pages/HelpCenter";
 import WhyFreightShare from "./pages/WhyFreightShare";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
@@ -32,6 +35,7 @@ const App = () => (
             <Route path="/why-freightshare" element={<WhyFreightShare />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
+            <Route path="/help" element={<HelpCenter />} />
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <ShipperDashboard />
@@ -45,6 +49,16 @@ const App = () => (
             <Route path="/dashboard/shipper/loads/new" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <PostLoad />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/loads" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <ShipperLoads />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/shipments" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <ShipperShipments />
               </ProtectedRoute>
             } />
             <Route path="/dashboard/carrier/routes/new" element={
