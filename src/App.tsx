@@ -13,8 +13,10 @@ import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
 import MyRoutes from "./pages/MyRoutes";
 import BrowseRoutes from "./pages/BrowseRoutes";
+import FindLoads from "./pages/FindLoads";
 import ShipperLoads from "./pages/ShipperLoads";
 import ShipperShipments from "./pages/ShipperShipments";
+import CarrierShipments from "./pages/CarrierShipments";
 import ShipmentDetails from "./pages/ShipmentDetails";
 import HelpCenter from "./pages/HelpCenter";
 import WhyFreightShare from "./pages/WhyFreightShare";
@@ -36,14 +38,10 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />
+            {/* Shipper Routes */}
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <ShipperDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/carrier" element={
-              <ProtectedRoute allowedRoles={['carrier']}>
-                <CarrierDashboard />
               </ProtectedRoute>
             } />
             <Route path="/dashboard/shipper/loads/new" element={
@@ -61,6 +59,12 @@ const App = () => (
                 <ShipperShipments />
               </ProtectedRoute>
             } />
+            {/* Carrier Routes */}
+            <Route path="/dashboard/carrier" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierDashboard />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/carrier/routes/new" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <PostRoute />
@@ -71,6 +75,17 @@ const App = () => (
                 <MyRoutes />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/carrier/find-loads" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <FindLoads />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/shipments" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierShipments />
+              </ProtectedRoute>
+            } />
+            {/* Shared Routes */}
             <Route path="/shipment/:id" element={
               <ProtectedRoute>
                 <ShipmentDetails />

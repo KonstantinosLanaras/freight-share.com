@@ -1,13 +1,30 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Truck, Package } from 'lucide-react';
+import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, role, signOut, loading } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const dashboardPath = role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper';
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -38,16 +55,59 @@ export const Navbar = () => {
             >
               Why FreightShare
             </Link>
+            <a 
+              href="/#how-it-works" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              How It Works
+            </a>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link to="/auth?mode=login">Log In</Link>
-            </Button>
-            <Button variant="accent" asChild>
-              <Link to="/auth?mode=signup">Get Started</Link>
-            </Button>
+            {!loading && user ? (
+              <>
+                <Button variant="default" asChild>
+                  <Link to={dashboardPath}>
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{user.email}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{role} account</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to={dashboardPath}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Go to Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/auth?mode=login">Log In</Link>
+                </Button>
+                <Button variant="accent" asChild>
+                  <Link to="/auth?mode=signup">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,13 +137,37 @@ export const Navbar = () => {
               >
                 Why FreightShare
               </Link>
+              <a 
+                href="/#how-it-works" 
+                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                How It Works
+              </a>
+              
               <div className="flex gap-2 px-4 pt-2">
-                <Button variant="outline" className="flex-1" asChild>
-                  <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>Log In</Link>
-                </Button>
-                <Button variant="accent" className="flex-1" asChild>
-                  <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
-                </Button>
+                {!loading && user ? (
+                  <>
+                    <Button variant="default" className="flex-1" asChild>
+                      <Link to={dashboardPath} onClick={() => setIsOpen(false)}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                    <Button variant="outline" onClick={() => { handleSignOut(); setIsOpen(false); }}>
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>Log In</Link>
+                    </Button>
+                    <Button variant="accent" className="flex-1" asChild>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
