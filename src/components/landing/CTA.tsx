@@ -49,11 +49,18 @@ export const CTA = () => {
                 className="border-white/30 text-white bg-white/10 hover:bg-white/20"
                 asChild
               >
-                <Link to="/#how-it-works">
+                <a href="#how-it-works">
                   See How It Works
-                </Link>
+                </a>
               </Button>
             </div>
+
+            <p className="text-sm text-white/60 mt-6">
+              Already have an account?{' '}
+              <Link to="/auth" className="text-white hover:underline font-medium">
+                Log in
+              </Link>
+            </p>
           </div>
         </div>
       </div>
