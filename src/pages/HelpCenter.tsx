@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   ArrowLeft,
   HelpCircle,
@@ -17,9 +16,7 @@ import {
   Truck,
   Package,
   Send,
-  Loader2,
-  CheckCircle,
-  ExternalLink
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -83,7 +80,8 @@ const faqs = [
 ];
 
 export default function HelpCenter() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -92,6 +90,15 @@ export default function HelpCenter() {
     subject: '',
     description: '',
   });
+
+  // Pre-populate shipment ID from URL params
+  useEffect(() => {
+    const shipmentId = searchParams.get('shipment');
+    if (shipmentId) {
+      setSelectedCategory('shipment');
+      setFormData(prev => ({ ...prev, category: 'shipment', shipmentId }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +113,12 @@ export default function HelpCenter() {
     setIsSubmitting(false);
   };
 
+  // Determine back link based on user role
+  const getBackLink = () => {
+    if (!user) return '/';
+    return role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper';
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -113,7 +126,7 @@ export default function HelpCenter() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
-              <Link to={user ? "/dashboard/shipper" : "/"}>
+              <Link to={getBackLink()}>
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
