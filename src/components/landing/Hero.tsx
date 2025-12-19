@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, Users, Route } from 'lucide-react';
+import { ArrowRight, Route } from 'lucide-react';
+import heroIllustration from '@/assets/hero-illustration.png';
 
 export const Hero = () => {
   return (
@@ -15,9 +16,9 @@ export const Hero = () => {
       />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
-          <div className="space-y-8">
+          <div className="space-y-6 lg:space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
               <Route className="h-4 w-4" />
               Direct Shipper-Carrier Matching
@@ -54,79 +55,42 @@ export const Hero = () => {
               </Link>
             </p>
 
+            {/* Mobile Illustration */}
+            <div className="lg:hidden animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <img 
+                src={heroIllustration} 
+                alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
+                className="w-full h-auto max-w-md mx-auto"
+                loading="eager"
+              />
+            </div>
+
             {/* Value Props */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.35s' }}>
               <div>
-                <div className="text-lg font-heading font-bold text-foreground">Direct Matching</div>
-                <div className="text-sm text-muted-foreground">No brokers or middlemen</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Direct Matching</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">No brokers or middlemen</div>
               </div>
               <div>
-                <div className="text-lg font-heading font-bold text-foreground">Secure Escrow</div>
-                <div className="text-sm text-muted-foreground">Payment on delivery</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Secure Escrow</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">Payment on delivery</div>
               </div>
               <div>
-                <div className="text-lg font-heading font-bold text-foreground">Fair Pricing</div>
-                <div className="text-sm text-muted-foreground">You set the terms</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Fair Pricing</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">You set the terms</div>
               </div>
             </div>
           </div>
 
-          {/* Right Content - Visual */}
-          <div className="relative hidden lg:block">
-            <div className="relative">
-              {/* Main Card */}
-              <div className="bg-card rounded-2xl shadow-xl border border-border p-6 animate-slide-up">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">New Load Posted</div>
-                    <div className="text-sm text-muted-foreground">Rotterdam → Munich</div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pallets</span>
-                    <span className="font-medium">12 pallets</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pickup</span>
-                    <span className="font-medium">Dec 20-22</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Price</span>
-                    <span className="font-semibold text-primary">€850</span>
-                  </div>
-                </div>
-                <Button variant="accent" className="w-full mt-4">Make Offer</Button>
-              </div>
-
-              {/* Floating Cards */}
-              <div className="absolute -top-4 -right-4 bg-card rounded-xl shadow-lg border border-border p-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-success" />
-                  </div>
-                  <div className="text-sm">
-                    <div className="font-medium">Route Match Found</div>
-                    <div className="text-xs text-muted-foreground">Carrier heading your way</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 bg-card rounded-xl shadow-lg border border-border p-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Route className="h-4 w-4 text-accent" />
-                  </div>
-                  <div className="text-sm">
-                    <div className="font-medium">Direct Connection</div>
-                    <div className="text-xs text-muted-foreground">No middlemen involved</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Right Content - Hero Illustration (Desktop Only) */}
+          <div className="relative hidden lg:flex justify-center items-center">
+            <img 
+              src={heroIllustration} 
+              alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
+              className="w-full h-auto max-w-2xl animate-fade-in"
+              style={{ animationDelay: '0.2s' }}
+              loading="eager"
+            />
           </div>
         </div>
       </div>
