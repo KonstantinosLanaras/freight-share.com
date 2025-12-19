@@ -1,37 +1,30 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Route } from 'lucide-react';
-import heroIllustration from '@/assets/hero-illustration.png';
 
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Background with subtle map texture */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+      {/* Base background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/10" />
       
-      {/* Subtle map/network pattern overlay */}
+      {/* Subtle European map background - watermark style */}
       <div 
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.035] md:opacity-[0.045]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%2322c55e' stroke-width='1'%3E%3C!-- Europe-like landmass shape --%3E%3Cpath d='M50,120 Q80,100 120,110 T180,90 Q220,85 260,100 T320,95 Q350,110 380,120' /%3E%3Cpath d='M60,150 Q100,140 150,155 T220,145 Q270,140 310,160 T370,155' /%3E%3Cpath d='M40,180 Q90,170 140,185 T200,175 Q250,180 300,190 T360,185' /%3E%3Cpath d='M55,210 Q100,200 160,215 T230,205 Q280,210 330,220 T380,210' /%3E%3Cpath d='M45,240 Q95,235 145,250 T210,240 Q260,245 320,255 T375,245' /%3E%3Cpath d='M50,270 Q90,260 140,275 T200,265 Q250,270 310,280 T365,270' /%3E%3C!-- Route connection dots --%3E%3Ccircle cx='80' cy='130' r='3' fill='%2322c55e'/%3E%3Ccircle cx='150' cy='145' r='3' fill='%2322c55e'/%3E%3Ccircle cx='220' cy='120' r='3' fill='%2322c55e'/%3E%3Ccircle cx='290' cy='140' r='3' fill='%2322c55e'/%3E%3Ccircle cx='350' cy='125' r='3' fill='%2322c55e'/%3E%3Ccircle cx='100' cy='190' r='3' fill='%2322c55e'/%3E%3Ccircle cx='180' cy='175' r='3' fill='%2322c55e'/%3E%3Ccircle cx='260' cy='195' r='3' fill='%2322c55e'/%3E%3Ccircle cx='330' cy='180' r='3' fill='%2322c55e'/%3E%3Ccircle cx='120' cy='250' r='3' fill='%2322c55e'/%3E%3Ccircle cx='200' cy='235' r='3' fill='%2322c55e'/%3E%3Ccircle cx='280' cy='255' r='3' fill='%2322c55e'/%3E%3C!-- Dotted route lines --%3E%3Cpath d='M80,130 Q115,138 150,145' stroke-dasharray='4,4'/%3E%3Cpath d='M150,145 Q185,132 220,120' stroke-dasharray='4,4'/%3E%3Cpath d='M220,120 Q255,130 290,140' stroke-dasharray='4,4'/%3E%3Cpath d='M100,190 Q140,182 180,175' stroke-dasharray='4,4'/%3E%3Cpath d='M180,175 Q220,185 260,195' stroke-dasharray='4,4'/%3E%3Cpath d='M120,250 Q160,242 200,235' stroke-dasharray='4,4'/%3E%3Cpath d='M200,235 Q240,245 280,255' stroke-dasharray='4,4'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '600px 600px'
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'%3E%3Cg fill='none' stroke='%2322c55e' stroke-width='0.8'%3E%3C!-- Simplified Europe landmass outline --%3E%3Cpath d='M180,80 Q220,60 280,70 Q340,55 400,65 Q460,50 520,60 Q580,45 640,55 Q680,70 720,90' stroke-width='1.2'/%3E%3Cpath d='M150,120 Q200,100 260,115 Q320,95 380,110 Q440,90 500,105 Q560,85 620,100 Q680,110 740,130' stroke-width='1'/%3E%3Cpath d='M120,170 Q180,150 240,165 Q300,145 360,160 Q420,140 480,155 Q540,135 600,150 Q660,160 720,180' stroke-width='1'/%3E%3Cpath d='M100,220 Q160,200 220,215 Q280,195 340,210 Q400,190 460,205 Q520,185 580,200 Q640,210 700,230' stroke-width='0.8'/%3E%3Cpath d='M90,270 Q150,250 210,265 Q270,245 330,260 Q390,240 450,255 Q510,235 570,250 Q630,260 690,280' stroke-width='0.8'/%3E%3Cpath d='M80,320 Q140,300 200,315 Q260,295 320,310 Q380,290 440,305 Q500,285 560,300 Q620,310 680,330' stroke-width='0.6'/%3E%3Cpath d='M100,370 Q160,350 220,365 Q280,345 340,360 Q400,340 460,355 Q520,335 580,350 Q640,360 700,380' stroke-width='0.6'/%3E%3Cpath d='M130,420 Q190,400 250,415 Q310,395 370,410 Q430,390 490,405 Q550,385 610,400 Q670,410 720,430' stroke-width='0.5'/%3E%3C!-- Subtle connection points --%3E%3Ccircle cx='280' cy='115' r='2.5' fill='%2322c55e' opacity='0.6'/%3E%3Ccircle cx='400' cy='105' r='2.5' fill='%2322c55e' opacity='0.6'/%3E%3Ccircle cx='520' cy='100' r='2.5' fill='%2322c55e' opacity='0.6'/%3E%3Ccircle cx='640' cy='95' r='2.5' fill='%2322c55e' opacity='0.6'/%3E%3Ccircle cx='240' cy='165' r='2' fill='%2322c55e' opacity='0.5'/%3E%3Ccircle cx='360' cy='155' r='2' fill='%2322c55e' opacity='0.5'/%3E%3Ccircle cx='480' cy='150' r='2' fill='%2322c55e' opacity='0.5'/%3E%3Ccircle cx='600' cy='145' r='2' fill='%2322c55e' opacity='0.5'/%3E%3Ccircle cx='320' cy='260' r='2' fill='%2322c55e' opacity='0.4'/%3E%3Ccircle cx='450' cy='250' r='2' fill='%2322c55e' opacity='0.4'/%3E%3Ccircle cx='570' cy='245' r='2' fill='%2322c55e' opacity='0.4'/%3E%3C!-- Faint dotted route connections --%3E%3Cpath d='M280,115 Q340,110 400,105' stroke-dasharray='3,5' opacity='0.5'/%3E%3Cpath d='M400,105 Q460,102 520,100' stroke-dasharray='3,5' opacity='0.5'/%3E%3Cpath d='M520,100 Q580,97 640,95' stroke-dasharray='3,5' opacity='0.5'/%3E%3Cpath d='M240,165 Q300,160 360,155' stroke-dasharray='3,5' opacity='0.4'/%3E%3Cpath d='M360,155 Q420,152 480,150' stroke-dasharray='3,5' opacity='0.4'/%3E%3Cpath d='M480,150 Q540,147 600,145' stroke-dasharray='3,5' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '100% auto',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       />
       
-      {/* Hero Illustration - positioned absolutely on the right */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-full hidden lg:flex items-center justify-end pointer-events-none">
-        <img 
-          src={heroIllustration} 
-          alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
-          className="w-full h-auto max-w-[800px] object-contain animate-fade-in"
-          style={{ animationDelay: '0.2s' }}
-          loading="eager"
-        />
-      </div>
+      {/* Fade edges for seamless blend */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background opacity-60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/80" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-xl lg:max-w-2xl">
-          {/* Left Content */}
+        <div className="max-w-2xl">
           <div className="space-y-6 lg:space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
               <Route className="h-4 w-4" />
@@ -69,18 +62,8 @@ export const Hero = () => {
               </Link>
             </p>
 
-            {/* Mobile Illustration */}
-            <div className="lg:hidden animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <img 
-                src={heroIllustration} 
-                alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
-                className="w-full h-auto max-w-md mx-auto"
-                loading="eager"
-              />
-            </div>
-
             {/* Value Props */}
-            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.35s' }}>
+            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8 border-t border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <div>
                 <div className="text-base lg:text-lg font-heading font-bold text-foreground">Direct Matching</div>
                 <div className="text-xs lg:text-sm text-muted-foreground">No brokers or middlemen</div>
