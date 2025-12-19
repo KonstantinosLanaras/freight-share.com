@@ -21,6 +21,10 @@ import ShipmentDetails from "./pages/ShipmentDetails";
 import HelpCenter from "./pages/HelpCenter";
 import WhyFreightShare from "./pages/WhyFreightShare";
 import AdminPanel from "./pages/AdminPanel";
+import About from "./pages/About";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +42,10 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
             {/* Shipper Routes */}
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
