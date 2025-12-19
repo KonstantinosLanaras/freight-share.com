@@ -6,17 +6,22 @@ import heroIllustration from '@/assets/hero-illustration.png';
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30" />
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}
-      />
+      {/* Background with subtle map texture */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+      
+      {/* Hero Illustration - positioned absolutely on the right */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-full hidden lg:flex items-center justify-end pointer-events-none">
+        <img 
+          src={heroIllustration} 
+          alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
+          className="w-full h-auto max-w-[800px] object-contain animate-fade-in"
+          style={{ animationDelay: '0.2s' }}
+          loading="eager"
+        />
+      </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="max-w-xl lg:max-w-2xl">
           {/* Left Content */}
           <div className="space-y-6 lg:space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
@@ -80,17 +85,6 @@ export const Hero = () => {
                 <div className="text-xs lg:text-sm text-muted-foreground">You set the terms</div>
               </div>
             </div>
-          </div>
-
-          {/* Right Content - Hero Illustration (Desktop Only) */}
-          <div className="relative hidden lg:flex justify-center items-center">
-            <img 
-              src={heroIllustration} 
-              alt="FreightShare platform showing carrier routes, trucks in motion, and pallets being matched onto existing routes with secure escrow" 
-              className="w-full h-auto max-w-2xl animate-fade-in"
-              style={{ animationDelay: '0.2s' }}
-              loading="eager"
-            />
           </div>
         </div>
       </div>
