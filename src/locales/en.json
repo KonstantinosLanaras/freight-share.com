@@ -1,0 +1,297 @@
+{
+  "nav": {
+    "home": "Home",
+    "whyFreightShare": "Why FreightShare",
+    "howItWorks": "How It Works",
+    "logIn": "Log In",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "hero": {
+    "tagline": "European Freight Marketplace",
+    "title": "Connect Directly.",
+    "titleHighlight": "Ship Smarter.",
+    "description": "The freight platform that matches SME shippers with carriers who have available capacity. No intermediaries. Transparent pricing. Secure payments.",
+    "postLoad": "Post a Load",
+    "postRoute": "Post a Route",
+    "learnMore": "Learn more"
+  },
+  "features": {
+    "title": "Why shippers and carriers choose FreightShare",
+    "subtitle": "Built for small and medium businesses across Europe",
+    "directConnections": {
+      "title": "Direct Connections",
+      "description": "Connect directly with verified carriers or shippers. No intermediaries taking margins."
+    },
+    "transparentPricing": {
+      "title": "Transparent Pricing",
+      "description": "See all costs upfront. No hidden fees, no surprises at delivery."
+    },
+    "securePayments": {
+      "title": "Secure Payments",
+      "description": "Escrow-style payments protect both parties. Carriers get paid when delivery is confirmed."
+    },
+    "verifiedPartners": {
+      "title": "Verified Partners",
+      "description": "All users are verified businesses. Trade with confidence across Europe."
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Simple, transparent, efficient",
+    "forShippers": "For Shippers",
+    "forCarriers": "For Carriers",
+    "shipper": {
+      "step1": {
+        "title": "Post Your Load",
+        "description": "Enter shipment details: origin, destination, pallet count, and dates."
+      },
+      "step2": {
+        "title": "Receive Offers",
+        "description": "Carriers with matching routes submit competitive price offers."
+      },
+      "step3": {
+        "title": "Accept & Pay",
+        "description": "Choose the best offer. Payment is held securely until delivery."
+      },
+      "step4": {
+        "title": "Confirm Delivery",
+        "description": "Once delivered, confirm and release payment to the carrier."
+      }
+    },
+    "carrier": {
+      "step1": {
+        "title": "Post Your Route",
+        "description": "Share your planned routes with available pallet capacity."
+      },
+      "step2": {
+        "title": "Find Matching Loads",
+        "description": "Get matched with loads that fit your route and schedule."
+      },
+      "step3": {
+        "title": "Make Offers",
+        "description": "Submit competitive offers on loads that match your routes."
+      },
+      "step4": {
+        "title": "Deliver & Get Paid",
+        "description": "Complete the delivery and receive payment directly."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to ship smarter?",
+    "description": "Join the marketplace that puts shippers and carriers first.",
+    "postLoad": "Post a Load",
+    "postRoute": "Post a Route"
+  },
+  "footer": {
+    "tagline": "Connecting shippers and carriers directly across Europe.",
+    "platform": "Platform",
+    "browseRoutes": "Browse Routes",
+    "findLoads": "Find Loads",
+    "company": "Company",
+    "about": "About",
+    "contact": "Contact",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "rights": "All rights reserved."
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "enterCredentials": "Enter your credentials to access your dashboard",
+    "joinFreightShare": "Join FreightShare",
+    "chooseRole": "Choose how you'll use the platform",
+    "imShipper": "I'm a Shipper",
+    "shipperDesc": "Post loads and find carriers",
+    "imCarrier": "I'm a Carrier",
+    "carrierDesc": "Find loads and grow your business",
+    "createAccount": "Create your account",
+    "fillDetails": "Fill in your details to get started",
+    "changeRole": "Change role",
+    "fullName": "Full Name",
+    "country": "Country",
+    "selectCountry": "Select your country",
+    "companyName": "Company Name",
+    "email": "Email",
+    "password": "Password",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "backToHome": "Back to home",
+    "loggingIn": "Logging in...",
+    "creatingAccount": "Creating account...",
+    "switchRole": "Switch to",
+    "continueAs": "Continue as",
+    "signOutSwitch": "Sign out & switch to"
+  },
+  "whyFreightShare": {
+    "tagline": "Why FreightShare",
+    "title": "European logistics infrastructure for SMEs and carriers",
+    "intro1": "Small and medium businesses struggle to access efficient national and international transport at small volumes. Meanwhile, carriers operate with significant unused capacity on existing routes.",
+    "intro2": "FreightShare connects these two realities directly — without intermediaries, without complexity.",
+    "scaleTitle": "The scale of inefficiency",
+    "scaleSubtitle": "European road logistics operates far below its potential. These gaps create cost and competitive disadvantages across the supply chain.",
+    "stat1": {
+      "value": "20–30%",
+      "label": "of truck capacity in Europe runs empty or underutilized on average",
+      "source": "Source: European Commission, IRU"
+    },
+    "stat2": {
+      "value": "~30%",
+      "label": "more per unit — what SMEs pay for transport compared to large shippers",
+      "source": "Source: EU SME logistics studies"
+    },
+    "stat3": {
+      "value": "10–25%",
+      "label": "of logistics value captured by intermediaries as margin",
+      "source": "Source: Freight forwarding reports"
+    },
+    "stat4": {
+      "value": "Major",
+      "label": "Road freight is one of the largest contributors to transport-related CO₂",
+      "source": "Source: European Commission, Eurostat"
+    },
+    "mechanismTitle": "How FreightShare works",
+    "mechanismSubtitle": "A straightforward mechanism that connects available capacity with shipping demand.",
+    "step1": {
+      "title": "SMEs ship by pallet",
+      "description": "Post any shipment size — from a single pallet to partial loads. No full truckload required."
+    },
+    "step2": {
+      "title": "Carriers post routes",
+      "description": "Transport companies publish existing routes with available pallet capacity."
+    },
+    "step3": {
+      "title": "Loads match to routes",
+      "description": "Shipments are matched onto routes already running — no new trucks added."
+    },
+    "step4": {
+      "title": "Transparent payment",
+      "description": "Pricing is visible upfront. Payments are processed securely on the platform."
+    },
+    "efficiencyTitle": "Efficiency drives lower emissions",
+    "efficiencySubtitle": "Environmental benefits are a direct consequence of optimization — not a separate initiative.",
+    "utilizationTitle": "Truck utilization impact",
+    "currentUtilization": "Current average utilization",
+    "improvedUtilization": "With +10% utilization",
+    "co2Reduction": "Estimated CO₂ reduction",
+    "co2Value": "5–10% per shipment",
+    "betterLoadFactors": {
+      "title": "Better load factors",
+      "description": "When trucks run closer to capacity, fewer empty kilometers are traveled per unit shipped."
+    },
+    "noAdditionalVehicles": {
+      "title": "No additional vehicles",
+      "description": "FreightShare fills capacity on trucks already running. We don't add new vehicles to the road."
+    },
+    "lowerEmissions": {
+      "title": "Lower emissions per unit",
+      "description": "Increasing average truck utilization by just 10% reduces CO₂ emissions per unit shipped proportionally."
+    },
+    "valueTitle": "Value for both sides",
+    "valueSubtitle": "FreightShare creates opportunities for SME shippers and carriers equally.",
+    "forSMEs": "For SME Shippers",
+    "forCarriers": "For Carriers",
+    "sme1": {
+      "title": "Access national and international markets",
+      "description": "Ship to destinations across Europe without needing full truckloads"
+    },
+    "sme2": {
+      "title": "Ship smaller volumes competitively",
+      "description": "Pallet-level shipping at rates previously reserved for large shippers"
+    },
+    "sme3": {
+      "title": "Predictable pricing and visibility",
+      "description": "See prices upfront. Track shipments. No hidden fees."
+    },
+    "carrier1": {
+      "title": "Monetize unused capacity",
+      "description": "Turn empty pallet positions into revenue on routes you're already running"
+    },
+    "carrier2": {
+      "title": "Improve route profitability",
+      "description": "Increase revenue per trip without adding operational complexity"
+    },
+    "carrier3": {
+      "title": "Access SME demand directly",
+      "description": "Connect with shippers who need your routes — no intermediary required"
+    },
+    "downstreamTitle": "Downstream effects",
+    "downstreamText": "More efficient logistics lowers distribution costs. Improved market access increases product availability. More resilient supply chains benefit end consumers indirectly.",
+    "ctaTitle": "Start shipping competitively across Europe",
+    "ctaSubtitle": "Join the platform that connects SME shippers with carriers directly. No intermediaries, no hidden fees.",
+    "sourcesTitle": "Sources",
+    "source1": "European Commission (transport & emissions data)",
+    "source2": "International Road Transport Union (IRU)",
+    "source3": "EU SME logistics market studies",
+    "source4": "Industry freight forwarding reports"
+  },
+  "dashboard": {
+    "shipper": {
+      "title": "Shipper Dashboard",
+      "activeLoads": "Active Loads",
+      "pendingOffers": "Pending Offers",
+      "activeShipments": "Active Shipments",
+      "completedShipments": "Completed Shipments"
+    },
+    "carrier": {
+      "title": "Carrier Dashboard",
+      "activeRoutes": "Active Routes",
+      "pendingOffers": "Pending Offers",
+      "activeShipments": "Active Shipments",
+      "completedShipments": "Completed Shipments"
+    },
+    "quickActions": "Quick Actions",
+    "postLoad": "Post a Load",
+    "postRoute": "Post a Route",
+    "browseRoutes": "Browse Routes",
+    "findLoads": "Find Loads",
+    "myLoads": "My Loads",
+    "myRoutes": "My Routes",
+    "shipments": "Shipments",
+    "recentActivity": "Recent Activity"
+  },
+  "payment": {
+    "pending": "Payment Pending",
+    "held": "Payment Held",
+    "released": "Payment Released",
+    "completed": "Payment Completed",
+    "payNow": "Pay Now",
+    "releasePayment": "Release Payment",
+    "confirmDelivery": "Confirm Delivery & Release Payment",
+    "escrowInfo": "Funds are held securely until delivery is confirmed",
+    "paymentSecured": "Payment Secured",
+    "heldInEscrow": "held in escrow"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "pallets": "Pallets",
+    "price": "Price",
+    "origin": "Origin",
+    "destination": "Destination",
+    "pickupDate": "Pickup Date",
+    "deliveryDate": "Delivery Date",
+    "status": "Status"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français",
+    "el": "Ελληνικά"
+  }
+}

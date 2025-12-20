@@ -1,0 +1,297 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "whyFreightShare": "Pourquoi FreightShare",
+    "howItWorks": "Comment ça marche",
+    "logIn": "Connexion",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord",
+    "signOut": "Déconnexion",
+    "goToDashboard": "Aller au tableau de bord"
+  },
+  "hero": {
+    "tagline": "Marché du fret européen",
+    "title": "Connectez-vous directement.",
+    "titleHighlight": "Expédiez intelligemment.",
+    "description": "La plateforme de fret qui met en relation les expéditeurs PME avec les transporteurs disposant de capacité disponible. Pas d'intermédiaires. Tarification transparente. Paiements sécurisés.",
+    "postLoad": "Publier un chargement",
+    "postRoute": "Publier un itinéraire",
+    "learnMore": "En savoir plus"
+  },
+  "features": {
+    "title": "Pourquoi les expéditeurs et transporteurs choisissent FreightShare",
+    "subtitle": "Conçu pour les petites et moyennes entreprises à travers l'Europe",
+    "directConnections": {
+      "title": "Connexions directes",
+      "description": "Connectez-vous directement avec des transporteurs ou expéditeurs vérifiés. Pas d'intermédiaires prenant des marges."
+    },
+    "transparentPricing": {
+      "title": "Tarification transparente",
+      "description": "Voyez tous les coûts à l'avance. Pas de frais cachés, pas de surprises à la livraison."
+    },
+    "securePayments": {
+      "title": "Paiements sécurisés",
+      "description": "Les paiements de type séquestre protègent les deux parties. Les transporteurs sont payés à la confirmation de livraison."
+    },
+    "verifiedPartners": {
+      "title": "Partenaires vérifiés",
+      "description": "Tous les utilisateurs sont des entreprises vérifiées. Commercez en confiance à travers l'Europe."
+    }
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "subtitle": "Simple, transparent, efficace",
+    "forShippers": "Pour les expéditeurs",
+    "forCarriers": "Pour les transporteurs",
+    "shipper": {
+      "step1": {
+        "title": "Publiez votre chargement",
+        "description": "Entrez les détails de l'expédition : origine, destination, nombre de palettes et dates."
+      },
+      "step2": {
+        "title": "Recevez des offres",
+        "description": "Les transporteurs avec des itinéraires correspondants soumettent des offres de prix compétitives."
+      },
+      "step3": {
+        "title": "Acceptez et payez",
+        "description": "Choisissez la meilleure offre. Le paiement est conservé en sécurité jusqu'à la livraison."
+      },
+      "step4": {
+        "title": "Confirmez la livraison",
+        "description": "Une fois livré, confirmez et libérez le paiement au transporteur."
+      }
+    },
+    "carrier": {
+      "step1": {
+        "title": "Publiez votre itinéraire",
+        "description": "Partagez vos itinéraires planifiés avec la capacité de palettes disponible."
+      },
+      "step2": {
+        "title": "Trouvez des chargements correspondants",
+        "description": "Soyez mis en relation avec des chargements qui correspondent à votre itinéraire et calendrier."
+      },
+      "step3": {
+        "title": "Faites des offres",
+        "description": "Soumettez des offres compétitives sur les chargements qui correspondent à vos itinéraires."
+      },
+      "step4": {
+        "title": "Livrez et soyez payé",
+        "description": "Effectuez la livraison et recevez le paiement directement."
+      }
+    }
+  },
+  "cta": {
+    "title": "Prêt à expédier plus intelligemment ?",
+    "description": "Rejoignez le marché qui place les expéditeurs et les transporteurs en premier.",
+    "postLoad": "Publier un chargement",
+    "postRoute": "Publier un itinéraire"
+  },
+  "footer": {
+    "tagline": "Connecter directement expéditeurs et transporteurs à travers l'Europe.",
+    "platform": "Plateforme",
+    "browseRoutes": "Parcourir les itinéraires",
+    "findLoads": "Trouver des chargements",
+    "company": "Entreprise",
+    "about": "À propos",
+    "contact": "Contact",
+    "legal": "Mentions légales",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "rights": "Tous droits réservés."
+  },
+  "auth": {
+    "welcomeBack": "Bon retour",
+    "enterCredentials": "Entrez vos identifiants pour accéder à votre tableau de bord",
+    "joinFreightShare": "Rejoignez FreightShare",
+    "chooseRole": "Choisissez comment vous utiliserez la plateforme",
+    "imShipper": "Je suis un expéditeur",
+    "shipperDesc": "Publiez des chargements et trouvez des transporteurs",
+    "imCarrier": "Je suis un transporteur",
+    "carrierDesc": "Trouvez des chargements et développez votre activité",
+    "createAccount": "Créez votre compte",
+    "fillDetails": "Remplissez vos informations pour commencer",
+    "changeRole": "Changer de rôle",
+    "fullName": "Nom complet",
+    "country": "Pays",
+    "selectCountry": "Sélectionnez votre pays",
+    "companyName": "Nom de l'entreprise",
+    "email": "Email",
+    "password": "Mot de passe",
+    "logIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "backToHome": "Retour à l'accueil",
+    "loggingIn": "Connexion en cours...",
+    "creatingAccount": "Création du compte...",
+    "switchRole": "Passer à",
+    "continueAs": "Continuer en tant que",
+    "signOutSwitch": "Se déconnecter et passer à"
+  },
+  "whyFreightShare": {
+    "tagline": "Pourquoi FreightShare",
+    "title": "Infrastructure logistique européenne pour les PME et les transporteurs",
+    "intro1": "Les petites et moyennes entreprises peinent à accéder à un transport national et international efficace pour de petits volumes. Pendant ce temps, les transporteurs opèrent avec une capacité inutilisée significative sur les itinéraires existants.",
+    "intro2": "FreightShare connecte ces deux réalités directement — sans intermédiaires, sans complexité.",
+    "scaleTitle": "L'ampleur de l'inefficacité",
+    "scaleSubtitle": "La logistique routière européenne fonctionne bien en dessous de son potentiel. Ces écarts créent des désavantages de coût et de compétitivité dans toute la chaîne d'approvisionnement.",
+    "stat1": {
+      "value": "20–30%",
+      "label": "de la capacité des camions en Europe roule à vide ou sous-utilisée en moyenne",
+      "source": "Source : Commission européenne, IRU"
+    },
+    "stat2": {
+      "value": "~30%",
+      "label": "de plus par unité — ce que paient les PME pour le transport par rapport aux grands expéditeurs",
+      "source": "Source : Études logistiques PME UE"
+    },
+    "stat3": {
+      "value": "10–25%",
+      "label": "de la valeur logistique captée par les intermédiaires comme marge",
+      "source": "Source : Rapports de transitaires"
+    },
+    "stat4": {
+      "value": "Majeur",
+      "label": "Le fret routier est l'un des plus grands contributeurs aux émissions de CO₂ liées au transport",
+      "source": "Source : Commission européenne, Eurostat"
+    },
+    "mechanismTitle": "Comment fonctionne FreightShare",
+    "mechanismSubtitle": "Un mécanisme simple qui connecte la capacité disponible avec la demande d'expédition.",
+    "step1": {
+      "title": "Les PME expédient par palette",
+      "description": "Publiez n'importe quelle taille d'envoi — d'une seule palette aux chargements partiels. Pas de camion complet requis."
+    },
+    "step2": {
+      "title": "Les transporteurs publient des itinéraires",
+      "description": "Les entreprises de transport publient les itinéraires existants avec la capacité de palettes disponible."
+    },
+    "step3": {
+      "title": "Les chargements correspondent aux itinéraires",
+      "description": "Les envois sont associés aux itinéraires déjà en cours — pas de nouveaux camions ajoutés."
+    },
+    "step4": {
+      "title": "Paiement transparent",
+      "description": "Les prix sont visibles à l'avance. Les paiements sont traités de manière sécurisée sur la plateforme."
+    },
+    "efficiencyTitle": "L'efficacité entraîne moins d'émissions",
+    "efficiencySubtitle": "Les bénéfices environnementaux sont une conséquence directe de l'optimisation — pas une initiative séparée.",
+    "utilizationTitle": "Impact de l'utilisation des camions",
+    "currentUtilization": "Utilisation moyenne actuelle",
+    "improvedUtilization": "Avec +10% d'utilisation",
+    "co2Reduction": "Réduction estimée de CO₂",
+    "co2Value": "5–10% par envoi",
+    "betterLoadFactors": {
+      "title": "Meilleurs taux de chargement",
+      "description": "Quand les camions roulent plus près de leur capacité, moins de kilomètres à vide sont parcourus par unité expédiée."
+    },
+    "noAdditionalVehicles": {
+      "title": "Pas de véhicules supplémentaires",
+      "description": "FreightShare remplit la capacité des camions déjà en route. Nous n'ajoutons pas de nouveaux véhicules sur la route."
+    },
+    "lowerEmissions": {
+      "title": "Moins d'émissions par unité",
+      "description": "Augmenter l'utilisation moyenne des camions de seulement 10% réduit proportionnellement les émissions de CO₂ par unité expédiée."
+    },
+    "valueTitle": "Valeur pour les deux parties",
+    "valueSubtitle": "FreightShare crée des opportunités pour les expéditeurs PME et les transporteurs de manière égale.",
+    "forSMEs": "Pour les expéditeurs PME",
+    "forCarriers": "Pour les transporteurs",
+    "sme1": {
+      "title": "Accédez aux marchés nationaux et internationaux",
+      "description": "Expédiez vers des destinations à travers l'Europe sans avoir besoin de camions complets"
+    },
+    "sme2": {
+      "title": "Expédiez de plus petits volumes de manière compétitive",
+      "description": "Expédition au niveau de la palette à des tarifs auparavant réservés aux grands expéditeurs"
+    },
+    "sme3": {
+      "title": "Tarification prévisible et visibilité",
+      "description": "Voyez les prix à l'avance. Suivez les envois. Pas de frais cachés."
+    },
+    "carrier1": {
+      "title": "Monétisez la capacité inutilisée",
+      "description": "Transformez les positions de palettes vides en revenus sur les itinéraires que vous effectuez déjà"
+    },
+    "carrier2": {
+      "title": "Améliorez la rentabilité des itinéraires",
+      "description": "Augmentez les revenus par trajet sans ajouter de complexité opérationnelle"
+    },
+    "carrier3": {
+      "title": "Accédez directement à la demande PME",
+      "description": "Connectez-vous avec les expéditeurs qui ont besoin de vos itinéraires — pas d'intermédiaire requis"
+    },
+    "downstreamTitle": "Effets en aval",
+    "downstreamText": "Une logistique plus efficace réduit les coûts de distribution. Un meilleur accès au marché augmente la disponibilité des produits. Des chaînes d'approvisionnement plus résilientes profitent indirectement aux consommateurs finaux.",
+    "ctaTitle": "Commencez à expédier de manière compétitive à travers l'Europe",
+    "ctaSubtitle": "Rejoignez la plateforme qui connecte directement les expéditeurs PME avec les transporteurs. Pas d'intermédiaires, pas de frais cachés.",
+    "sourcesTitle": "Sources",
+    "source1": "Commission européenne (données transport et émissions)",
+    "source2": "Union Internationale des Transports Routiers (IRU)",
+    "source3": "Études logistiques PME UE",
+    "source4": "Rapports de l'industrie du transit"
+  },
+  "dashboard": {
+    "shipper": {
+      "title": "Tableau de bord expéditeur",
+      "activeLoads": "Chargements actifs",
+      "pendingOffers": "Offres en attente",
+      "activeShipments": "Envois actifs",
+      "completedShipments": "Envois terminés"
+    },
+    "carrier": {
+      "title": "Tableau de bord transporteur",
+      "activeRoutes": "Itinéraires actifs",
+      "pendingOffers": "Offres en attente",
+      "activeShipments": "Envois actifs",
+      "completedShipments": "Envois terminés"
+    },
+    "quickActions": "Actions rapides",
+    "postLoad": "Publier un chargement",
+    "postRoute": "Publier un itinéraire",
+    "browseRoutes": "Parcourir les itinéraires",
+    "findLoads": "Trouver des chargements",
+    "myLoads": "Mes chargements",
+    "myRoutes": "Mes itinéraires",
+    "shipments": "Envois",
+    "recentActivity": "Activité récente"
+  },
+  "payment": {
+    "pending": "Paiement en attente",
+    "held": "Paiement retenu",
+    "released": "Paiement libéré",
+    "completed": "Paiement terminé",
+    "payNow": "Payer maintenant",
+    "releasePayment": "Libérer le paiement",
+    "confirmDelivery": "Confirmer la livraison et libérer le paiement",
+    "escrowInfo": "Les fonds sont conservés en sécurité jusqu'à la confirmation de livraison",
+    "paymentSecured": "Paiement sécurisé",
+    "heldInEscrow": "retenu en séquestre"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "pallets": "Palettes",
+    "price": "Prix",
+    "origin": "Origine",
+    "destination": "Destination",
+    "pickupDate": "Date d'enlèvement",
+    "deliveryDate": "Date de livraison",
+    "status": "Statut"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français",
+    "el": "Ελληνικά"
+  }
+}
