@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -12,7 +13,6 @@ import {
   Leaf,
   TrendingUp,
   Globe,
-  ShieldCheck,
   CreditCard,
   BarChart3,
   Target,
@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 
 const WhyFreightShare = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -28,17 +30,13 @@ const WhyFreightShare = () => {
         {/* SECTION 1: Introduction */}
         <section className="container mx-auto px-4 mb-24">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-primary font-medium mb-4 uppercase tracking-wide text-sm">Why FreightShare</p>
+            <p className="text-primary font-medium mb-4 uppercase tracking-wide text-sm">{t('whyFreightShare.tagline')}</p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-8 leading-tight">
-              European logistics infrastructure for SMEs and carriers
+              {t('whyFreightShare.title')}
             </h1>
             <div className="text-lg text-muted-foreground space-y-4 max-w-2xl mx-auto">
-              <p>
-                Small and medium businesses struggle to access efficient national and international transport at small volumes. Meanwhile, carriers operate with significant unused capacity on existing routes.
-              </p>
-              <p>
-                FreightShare connects these two realities directly — without intermediaries, without complexity.
-              </p>
+              <p>{t('whyFreightShare.intro1')}</p>
+              <p>{t('whyFreightShare.intro2')}</p>
             </div>
           </div>
         </section>
@@ -49,10 +47,10 @@ const WhyFreightShare = () => {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-14">
                 <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-                  The scale of inefficiency
+                  {t('whyFreightShare.scaleTitle')}
                 </h2>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                  European road logistics operates far below its potential. These gaps create cost and competitive disadvantages across the supply chain.
+                  {t('whyFreightShare.scaleSubtitle')}
                 </p>
               </div>
               
@@ -62,13 +60,9 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4">
                     <Truck className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="text-4xl font-heading font-bold text-foreground mb-2">20–30%</div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    of truck capacity in Europe runs empty or underutilized on average
-                  </p>
-                  <p className="text-xs text-muted-foreground/70">
-                    Source: European Commission, IRU
-                  </p>
+                  <div className="text-4xl font-heading font-bold text-foreground mb-2">{t('whyFreightShare.stat1.value')}</div>
+                  <p className="text-muted-foreground text-sm mb-4">{t('whyFreightShare.stat1.label')}</p>
+                  <p className="text-xs text-muted-foreground/70">{t('whyFreightShare.stat1.source')}</p>
                 </div>
 
                 {/* Stat Card 2 */}
@@ -76,13 +70,9 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-accent/10 w-fit mb-4">
                     <Euro className="h-6 w-6 text-accent" />
                   </div>
-                  <div className="text-4xl font-heading font-bold text-foreground mb-2">~30%</div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    more per unit — what SMEs pay for transport compared to large shippers
-                  </p>
-                  <p className="text-xs text-muted-foreground/70">
-                    Source: EU SME logistics studies
-                  </p>
+                  <div className="text-4xl font-heading font-bold text-foreground mb-2">{t('whyFreightShare.stat2.value')}</div>
+                  <p className="text-muted-foreground text-sm mb-4">{t('whyFreightShare.stat2.label')}</p>
+                  <p className="text-xs text-muted-foreground/70">{t('whyFreightShare.stat2.source')}</p>
                 </div>
 
                 {/* Stat Card 3 */}
@@ -90,13 +80,9 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-destructive/10 w-fit mb-4">
                     <Users className="h-6 w-6 text-destructive" />
                   </div>
-                  <div className="text-4xl font-heading font-bold text-foreground mb-2">10–25%</div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    of logistics value captured by intermediaries as margin
-                  </p>
-                  <p className="text-xs text-muted-foreground/70">
-                    Source: Freight forwarding reports
-                  </p>
+                  <div className="text-4xl font-heading font-bold text-foreground mb-2">{t('whyFreightShare.stat3.value')}</div>
+                  <p className="text-muted-foreground text-sm mb-4">{t('whyFreightShare.stat3.label')}</p>
+                  <p className="text-xs text-muted-foreground/70">{t('whyFreightShare.stat3.source')}</p>
                 </div>
 
                 {/* Stat Card 4 */}
@@ -104,13 +90,9 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4">
                     <Leaf className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="text-4xl font-heading font-bold text-foreground mb-2">Major</div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Road freight is one of the largest contributors to transport-related CO₂
-                  </p>
-                  <p className="text-xs text-muted-foreground/70">
-                    Source: European Commission, Eurostat
-                  </p>
+                  <div className="text-4xl font-heading font-bold text-foreground mb-2">{t('whyFreightShare.stat4.value')}</div>
+                  <p className="text-muted-foreground text-sm mb-4">{t('whyFreightShare.stat4.label')}</p>
+                  <p className="text-xs text-muted-foreground/70">{t('whyFreightShare.stat4.source')}</p>
                 </div>
               </div>
             </div>
@@ -122,10 +104,10 @@ const WhyFreightShare = () => {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-                How FreightShare works
+                {t('whyFreightShare.mechanismTitle')}
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                A straightforward mechanism that connects available capacity with shipping demand.
+                {t('whyFreightShare.mechanismSubtitle')}
               </p>
             </div>
 
@@ -137,10 +119,8 @@ const WhyFreightShare = () => {
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</div>
                     <Package className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">SMEs ship by pallet</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Post any shipment size — from a single pallet to partial loads. No full truckload required.
-                  </p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('whyFreightShare.step1.title')}</h3>
+                  <p className="text-muted-foreground text-sm">{t('whyFreightShare.step1.description')}</p>
                 </div>
                 <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-muted-foreground/30">
                   <ArrowRight className="h-6 w-6" />
@@ -154,10 +134,8 @@ const WhyFreightShare = () => {
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</div>
                     <Route className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">Carriers post routes</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Transport companies publish existing routes with available pallet capacity.
-                  </p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('whyFreightShare.step2.title')}</h3>
+                  <p className="text-muted-foreground text-sm">{t('whyFreightShare.step2.description')}</p>
                 </div>
                 <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-muted-foreground/30">
                   <ArrowRight className="h-6 w-6" />
@@ -171,10 +149,8 @@ const WhyFreightShare = () => {
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</div>
                     <Target className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">Loads match to routes</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Shipments are matched onto routes already running — no new trucks added.
-                  </p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('whyFreightShare.step3.title')}</h3>
+                  <p className="text-muted-foreground text-sm">{t('whyFreightShare.step3.description')}</p>
                 </div>
                 <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-muted-foreground/30">
                   <ArrowRight className="h-6 w-6" />
@@ -188,10 +164,8 @@ const WhyFreightShare = () => {
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">4</div>
                     <CreditCard className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">Transparent payment</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Pricing is visible upfront. Payments are processed securely on the platform.
-                  </p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('whyFreightShare.step4.title')}</h3>
+                  <p className="text-muted-foreground text-sm">{t('whyFreightShare.step4.description')}</p>
                 </div>
               </div>
             </div>
@@ -204,23 +178,23 @@ const WhyFreightShare = () => {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-14">
                 <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-                  Efficiency drives lower emissions
+                  {t('whyFreightShare.efficiencyTitle')}
                 </h2>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                  Environmental benefits are a direct consequence of optimization — not a separate initiative.
+                  {t('whyFreightShare.efficiencySubtitle')}
                 </p>
               </div>
 
               <div className="grid lg:grid-cols-2 gap-8 items-center">
                 {/* Visual Comparison */}
                 <div className="bg-card border border-border rounded-2xl p-8">
-                  <h3 className="font-semibold text-foreground mb-6">Truck utilization impact</h3>
+                  <h3 className="font-semibold text-foreground mb-6">{t('whyFreightShare.utilizationTitle')}</h3>
                   
                   <div className="space-y-6">
                     {/* Current State */}
                     <div>
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Current average utilization</span>
+                        <span className="text-muted-foreground">{t('whyFreightShare.currentUtilization')}</span>
                         <span className="font-medium text-foreground">~70%</span>
                       </div>
                       <div className="h-4 bg-muted rounded-full overflow-hidden">
@@ -231,7 +205,7 @@ const WhyFreightShare = () => {
                     {/* Improved State */}
                     <div>
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">With +10% utilization</span>
+                        <span className="text-muted-foreground">{t('whyFreightShare.improvedUtilization')}</span>
                         <span className="font-medium text-primary">~80%</span>
                       </div>
                       <div className="h-4 bg-muted rounded-full overflow-hidden">
@@ -246,8 +220,8 @@ const WhyFreightShare = () => {
                         <TrendingUp className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Estimated CO₂ reduction</p>
-                        <p className="font-semibold text-foreground">5–10% per shipment</p>
+                        <p className="text-sm text-muted-foreground">{t('whyFreightShare.co2Reduction')}</p>
+                        <p className="font-semibold text-foreground">{t('whyFreightShare.co2Value')}</p>
                       </div>
                     </div>
                   </div>
@@ -260,10 +234,8 @@ const WhyFreightShare = () => {
                       <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground mb-2">Better load factors</h4>
-                      <p className="text-muted-foreground text-sm">
-                        When trucks run closer to capacity, fewer empty kilometers are traveled per unit shipped.
-                      </p>
+                      <h4 className="font-semibold text-foreground mb-2">{t('whyFreightShare.betterLoadFactors.title')}</h4>
+                      <p className="text-muted-foreground text-sm">{t('whyFreightShare.betterLoadFactors.description')}</p>
                     </div>
                   </div>
 
@@ -272,10 +244,8 @@ const WhyFreightShare = () => {
                       <Truck className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground mb-2">No additional vehicles</h4>
-                      <p className="text-muted-foreground text-sm">
-                        FreightShare fills capacity on trucks already running. We don't add new vehicles to the road.
-                      </p>
+                      <h4 className="font-semibold text-foreground mb-2">{t('whyFreightShare.noAdditionalVehicles.title')}</h4>
+                      <p className="text-muted-foreground text-sm">{t('whyFreightShare.noAdditionalVehicles.description')}</p>
                     </div>
                   </div>
 
@@ -284,10 +254,8 @@ const WhyFreightShare = () => {
                       <Leaf className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground mb-2">Lower emissions per unit</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Increasing average truck utilization by just 10% reduces CO₂ emissions per unit shipped proportionally.
-                      </p>
+                      <h4 className="font-semibold text-foreground mb-2">{t('whyFreightShare.lowerEmissions.title')}</h4>
+                      <p className="text-muted-foreground text-sm">{t('whyFreightShare.lowerEmissions.description')}</p>
                     </div>
                   </div>
                 </div>
@@ -301,10 +269,10 @@ const WhyFreightShare = () => {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-                Value for both sides
+                {t('whyFreightShare.valueTitle')}
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                FreightShare creates opportunities for SME shippers and carriers equally.
+                {t('whyFreightShare.valueSubtitle')}
               </p>
             </div>
 
@@ -315,29 +283,29 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-primary/10">
                     <Package className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="text-xl font-heading font-semibold text-foreground">For SME Shippers</h3>
+                  <h3 className="text-xl font-heading font-semibold text-foreground">{t('whyFreightShare.forSMEs')}</h3>
                 </div>
                 
                 <ul className="space-y-4">
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Access national and international markets</p>
-                      <p className="text-sm text-muted-foreground">Ship to destinations across Europe without needing full truckloads</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.sme1.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.sme1.description')}</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Ship smaller volumes competitively</p>
-                      <p className="text-sm text-muted-foreground">Pallet-level shipping at rates previously reserved for large shippers</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.sme2.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.sme2.description')}</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Predictable pricing and visibility</p>
-                      <p className="text-sm text-muted-foreground">See prices upfront. Track shipments. No hidden fees.</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.sme3.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.sme3.description')}</p>
                     </div>
                   </li>
                 </ul>
@@ -349,29 +317,29 @@ const WhyFreightShare = () => {
                   <div className="p-3 rounded-xl bg-accent/10">
                     <Truck className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="text-xl font-heading font-semibold text-foreground">For Carriers</h3>
+                  <h3 className="text-xl font-heading font-semibold text-foreground">{t('whyFreightShare.forCarriers')}</h3>
                 </div>
                 
                 <ul className="space-y-4">
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Monetize unused capacity</p>
-                      <p className="text-sm text-muted-foreground">Turn empty pallet positions into revenue on routes you're already running</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.carrier1.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.carrier1.description')}</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Improve route profitability</p>
-                      <p className="text-sm text-muted-foreground">Increase revenue per trip without adding operational complexity</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.carrier2.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.carrier2.description')}</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />
                     <div>
-                      <p className="font-medium text-foreground">Access SME demand directly</p>
-                      <p className="text-sm text-muted-foreground">Connect with shippers who need your routes — no intermediary required</p>
+                      <p className="font-medium text-foreground">{t('whyFreightShare.carrier3.title')}</p>
+                      <p className="text-sm text-muted-foreground">{t('whyFreightShare.carrier3.description')}</p>
                     </div>
                   </li>
                 </ul>
@@ -390,10 +358,10 @@ const WhyFreightShare = () => {
                 </div>
               </div>
               <h3 className="text-xl font-heading font-semibold text-foreground mb-4">
-                Downstream effects
+                {t('whyFreightShare.downstreamTitle')}
               </h3>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                More efficient logistics lowers distribution costs. Improved market access increases product availability. More resilient supply chains benefit end consumers indirectly.
+                {t('whyFreightShare.downstreamText')}
               </p>
             </div>
           </div>
@@ -409,22 +377,24 @@ const WhyFreightShare = () => {
                 </div>
               </div>
               <h2 className="text-2xl md:text-3xl font-heading font-bold text-secondary-foreground mb-4">
-                Start shipping competitively across Europe
+                {t('whyFreightShare.ctaTitle')}
               </h2>
               <p className="text-secondary-foreground/70 mb-8 max-w-xl mx-auto">
-                Join the platform that connects SME shippers with carriers directly. No intermediaries, no hidden fees.
+                {t('whyFreightShare.ctaSubtitle')}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="default" asChild className="bg-primary hover:bg-primary/90">
+                <Button size="lg" variant="default" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Link to="/auth?mode=signup&role=shipper" className="gap-2">
-                    Post a Load
+                    <Package className="h-4 w-4" />
+                    {t('hero.postLoad')}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" className="border-secondary-foreground/30 text-secondary-foreground hover:bg-secondary-foreground/10" asChild>
                   <Link to="/auth?mode=signup&role=carrier" className="gap-2">
-                    Post a Route
+                    <Route className="h-4 w-4" />
+                    {t('hero.postRoute')}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -437,12 +407,12 @@ const WhyFreightShare = () => {
         <section className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="border-t border-border pt-8">
-              <h4 className="text-sm font-medium text-muted-foreground mb-4">Sources</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-4">{t('whyFreightShare.sourcesTitle')}</h4>
               <div className="grid sm:grid-cols-2 gap-2 text-xs text-muted-foreground/70">
-                <p>• European Commission (transport & emissions data)</p>
-                <p>• International Road Transport Union (IRU)</p>
-                <p>• EU SME logistics market studies</p>
-                <p>• Industry freight forwarding reports</p>
+                <p>• {t('whyFreightShare.source1')}</p>
+                <p>• {t('whyFreightShare.source2')}</p>
+                <p>• {t('whyFreightShare.source3')}</p>
+                <p>• {t('whyFreightShare.source4')}</p>
               </div>
             </div>
           </div>

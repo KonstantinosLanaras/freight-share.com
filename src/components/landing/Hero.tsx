@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Route } from 'lucide-react';
 import heroMapBackground from '@/assets/hero-map-background.png';
 
 export const Hero = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* European map background image */}
@@ -17,53 +20,52 @@ export const Hero = () => {
           <div className="space-y-6 lg:space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
               <Route className="h-4 w-4" />
-              Direct Shipper-Carrier Matching
+              {t('hero.tagline')}
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-foreground leading-tight animate-slide-up">
-              Connect Directly.{' '}
-              <span className="text-primary">Ship Smarter.</span>
+              {t('hero.title')}{' '}
+              <span className="text-primary">{t('hero.titleHighlight')}</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              FreightShare matches your loads directly with carriers on the right routes. 
-              Secure payments, transparent pricing, no middlemen.
+              {t('hero.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Button variant="hero" asChild>
                 <Link to="/auth?role=shipper">
-                  Ship a Load
+                  {t('hero.postLoad')}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
               <Button variant="heroOutline" asChild>
                 <Link to="/auth?role=carrier">
-                  Find Loads as Carrier
+                  {t('hero.postRoute')}
                 </Link>
               </Button>
             </div>
 
             <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.25s' }}>
-              Already have an account?{' '}
+              {t('auth.alreadyHaveAccount')}{' '}
               <Link to="/auth" className="text-primary hover:underline font-medium">
-                Log in
+                {t('nav.logIn')}
               </Link>
             </p>
 
             {/* Value Props */}
             <div className="grid grid-cols-3 gap-4 lg:gap-8 pt-8 lg:pt-12 border-t border-border max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Direct Matching</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">No brokers or middlemen</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('features.directConnections.title')}</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">{t('features.directConnections.description').substring(0, 30)}...</div>
               </div>
               <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Secure Escrow</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">Payment on delivery</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('payment.escrowInfo').split(' ').slice(0, 2).join(' ')}</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">{t('payment.escrowInfo').substring(0, 30)}...</div>
               </div>
               <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">Fair Pricing</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">You set the terms</div>
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('features.transparentPricing.title')}</div>
+                <div className="text-xs lg:text-sm text-muted-foreground">{t('features.transparentPricing.description').substring(0, 30)}...</div>
               </div>
             </div>
           </div>
