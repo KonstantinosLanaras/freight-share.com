@@ -1,1 +1,10 @@
 project_id = "yiwpooztihgmhncxwgsd"
+
+[functions.create-shipment-payment]
+verify_jwt = false
+
+[functions.verify-shipment-payment]
+verify_jwt = false
+
+[functions.release-payment]
+verify_jwt = false
