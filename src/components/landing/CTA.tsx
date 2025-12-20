@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Route } from 'lucide-react';
+import { ArrowRight, Route, Package } from 'lucide-react';
 
 export const CTA = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="py-24 bg-secondary">
       <div className="container mx-auto px-4">
@@ -18,18 +21,15 @@ export const CTA = () => {
           <div className="relative z-10 text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-6">
               <Route className="h-4 w-4" />
-              Start shipping smarter today
+              {t('cta.title')}
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-white mb-6">
-              Ready to Connect
-              <br />
-              <span className="text-accent">Directly?</span>
+              {t('cta.title')}
             </h2>
 
             <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto">
-              Join FreightShare and find the right carriers or loads for your business. 
-              No middlemen, secure payments, fair pricing.
+              {t('cta.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -38,8 +38,9 @@ export const CTA = () => {
                 variant="accent" 
                 asChild
               >
-                <Link to="/auth?mode=signup">
-                  Get Started Free
+                <Link to="/auth?mode=signup&role=shipper" className="gap-2">
+                  <Package className="h-5 w-5" />
+                  {t('cta.postLoad')}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
@@ -49,16 +50,17 @@ export const CTA = () => {
                 className="border-white/30 text-white bg-white/10 hover:bg-white/20"
                 asChild
               >
-                <a href="/#how-it-works">
-                  See How It Works
-                </a>
+                <Link to="/auth?mode=signup&role=carrier" className="gap-2">
+                  <Route className="h-5 w-5" />
+                  {t('cta.postRoute')}
+                </Link>
               </Button>
             </div>
 
             <p className="text-sm text-white/60 mt-6">
-              Already have an account?{' '}
+              {t('auth.alreadyHaveAccount')}{' '}
               <Link to="/auth" className="text-white hover:underline font-medium">
-                Log in
+                {t('nav.logIn')}
               </Link>
             </p>
           </div>

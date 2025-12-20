@@ -1,29 +1,32 @@
+import { useTranslation } from 'react-i18next';
 import { Package, Search, CreditCard, Truck, CheckCircle, Route } from 'lucide-react';
 
-const shipperSteps = [
-  { icon: Package, title: 'Post Your Load', description: 'Enter route, dates, pallets, and set your price or accept offers.' },
-  { icon: Search, title: 'Get Matched', description: 'Carriers on matching routes see your load and make offers.' },
-  { icon: CreditCard, title: 'Pay to Confirm', description: 'Your payment is held in escrow until delivery.' },
-  { icon: CheckCircle, title: 'Confirm & Release', description: 'Confirm delivery and payment goes to the carrier.' },
-];
-
-const carrierSteps = [
-  { icon: Truck, title: 'Post Your Route', description: 'Share your upcoming journey and available pallet space.' },
-  { icon: Route, title: 'Get Load Matches', description: 'See loads that fit your route automatically.' },
-  { icon: Package, title: 'Make an Offer', description: 'Set your price and win the job.' },
-  { icon: CreditCard, title: 'Deliver & Get Paid', description: 'Complete delivery and receive your payment.' },
-];
-
 export const HowItWorks = () => {
+  const { t } = useTranslation();
+
+  const shipperSteps = [
+    { icon: Package, titleKey: 'howItWorks.shipper.step1.title', descriptionKey: 'howItWorks.shipper.step1.description' },
+    { icon: Search, titleKey: 'howItWorks.shipper.step2.title', descriptionKey: 'howItWorks.shipper.step2.description' },
+    { icon: CreditCard, titleKey: 'howItWorks.shipper.step3.title', descriptionKey: 'howItWorks.shipper.step3.description' },
+    { icon: CheckCircle, titleKey: 'howItWorks.shipper.step4.title', descriptionKey: 'howItWorks.shipper.step4.description' },
+  ];
+
+  const carrierSteps = [
+    { icon: Truck, titleKey: 'howItWorks.carrier.step1.title', descriptionKey: 'howItWorks.carrier.step1.description' },
+    { icon: Route, titleKey: 'howItWorks.carrier.step2.title', descriptionKey: 'howItWorks.carrier.step2.description' },
+    { icon: Package, titleKey: 'howItWorks.carrier.step3.title', descriptionKey: 'howItWorks.carrier.step3.description' },
+    { icon: CreditCard, titleKey: 'howItWorks.carrier.step4.title', descriptionKey: 'howItWorks.carrier.step4.description' },
+  ];
+
   return (
     <section id="how-it-works" className="py-24 scroll-mt-20">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            How It Works
+            {t('howItWorks.title')}
           </h2>
           <p className="text-lg text-muted-foreground">
-            Simple process, direct connections, secure transactions.
+            {t('howItWorks.subtitle')}
           </p>
         </div>
 
@@ -32,11 +35,11 @@ export const HowItWorks = () => {
           <div className="bg-card rounded-2xl border border-border p-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-shipper/10 rounded-full text-shipper text-sm font-medium mb-6">
               <Package className="h-4 w-4" />
-              For Shippers
+              {t('howItWorks.forShippers')}
             </div>
             <div className="space-y-6">
               {shipperSteps.map((step, index) => (
-                <div key={step.title} className="flex gap-4">
+                <div key={step.titleKey} className="flex gap-4">
                   <div className="relative">
                     <div className="w-10 h-10 rounded-full bg-shipper/10 flex items-center justify-center">
                       <step.icon className="h-5 w-5 text-shipper" />
@@ -46,8 +49,8 @@ export const HowItWorks = () => {
                     )}
                   </div>
                   <div className="flex-1 pb-4">
-                    <h4 className="font-semibold text-foreground mb-1">{step.title}</h4>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
+                    <h4 className="font-semibold text-foreground mb-1">{t(step.titleKey)}</h4>
+                    <p className="text-sm text-muted-foreground">{t(step.descriptionKey)}</p>
                   </div>
                 </div>
               ))}
@@ -58,11 +61,11 @@ export const HowItWorks = () => {
           <div className="bg-card rounded-2xl border border-border p-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-carrier/10 rounded-full text-carrier text-sm font-medium mb-6">
               <Truck className="h-4 w-4" />
-              For Carriers
+              {t('howItWorks.forCarriers')}
             </div>
             <div className="space-y-6">
               {carrierSteps.map((step, index) => (
-                <div key={step.title} className="flex gap-4">
+                <div key={step.titleKey} className="flex gap-4">
                   <div className="relative">
                     <div className="w-10 h-10 rounded-full bg-carrier/10 flex items-center justify-center">
                       <step.icon className="h-5 w-5 text-carrier" />
@@ -72,8 +75,8 @@ export const HowItWorks = () => {
                     )}
                   </div>
                   <div className="flex-1 pb-4">
-                    <h4 className="font-semibold text-foreground mb-1">{step.title}</h4>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
+                    <h4 className="font-semibold text-foreground mb-1">{t(step.titleKey)}</h4>
+                    <p className="text-sm text-muted-foreground">{t(step.descriptionKey)}</p>
                   </div>
                 </div>
               ))}

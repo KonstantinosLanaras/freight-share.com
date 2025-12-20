@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +18,7 @@ export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, signOut, loading } = useAuth();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -47,30 +50,31 @@ export const Navbar = () => {
               to="/" 
               className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              Home
+              {t('nav.home')}
             </Link>
             <Link 
               to="/why-freightshare" 
               className={`text-sm font-medium transition-colors ${isActive('/why-freightshare') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              Why FreightShare
+              {t('nav.whyFreightShare')}
             </Link>
             <a 
               href="/#how-it-works" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              How It Works
+              {t('nav.howItWorks')}
             </a>
           </div>
 
-          {/* Auth Buttons - Desktop */}
+          {/* Auth Buttons + Language Selector - Desktop */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSelector />
             {!loading && user ? (
               <>
                 <Button variant="default" asChild>
                   <Link to={dashboardPath}>
                     <LayoutDashboard className="h-4 w-4 mr-2" />
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 </Button>
                 <DropdownMenu>
@@ -88,12 +92,12 @@ export const Navbar = () => {
                     <DropdownMenuItem asChild>
                       <Link to={dashboardPath}>
                         <LayoutDashboard className="h-4 w-4 mr-2" />
-                        Go to Dashboard
+                        {t('nav.goToDashboard')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
+                      {t('nav.signOut')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -101,22 +105,25 @@ export const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link to="/auth">Log In</Link>
+                  <Link to="/auth">{t('nav.logIn')}</Link>
                 </Button>
                 <Button variant="accent" asChild>
-                  <Link to="/auth?mode=signup">Get Started</Link>
+                  <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
                 </Button>
               </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <LanguageSelector />
+            <button
+              className="p-2"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -128,21 +135,21 @@ export const Navbar = () => {
                 className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                 onClick={() => setIsOpen(false)}
               >
-                Home
+                {t('nav.home')}
               </Link>
               <Link 
                 to="/why-freightshare" 
                 className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                 onClick={() => setIsOpen(false)}
               >
-                Why FreightShare
+                {t('nav.whyFreightShare')}
               </Link>
               <a 
                 href="/#how-it-works" 
                 className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                 onClick={() => setIsOpen(false)}
               >
-                How It Works
+                {t('nav.howItWorks')}
               </a>
               
               <div className="flex gap-2 px-4 pt-2">
@@ -151,7 +158,7 @@ export const Navbar = () => {
                     <Button variant="default" className="flex-1" asChild>
                       <Link to={dashboardPath} onClick={() => setIsOpen(false)}>
                         <LayoutDashboard className="h-4 w-4 mr-2" />
-                        Dashboard
+                        {t('nav.dashboard')}
                       </Link>
                     </Button>
                     <Button variant="outline" onClick={() => { handleSignOut(); setIsOpen(false); }}>
@@ -161,10 +168,10 @@ export const Navbar = () => {
                 ) : (
                   <>
                     <Button variant="outline" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setIsOpen(false)}>Log In</Link>
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>{t('nav.logIn')}</Link>
                     </Button>
                     <Button variant="accent" className="flex-1" asChild>
-                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t('nav.getStarted')}</Link>
                     </Button>
                   </>
                 )}
