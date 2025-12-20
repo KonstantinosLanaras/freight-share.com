@@ -12,9 +12,9 @@ const resources = {
   el: { translation: el },
 };
 
+// Initialize i18n synchronously without React binding first
 i18n
   .use(LanguageDetector)
-  .use(initReactI18next)
   .init({
     resources,
     fallbackLng: 'en',
@@ -25,6 +25,12 @@ i18n
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
     },
+    react: {
+      useSuspense: false,
+    },
   });
+
+// Bind to React after initialization
+i18n.use(initReactI18next);
 
 export default i18n;
