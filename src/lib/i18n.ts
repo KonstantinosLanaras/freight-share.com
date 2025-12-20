@@ -12,11 +12,12 @@ const resources = {
   el: { translation: el },
 };
 
-// Initialize i18n synchronously without React binding first
 i18n
   .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     resources,
+    lng: 'en',
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
@@ -29,8 +30,5 @@ i18n
       useSuspense: false,
     },
   });
-
-// Bind to React after initialization
-i18n.use(initReactI18next);
 
 export default i18n;
