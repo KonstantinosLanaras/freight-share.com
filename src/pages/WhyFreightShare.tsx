@@ -391,7 +391,7 @@ const WhyFreightShare = () => {
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-secondary-foreground/30 text-secondary-foreground hover:bg-secondary-foreground/10" asChild>
+                <Button size="lg" variant="outline" className="border-2 border-primary-foreground/80 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground focus:ring-2 focus:ring-primary-foreground/50" asChild>
                   <Link to="/auth?mode=signup&role=carrier" className="gap-2">
                     <Route className="h-4 w-4" />
                     {t('hero.postRoute')}
