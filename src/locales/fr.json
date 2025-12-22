@@ -13,14 +13,14 @@
     "tagline": "Marché du fret européen",
     "title": "Connectez-vous directement.",
     "titleHighlight": "Expédiez intelligemment.",
-    "description": "La plateforme de fret qui met en relation les expéditeurs PME avec les transporteurs disposant de capacité disponible. Pas d'intermédiaires. Tarification transparente. Paiements sécurisés.",
-    "postLoad": "Publier un chargement",
-    "postRoute": "Publier un itinéraire",
+    "description": "La logistique simplifiée entre expéditeurs et transporteurs. Sans intermédiaires. Tarification transparente. Paiements sécurisés.",
+    "postLoad": "Publier une demande de transport",
+    "postRoute": "Voir les demandes de transport",
     "learnMore": "En savoir plus"
   },
   "features": {
     "title": "Pourquoi les expéditeurs et transporteurs choisissent FreightShare",
-    "subtitle": "Conçu pour les petites et moyennes entreprises à travers l'Europe",
+    "subtitle": "Conçu pour les PME européennes",
     "directConnections": {
       "title": "Connexions directes",
       "description": "Connectez-vous directement avec des transporteurs ou expéditeurs vérifiés. Pas d'intermédiaires prenant des marges."

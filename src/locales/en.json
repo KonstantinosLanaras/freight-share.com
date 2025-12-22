@@ -13,14 +13,14 @@
     "tagline": "European Freight Marketplace",
     "title": "Connect Directly.",
     "titleHighlight": "Ship Smarter.",
-    "description": "The freight platform that matches SME shippers with carriers who have available capacity. No intermediaries. Transparent pricing. Secure payments.",
+    "description": "The freight platform that matches shippers with carriers seamlessly. No intermediaries. Transparent pricing. Secure payments.",
     "postLoad": "Post a Load",
-    "postRoute": "Post a Route",
+    "postRoute": "Browse Loads",
     "learnMore": "Learn more"
   },
   "features": {
     "title": "Why shippers and carriers choose FreightShare",
-    "subtitle": "Built for small and medium businesses across Europe",
+    "subtitle": "Built for European SMEs",
     "directConnections": {
       "title": "Direct Connections",
       "description": "Connect directly with verified carriers or shippers. No intermediaries taking margins."
