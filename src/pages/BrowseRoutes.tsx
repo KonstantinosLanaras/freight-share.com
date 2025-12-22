@@ -163,8 +163,8 @@ export default function BrowseRoutes() {
                 </Link>
               </Button>
               <div>
-                <h1 className="text-xl font-heading font-bold text-foreground">Available Routes</h1>
-                <p className="text-sm text-muted-foreground">Find carriers traveling your direction</p>
+                <h1 className="text-xl font-heading font-bold text-foreground">Carrier Routes</h1>
+                <p className="text-sm text-muted-foreground">Browse carriers who have shared their upcoming routes</p>
               </div>
             </div>
             <Button 

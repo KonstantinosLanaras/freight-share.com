@@ -211,18 +211,11 @@ export default function CarrierDashboard() {
               Dashboard
             </Link>
             <Link 
-              to="/dashboard/carrier/routes"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <MapPin className="h-5 w-5" />
-              My Routes
-            </Link>
-            <Link 
               to="/dashboard/carrier/find-loads"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Package className="h-5 w-5" />
-              Find Loads
+              Browse Loads
             </Link>
             <Link 
               to="/dashboard/carrier/shipments"
@@ -231,6 +224,20 @@ export default function CarrierDashboard() {
               <Truck className="h-5 w-5" />
               Shipments
             </Link>
+            
+            {/* Optional Routes Section */}
+            <div className="pt-4 mt-4 border-t border-sidebar-border">
+              <div className="px-4 mb-2">
+                <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Optional</span>
+              </div>
+              <Link 
+                to="/dashboard/carrier/routes"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <MapPin className="h-5 w-5" />
+                My Routes
+              </Link>
+            </div>
           </nav>
 
           {/* Help & Sign Out - Always Visible */}
@@ -277,15 +284,23 @@ export default function CarrierDashboard() {
                     Welcome back, {firstName}! 🚚
                   </h1>
                   <p className="text-muted-foreground mt-1">
-                    Find loads that match your routes and grow your business.
+                    Browse available loads and find work that fits your schedule.
                   </p>
                 </div>
-                <Button variant="carrier" asChild>
-                  <Link to="/dashboard/carrier/routes/new">
-                    <Plus className="h-4 w-4" />
-                    Post New Route
-                  </Link>
-                </Button>
+                <div className="flex gap-3">
+                  <Button variant="carrier" asChild>
+                    <Link to="/dashboard/carrier/find-loads">
+                      <Package className="h-4 w-4" />
+                      Browse Loads
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link to="/dashboard/carrier/routes/new">
+                      <Plus className="h-4 w-4" />
+                      Share Route
+                    </Link>
+                  </Button>
+                </div>
               </div>
 
               {/* Verification Banner */}
@@ -405,10 +420,69 @@ export default function CarrierDashboard() {
               </div>
 
               <div className="grid lg:grid-cols-2 gap-6">
-                {/* My Routes */}
+                {/* Available Loads - Primary */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>My Routes</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-primary" />
+                      Available Loads
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/dashboard/carrier/find-loads">
+                        Browse All
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {availableLoads.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-muted-foreground mb-3">No loads available right now</p>
+                        <p className="text-sm text-muted-foreground">Check back soon for new opportunities</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {availableLoads.slice(0, 3).map((load) => (
+                          <Link 
+                            key={load.id}
+                            to={`/load/${load.id}`}
+                            className="block p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="font-medium text-foreground">
+                                {load.origin_city} → {load.destination_city}
+                              </div>
+                              <span className="text-primary font-semibold">
+                                {load.price ? `€${load.price}` : 'Open'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>{load.pallets} pallets</span>
+                              <span>{formatDateRange(load.pickup_date_from, load.pickup_date_to)}</span>
+                            </div>
+                          </Link>
+                        ))}
+                        {availableLoads.length > 3 && (
+                          <Button variant="outline" className="w-full" asChild>
+                            <Link to="/dashboard/carrier/find-loads">
+                              View {availableLoads.length - 3} more loads
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* My Routes - Optional */}
+                <Card className="border-dashed">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="h-5 w-5" />
+                      My Routes
+                      <Badge variant="secondary" className="text-xs font-normal">Optional</Badge>
+                    </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/dashboard/carrier/routes">
                         View All
@@ -420,11 +494,14 @@ export default function CarrierDashboard() {
                     {routes.length === 0 ? (
                       <div className="text-center py-8">
                         <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                        <p className="text-muted-foreground mb-3">No routes posted yet</p>
-                        <Button variant="carrier" size="sm" asChild>
+                        <p className="text-muted-foreground mb-2">Share your routes to get matched</p>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Posting routes is optional but helps shippers find you
+                        </p>
+                        <Button variant="outline" size="sm" asChild>
                           <Link to="/dashboard/carrier/routes/new">
                             <Plus className="h-4 w-4" />
-                            Post Route
+                            Share a Route
                           </Link>
                         </Button>
                       </div>

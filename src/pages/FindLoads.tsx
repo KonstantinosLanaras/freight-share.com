@@ -112,9 +112,9 @@ export default function FindLoads() {
               <div>
                 <h1 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
                   <Package className="h-6 w-6 text-primary" />
-                  Find Loads
+                  Browse Loads
                 </h1>
-                <p className="text-sm text-muted-foreground">Discover loads that match your routes</p>
+                <p className="text-sm text-muted-foreground">Find available loads and propose to carry them</p>
               </div>
             </div>
           </div>
@@ -232,10 +232,10 @@ export default function FindLoads() {
                           {load.pricing_type === 'fixed' ? 'Fixed price' : 'Accepting offers'}
                         </div>
                       </div>
-                      <Button variant="default" asChild>
+                      <Button variant="carrier" asChild>
                         <Link to={`/load/${load.id}`}>
                           <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                          View & Propose
                         </Link>
                       </Button>
                     </div>
