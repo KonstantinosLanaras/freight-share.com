@@ -11,8 +11,8 @@
   },
   "hero": {
     "tagline": "Marché du fret européen",
-    "title": "Connectez-vous directement.",
-    "titleHighlight": "Expédiez intelligemment.",
+    "title": "Une connexion simple.",
+    "titleHighlight": "Des expéditions optimisées.",
     "description": "La logistique simplifiée entre expéditeurs et transporteurs. Sans intermédiaires. Tarification transparente. Paiements sécurisés.",
     "postLoad": "Publier une demande de transport",
     "postRoute": "Voir les demandes de transport",
