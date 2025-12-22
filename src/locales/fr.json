@@ -15,7 +15,7 @@
     "titleHighlight": "Des expéditions optimisées.",
     "description": "La logistique simplifiée entre expéditeurs et transporteurs. Sans intermédiaires. Tarification transparente. Paiements sécurisés.",
     "postLoad": "Publier une demande de transport",
-    "postRoute": "Voir les demandes de transport",
+    "browseLoads": "Voir les demandes de transport",
     "learnMore": "En savoir plus"
   },
   "features": {
@@ -31,7 +31,7 @@
     },
     "securePayments": {
       "title": "Paiements sécurisés",
-      "description": "Les paiements de type séquestre protègent les deux parties. Les transporteurs sont payés à la confirmation de livraison."
+      "description": "Les fonds sont sécurisés jusqu'à confirmation de la livraison — puis le transporteur est payé."
     },
     "verifiedPartners": {
       "title": "Partenaires vérifiés",
@@ -49,7 +49,7 @@
     "forShippers": "Pour les expéditeurs",
     "forCarriers": "Pour les transporteurs",
     "shipperIntro": "Envoyez des marchandises partout en Europe — même de petits volumes",
-    "carrierIntro": "Remplissez votre capacité vide et développez votre activité",
+    "carrierIntro": "Parcourez les chargements, proposez vos services et développez votre activité",
     "shipper": {
       "step1": {
         "title": "Créez votre compte",
@@ -78,12 +78,12 @@
         "description": "Enregistrez votre entreprise et complétez une vérification rapide. Établissez la confiance avec les expéditeurs."
       },
       "step2": {
-        "title": "Publiez vos itinéraires",
-        "description": "Partagez vos trajets prévus et l'espace de palettes disponible. Nous trouverons des chargements adaptés."
+        "title": "Parcourez les chargements disponibles",
+        "description": "Voyez tous les envois ouverts des expéditeurs vérifiés. Filtrez par origine, destination et horaires."
       },
       "step3": {
-        "title": "Soyez mis en relation avec des chargements",
-        "description": "Voyez les chargements qui correspondent à vos itinéraires. Soumettez des offres compétitives avec une tarification transparente."
+        "title": "Proposez de transporter",
+        "description": "Trouvé un chargement adapté ? Soumettez votre offre avec votre prix. Les expéditeurs choisissent le meilleur match."
       },
       "step4": {
         "title": "Communiquez et coordonnez",
@@ -92,6 +92,10 @@
       "step5": {
         "title": "Livrez et soyez payé",
         "description": "Effectuez la livraison. Une fois confirmée, le paiement vous est envoyé directement — sans délais."
+      },
+      "optionalRoutes": {
+        "title": "Optionnel : Partagez votre itinéraire",
+        "description": "Publiez vos trajets prévus pour recevoir automatiquement des opportunités correspondantes. Les itinéraires sont optionnels — parcourir les chargements est toujours disponible."
       }
     },
     "supportTitle": "Besoin d'aide ?",

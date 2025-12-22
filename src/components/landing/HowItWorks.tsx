@@ -1,21 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import { Package, Search, CreditCard, Truck, CheckCircle, Route } from 'lucide-react';
+import { Package, Search, CreditCard, Truck, CheckCircle, Route, MessageSquare, UserPlus } from 'lucide-react';
 
 export const HowItWorks = () => {
   const { t } = useTranslation();
 
   const shipperSteps = [
-    { icon: Package, titleKey: 'howItWorks.shipper.step1.title', descriptionKey: 'howItWorks.shipper.step1.description' },
-    { icon: Search, titleKey: 'howItWorks.shipper.step2.title', descriptionKey: 'howItWorks.shipper.step2.description' },
-    { icon: CreditCard, titleKey: 'howItWorks.shipper.step3.title', descriptionKey: 'howItWorks.shipper.step3.description' },
-    { icon: CheckCircle, titleKey: 'howItWorks.shipper.step4.title', descriptionKey: 'howItWorks.shipper.step4.description' },
+    { icon: UserPlus, titleKey: 'howItWorks.shipper.step1.title', descriptionKey: 'howItWorks.shipper.step1.description' },
+    { icon: Package, titleKey: 'howItWorks.shipper.step2.title', descriptionKey: 'howItWorks.shipper.step2.description' },
+    { icon: CheckCircle, titleKey: 'howItWorks.shipper.step3.title', descriptionKey: 'howItWorks.shipper.step3.description' },
+    { icon: CreditCard, titleKey: 'howItWorks.shipper.step5.title', descriptionKey: 'howItWorks.shipper.step5.description' },
   ];
 
   const carrierSteps = [
-    { icon: Truck, titleKey: 'howItWorks.carrier.step1.title', descriptionKey: 'howItWorks.carrier.step1.description' },
-    { icon: Route, titleKey: 'howItWorks.carrier.step2.title', descriptionKey: 'howItWorks.carrier.step2.description' },
+    { icon: UserPlus, titleKey: 'howItWorks.carrier.step1.title', descriptionKey: 'howItWorks.carrier.step1.description' },
+    { icon: Search, titleKey: 'howItWorks.carrier.step2.title', descriptionKey: 'howItWorks.carrier.step2.description' },
     { icon: Package, titleKey: 'howItWorks.carrier.step3.title', descriptionKey: 'howItWorks.carrier.step3.description' },
-    { icon: CreditCard, titleKey: 'howItWorks.carrier.step4.title', descriptionKey: 'howItWorks.carrier.step4.description' },
+    { icon: CreditCard, titleKey: 'howItWorks.carrier.step5.title', descriptionKey: 'howItWorks.carrier.step5.description' },
   ];
 
   return (
@@ -80,6 +80,21 @@ export const HowItWorks = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Optional Route Tip */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+              <div className="flex items-start gap-3">
+                <Route className="h-5 w-5 text-carrier flex-shrink-0 mt-0.5" />
+                <div>
+                  <h5 className="font-medium text-foreground text-sm mb-1">
+                    {t('howItWorks.carrier.optionalRoutes.title')}
+                  </h5>
+                  <p className="text-xs text-muted-foreground">
+                    {t('howItWorks.carrier.optionalRoutes.description')}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

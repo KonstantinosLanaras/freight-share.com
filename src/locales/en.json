@@ -15,7 +15,7 @@
     "titleHighlight": "Ship Smarter.",
     "description": "The freight platform that matches shippers with carriers seamlessly. No intermediaries. Transparent pricing. Secure payments.",
     "postLoad": "Post a Load",
-    "postRoute": "Browse Loads",
+    "browseLoads": "Browse Loads",
     "learnMore": "Learn more"
   },
   "features": {
@@ -31,7 +31,7 @@
     },
     "securePayments": {
       "title": "Secure Payments",
-      "description": "Escrow-style payments protect both parties. Carriers get paid when delivery is confirmed."
+      "description": "Funds are held securely until delivery is confirmed — then the carrier is paid."
     },
     "verifiedPartners": {
       "title": "Verified Partners",
@@ -49,7 +49,7 @@
     "forShippers": "For Shippers",
     "forCarriers": "For Carriers",
     "shipperIntro": "Send goods anywhere in Europe — even small volumes",
-    "carrierIntro": "Fill your empty capacity and grow your business",
+    "carrierIntro": "Browse loads, propose to carry, and grow your business",
     "shipper": {
       "step1": {
         "title": "Create your account",
@@ -78,12 +78,12 @@
         "description": "Register your company and complete a quick verification. Build trust with shippers."
       },
       "step2": {
-        "title": "Post your routes",
-        "description": "Share your planned trips and available pallet space. We'll find loads that fit."
+        "title": "Browse available loads",
+        "description": "See all open shipments from verified shippers. Filter by origin, destination, and timing."
       },
       "step3": {
-        "title": "Get matched with loads",
-        "description": "See loads that match your routes. Submit competitive offers with transparent pricing."
+        "title": "Propose to carry",
+        "description": "Found a load that fits? Submit your offer with your price. Shippers choose the best match."
       },
       "step4": {
         "title": "Communicate and coordinate",
@@ -92,6 +92,10 @@
       "step5": {
         "title": "Deliver and get paid",
         "description": "Complete the delivery. Once confirmed, payment is sent directly to you — no delays."
+      },
+      "optionalRoutes": {
+        "title": "Optionally: Share your route",
+        "description": "Publish your planned trips to receive matching opportunities automatically. Routes are optional — browsing loads is always available."
       }
     },
     "supportTitle": "Need help?",

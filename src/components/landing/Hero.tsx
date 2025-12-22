@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Route } from 'lucide-react';
+import { ArrowRight, Route, Search } from 'lucide-react';
 import heroMapBackground from '@/assets/hero-map-background.png';
+import logisticsIllustration from '@/assets/logistics-illustration.png';
 
 export const Hero = () => {
   const { t } = useTranslation();
@@ -41,7 +42,8 @@ export const Hero = () => {
               </Button>
               <Button variant="heroOutline" asChild>
                 <Link to="/auth?role=carrier">
-                  {t('hero.postRoute')}
+                  <Search className="h-5 w-5 mr-1" />
+                  {t('hero.browseLoads')}
                 </Link>
               </Button>
             </div>
@@ -53,19 +55,28 @@ export const Hero = () => {
               </Link>
             </p>
 
+            {/* Logistics Illustration */}
+            <div className="pt-8 lg:pt-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <img 
+                src={logisticsIllustration} 
+                alt="Direct freight connections between shippers and carriers" 
+                className="w-full max-w-3xl mx-auto"
+              />
+            </div>
+
             {/* Value Props */}
-            <div className="grid grid-cols-3 gap-4 lg:gap-8 pt-8 lg:pt-12 border-t border-border max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('features.directConnections.title')}</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">{t('features.directConnections.description').substring(0, 30)}...</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pt-8 lg:pt-12 border-t border-border max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '0.35s' }}>
+              <div className="text-center md:text-left">
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.directConnections.title')}</div>
+                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.directConnections.description')}</div>
               </div>
-              <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('payment.escrowInfo').split(' ').slice(0, 2).join(' ')}</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">{t('payment.escrowInfo').substring(0, 30)}...</div>
+              <div className="text-center md:text-left">
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.securePayments.title')}</div>
+                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.securePayments.description')}</div>
               </div>
-              <div>
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground">{t('features.transparentPricing.title')}</div>
-                <div className="text-xs lg:text-sm text-muted-foreground">{t('features.transparentPricing.description').substring(0, 30)}...</div>
+              <div className="text-center md:text-left">
+                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.transparentPricing.title')}</div>
+                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.transparentPricing.description')}</div>
               </div>
             </div>
           </div>
