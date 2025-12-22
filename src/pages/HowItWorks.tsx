@@ -4,7 +4,7 @@ import {
   Package, 
   Truck, 
   UserPlus, 
-  FileText, 
+  Search, 
   Users, 
   MessageSquare, 
   CheckCircle, 
@@ -14,7 +14,9 @@ import {
   Mail,
   ArrowRight,
   Shield,
-  Heart
+  Heart,
+  Route,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
@@ -31,7 +33,7 @@ const HowItWorksPage = () => {
       descriptionKey: 'howItWorks.shipper.step1.description' 
     },
     { 
-      icon: FileText, 
+      icon: Package, 
       number: 2,
       titleKey: 'howItWorks.shipper.step2.title', 
       descriptionKey: 'howItWorks.shipper.step2.description' 
@@ -64,7 +66,7 @@ const HowItWorksPage = () => {
       descriptionKey: 'howItWorks.carrier.step1.description' 
     },
     { 
-      icon: FileText, 
+      icon: Search, 
       number: 2,
       titleKey: 'howItWorks.carrier.step2.title', 
       descriptionKey: 'howItWorks.carrier.step2.description' 
@@ -243,6 +245,23 @@ const HowItWorksPage = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* Optional Route Tip */}
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-carrier/10 flex items-center justify-center flex-shrink-0">
+                      <Route className="h-4 w-4 text-carrier" />
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-foreground text-sm mb-1">
+                        {t('howItWorks.carrier.optionalRoutes.title')}
+                      </h5>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {t('howItWorks.carrier.optionalRoutes.description')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Carrier CTA */}
                 <div className="mt-8 pt-6 border-t border-border space-y-3">
@@ -263,6 +282,36 @@ const HowItWorksPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Sticky Help Section */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="bg-card rounded-xl border border-border shadow-lg p-4 max-w-xs">
+          <div className="flex items-center gap-2 mb-3">
+            <Headphones className="h-5 w-5 text-primary" />
+            <span className="font-semibold text-foreground text-sm">{t('howItWorks.supportTitle')}</span>
+          </div>
+          <div className="space-y-2">
+            <a 
+              href={`tel:${t('howItWorks.phoneNumber')}`}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              {t('howItWorks.phoneNumber')}
+            </a>
+            <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <MessageSquare className="h-4 w-4" />
+              Chat with us
+            </button>
+            <a 
+              href={`mailto:${t('howItWorks.emailAddress')}`}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              {t('howItWorks.emailAddress')}
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* Support Section */}
       <section className="py-20">
