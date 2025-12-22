@@ -20,6 +20,7 @@ import CarrierShipments from "./pages/CarrierShipments";
 import ShipmentDetails from "./pages/ShipmentDetails";
 import HelpCenter from "./pages/HelpCenter";
 import WhyFreightShare from "./pages/WhyFreightShare";
+import HowItWorksPage from "./pages/HowItWorks";
 import AdminPanel from "./pages/AdminPanel";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
@@ -39,6 +40,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/why-freightshare" element={<WhyFreightShare />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />

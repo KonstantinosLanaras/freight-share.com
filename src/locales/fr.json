@@ -41,44 +41,75 @@
   "howItWorks": {
     "title": "Comment ça marche",
     "subtitle": "Simple, transparent, efficace",
+    "pageTitle": "Comment fonctionne FreightShare",
+    "pageSubtitle": "Un guide étape par étape pour expédier plus intelligemment",
+    "introTitle": "L'expédition simplifiée",
+    "introText": "FreightShare est conçu pour les petites et moyennes entreprises. Aucune connaissance technique requise. Suivez quelques étapes simples et expédiez à travers l'Europe.",
+    "introHighlight": "Une logistique conviviale pour tous.",
     "forShippers": "Pour les expéditeurs",
     "forCarriers": "Pour les transporteurs",
+    "shipperIntro": "Envoyez des marchandises partout en Europe — même de petits volumes",
+    "carrierIntro": "Remplissez votre capacité vide et développez votre activité",
     "shipper": {
       "step1": {
-        "title": "Publiez votre chargement",
-        "description": "Entrez les détails de l'expédition : origine, destination, nombre de palettes et dates."
+        "title": "Créez votre compte",
+        "description": "Inscrivez-vous en quelques minutes avec les détails de votre entreprise. Une vérification rapide assure la sécurité de tous."
       },
       "step2": {
-        "title": "Recevez des offres",
-        "description": "Les transporteurs avec des itinéraires correspondants soumettent des offres de prix compétitives."
+        "title": "Publiez votre chargement",
+        "description": "Dites-nous d'où vous expédiez, vers où, et combien de palettes. Nous nous occupons du matching."
       },
       "step3": {
-        "title": "Acceptez et payez",
-        "description": "Choisissez la meilleure offre. Le paiement est conservé en sécurité jusqu'à la livraison."
+        "title": "Soyez mis en relation avec des transporteurs",
+        "description": "Recevez des offres de transporteurs vérifiés qui effectuent déjà votre itinéraire. Comparez les prix facilement."
       },
       "step4": {
-        "title": "Confirmez la livraison",
-        "description": "Une fois livré, confirmez et libérez le paiement au transporteur."
+        "title": "Suivez et communiquez",
+        "description": "Suivez votre envoi en temps réel. Contactez votre transporteur directement si nécessaire."
+      },
+      "step5": {
+        "title": "Confirmez la livraison et payez",
+        "description": "Lorsque les marchandises arrivent en sécurité, confirmez la livraison. Le paiement est libéré automatiquement au transporteur."
       }
     },
     "carrier": {
       "step1": {
-        "title": "Publiez votre itinéraire",
-        "description": "Partagez vos itinéraires planifiés avec la capacité de palettes disponible."
+        "title": "Créez votre compte",
+        "description": "Enregistrez votre entreprise et complétez une vérification rapide. Établissez la confiance avec les expéditeurs."
       },
       "step2": {
-        "title": "Trouvez des chargements correspondants",
-        "description": "Soyez mis en relation avec des chargements qui correspondent à votre itinéraire et calendrier."
+        "title": "Publiez vos itinéraires",
+        "description": "Partagez vos trajets prévus et l'espace de palettes disponible. Nous trouverons des chargements adaptés."
       },
       "step3": {
-        "title": "Faites des offres",
-        "description": "Soumettez des offres compétitives sur les chargements qui correspondent à vos itinéraires."
+        "title": "Soyez mis en relation avec des chargements",
+        "description": "Voyez les chargements qui correspondent à vos itinéraires. Soumettez des offres compétitives avec une tarification transparente."
       },
       "step4": {
+        "title": "Communiquez et coordonnez",
+        "description": "Discutez directement avec les expéditeurs. Convenez des heures d'enlèvement et des exigences spéciales."
+      },
+      "step5": {
         "title": "Livrez et soyez payé",
-        "description": "Effectuez la livraison et recevez le paiement directement."
+        "description": "Effectuez la livraison. Une fois confirmée, le paiement vous est envoyé directement — sans délais."
       }
-    }
+    },
+    "supportTitle": "Besoin d'aide ?",
+    "supportSubtitle": "Préférez parler à quelqu'un ? Notre équipe est là pour vous aider.",
+    "supportText": "Nous comprenons que les nouvelles plateformes peuvent sembler peu familières. Notre équipe d'assistance parle votre langue et est disponible pendant les heures de bureau.",
+    "chatOption": "Démarrer une conversation",
+    "chatDescription": "Obtenez des réponses rapides via chat en direct",
+    "phoneOption": "Appelez-nous directement",
+    "phoneDescription": "Parlez à une vraie personne aujourd'hui",
+    "phoneNumber": "+30 210 123 4567",
+    "emailOption": "Envoyez-nous un email",
+    "emailDescription": "Nous répondons dans les 24 heures",
+    "emailAddress": "support@freightshare.eu",
+    "ctaTitle": "Prêt à commencer ?",
+    "ctaSubtitle": "Rejoignez des milliers d'entreprises qui expédient déjà plus intelligemment à travers l'Europe.",
+    "loginButton": "Connectez-vous pour commencer",
+    "signupButton": "Créer un compte",
+    "alreadyMember": "Vous avez déjà un compte ?"
   },
   "cta": {
     "title": "Prêt à expédier plus intelligemment ?",

@@ -58,12 +58,12 @@ export const Navbar = () => {
             >
               {t('nav.whyFreightShare')}
             </Link>
-            <a 
-              href="/#how-it-works" 
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            <Link 
+              to="/how-it-works" 
+              className={`text-sm font-medium transition-colors ${isActive('/how-it-works') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {t('nav.howItWorks')}
-            </a>
+            </Link>
           </div>
 
           {/* Auth Buttons + Language Selector - Desktop */}
@@ -144,13 +144,13 @@ export const Navbar = () => {
               >
                 {t('nav.whyFreightShare')}
               </Link>
-              <a 
-                href="/#how-it-works" 
+              <Link 
+                to="/how-it-works" 
                 className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                 onClick={() => setIsOpen(false)}
               >
                 {t('nav.howItWorks')}
-              </a>
+              </Link>
               
               <div className="flex gap-2 px-4 pt-2">
                 {!loading && user ? (

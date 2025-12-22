@@ -41,44 +41,75 @@
   "howItWorks": {
     "title": "How It Works",
     "subtitle": "Simple, transparent, efficient",
+    "pageTitle": "How FreightShare Works",
+    "pageSubtitle": "A step-by-step guide to shipping smarter",
+    "introTitle": "Shipping made simple",
+    "introText": "FreightShare is designed for small and medium businesses. No technical knowledge required. Just follow a few simple steps and you're shipping across Europe.",
+    "introHighlight": "Human-friendly logistics for everyone.",
     "forShippers": "For Shippers",
     "forCarriers": "For Carriers",
+    "shipperIntro": "Send goods anywhere in Europe — even small volumes",
+    "carrierIntro": "Fill your empty capacity and grow your business",
     "shipper": {
       "step1": {
-        "title": "Post Your Load",
-        "description": "Enter shipment details: origin, destination, pallet count, and dates."
+        "title": "Create your account",
+        "description": "Sign up in minutes with your company details. Quick verification keeps everyone safe."
       },
       "step2": {
-        "title": "Receive Offers",
-        "description": "Carriers with matching routes submit competitive price offers."
+        "title": "Post your load",
+        "description": "Tell us where you're shipping from, where to, and how many pallets. We'll handle the matching."
       },
       "step3": {
-        "title": "Accept & Pay",
-        "description": "Choose the best offer. Payment is held securely until delivery."
+        "title": "Get matched with carriers",
+        "description": "Receive offers from verified carriers who are already driving your route. Compare prices easily."
       },
       "step4": {
-        "title": "Confirm Delivery",
-        "description": "Once delivered, confirm and release payment to the carrier."
+        "title": "Track and communicate",
+        "description": "Follow your shipment in real-time. Message your carrier directly if needed."
+      },
+      "step5": {
+        "title": "Confirm delivery and pay",
+        "description": "When goods arrive safely, confirm delivery. Payment is released to the carrier automatically."
       }
     },
     "carrier": {
       "step1": {
-        "title": "Post Your Route",
-        "description": "Share your planned routes with available pallet capacity."
+        "title": "Create your account",
+        "description": "Register your company and complete a quick verification. Build trust with shippers."
       },
       "step2": {
-        "title": "Find Matching Loads",
-        "description": "Get matched with loads that fit your route and schedule."
+        "title": "Post your routes",
+        "description": "Share your planned trips and available pallet space. We'll find loads that fit."
       },
       "step3": {
-        "title": "Make Offers",
-        "description": "Submit competitive offers on loads that match your routes."
+        "title": "Get matched with loads",
+        "description": "See loads that match your routes. Submit competitive offers with transparent pricing."
       },
       "step4": {
-        "title": "Deliver & Get Paid",
-        "description": "Complete the delivery and receive payment directly."
+        "title": "Communicate and coordinate",
+        "description": "Chat with shippers directly. Agree on pickup times and any special requirements."
+      },
+      "step5": {
+        "title": "Deliver and get paid",
+        "description": "Complete the delivery. Once confirmed, payment is sent directly to you — no delays."
       }
-    }
+    },
+    "supportTitle": "Need help?",
+    "supportSubtitle": "Prefer to talk to someone? Our team is happy to help.",
+    "supportText": "We understand that new platforms can feel unfamiliar. Our support team speaks your language and is available during business hours.",
+    "chatOption": "Start a conversation",
+    "chatDescription": "Get quick answers via live chat",
+    "phoneOption": "Call us directly",
+    "phoneDescription": "Speak to a real person today",
+    "phoneNumber": "+30 210 123 4567",
+    "emailOption": "Send us an email",
+    "emailDescription": "We reply within 24 hours",
+    "emailAddress": "support@freightshare.eu",
+    "ctaTitle": "Ready to get started?",
+    "ctaSubtitle": "Join thousands of businesses already shipping smarter across Europe.",
+    "loginButton": "Log in to get started",
+    "signupButton": "Create an account",
+    "alreadyMember": "Already have an account?"
   },
   "cta": {
     "title": "Ready to ship smarter?",
