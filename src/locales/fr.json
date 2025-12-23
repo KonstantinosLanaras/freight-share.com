@@ -16,7 +16,17 @@
     "description": "La logistique simplifiée entre expéditeurs et transporteurs. Sans intermédiaires. Tarification transparente. Paiements sécurisés.",
     "postLoad": "Publier une demande de transport",
     "browseLoads": "Voir les demandes de transport",
-    "learnMore": "En savoir plus"
+    "learnMore": "En savoir plus",
+    "shipperCard": {
+      "title": "Expéditeurs",
+      "description": "Publiez un chargement ou parcourez les transporteurs disponibles en Europe.",
+      "subtitle": "Pour les PME expédiant des marchandises — sans intermédiaires."
+    },
+    "carrierCard": {
+      "title": "Transporteurs",
+      "description": "Parcourez les chargements disponibles ou associez des envois à vos itinéraires existants.",
+      "subtitle": "Pour les transporteurs professionnels avec capacité disponible."
+    }
   },
   "features": {
     "title": "Pourquoi les expéditeurs et transporteurs choisissent FreightShare",

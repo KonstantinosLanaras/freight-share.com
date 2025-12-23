@@ -16,7 +16,17 @@
     "description": "The freight platform that matches shippers with carriers seamlessly. No intermediaries. Transparent pricing. Secure payments.",
     "postLoad": "Post a Load",
     "browseLoads": "Browse Loads",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "shipperCard": {
+      "title": "Shippers",
+      "description": "Post a load or browse available carriers across Europe.",
+      "subtitle": "For SMEs shipping goods — no intermediaries."
+    },
+    "carrierCard": {
+      "title": "Carriers",
+      "description": "Browse available loads or match shipments to your existing routes.",
+      "subtitle": "For professional transporters with available capacity."
+    }
   },
   "features": {
     "title": "Why shippers and carriers choose FreightShare",
