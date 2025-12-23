@@ -34,12 +34,6 @@ const WhyFreightShare = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-8 leading-tight text-center">
               {t('whyFreightShare.title')}
             </h1>
-            <p className="text-lg text-muted-foreground mb-6 text-left">
-              {t('whyFreightShare.intro1')}
-            </p>
-            <p className="text-lg text-muted-foreground text-left">
-              {t('whyFreightShare.intro2')}
-            </p>
           </div>
         </section>
 
