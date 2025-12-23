@@ -14,9 +14,7 @@ import {
   Mail,
   ArrowRight,
   Shield,
-  Heart,
-  Route,
-  Info
+  Route
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
@@ -95,47 +93,70 @@ const HowItWorksPage = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-b from-muted/50 to-background">
+      {/* Hero Section - Compact */}
+      <section className="pt-20 pb-6">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-              {t('howItWorks.pageTitle')}
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              {t('howItWorks.pageSubtitle')}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Introduction */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-card rounded-2xl border border-border p-8 md:p-12">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Heart className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">
-                    {t('howItWorks.introTitle')}
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              {/* Main Hero Content */}
+              <div className="flex-1">
+                <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3">
+                  {t('howItWorks.pageTitle')}
+                </h1>
+                <p className="text-base text-muted-foreground mb-4 max-w-xl">
+                  {t('howItWorks.pageSubtitle')}
+                </p>
+                
+                {/* Compact intro card */}
+                <div className="bg-card rounded-xl border border-border p-4 md:p-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Route className="h-4 w-4 text-primary" />
+                    </div>
+                    <h2 className="text-lg font-heading font-semibold text-foreground">
+                      {t('howItWorks.introTitle')}
+                    </h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">
                     {t('howItWorks.introText')}
                   </p>
-                  <p className="text-lg font-medium text-primary">
-                    {t('howItWorks.introHighlight')}
-                  </p>
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      Verified carriers • Secure payments • Trusted by SMEs
+                    </span>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Trusted by SMEs across Europe • Verified carriers • Secure payments
-                </span>
+              {/* Compact Help Widget */}
+              <div className="lg:w-56 flex-shrink-0">
+                <div className="bg-muted/50 rounded-xl border border-border p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Headphones className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-foreground text-sm">{t('howItWorks.supportTitle')}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <a 
+                      href={`tel:${t('howItWorks.phoneNumber')}`}
+                      className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Phone className="h-3.5 w-3.5" />
+                      {t('howItWorks.phoneNumber')}
+                    </a>
+                    <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      Chat with us
+                    </button>
+                    <a 
+                      href={`mailto:${t('howItWorks.emailAddress')}`}
+                      className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                      {t('howItWorks.emailAddress')}
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -143,9 +164,9 @@ const HowItWorksPage = () => {
       </section>
 
       {/* Two Paths Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-8 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
             
             {/* Shipper Path */}
             <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -282,36 +303,6 @@ const HowItWorksPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Sticky Help Section */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="bg-card rounded-xl border border-border shadow-lg p-4 max-w-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <Headphones className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-foreground text-sm">{t('howItWorks.supportTitle')}</span>
-          </div>
-          <div className="space-y-2">
-            <a 
-              href={`tel:${t('howItWorks.phoneNumber')}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Phone className="h-4 w-4" />
-              {t('howItWorks.phoneNumber')}
-            </a>
-            <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-              <MessageSquare className="h-4 w-4" />
-              Chat with us
-            </button>
-            <a 
-              href={`mailto:${t('howItWorks.emailAddress')}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Mail className="h-4 w-4" />
-              {t('howItWorks.emailAddress')}
-            </a>
-          </div>
-        </div>
-      </div>
 
       {/* Support Section */}
       <section className="py-20">
