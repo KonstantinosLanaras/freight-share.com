@@ -29,15 +29,19 @@ const WhyFreightShare = () => {
       <main className="pt-24 pb-16">
         {/* SECTION 1: Introduction */}
         <section className="container mx-auto px-4 mb-24">
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-primary font-medium mb-4 uppercase tracking-wide text-sm">{t('whyFreightShare.tagline')}</p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-8 leading-tight">
-              {t('whyFreightShare.title')}
-            </h1>
-            <div className="text-lg text-muted-foreground space-y-4 max-w-2xl mx-auto">
-              <p>{t('whyFreightShare.intro1')}</p>
-              <p>{t('whyFreightShare.intro2')}</p>
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center">
+              <p className="text-primary font-medium mb-4 uppercase tracking-wide text-sm">{t('whyFreightShare.tagline')}</p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-8 leading-tight">
+                {t('whyFreightShare.title')}
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+                {t('whyFreightShare.intro1')}
+              </p>
             </div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-left">
+              {t('whyFreightShare.intro2')}
+            </p>
           </div>
         </section>
 
@@ -45,11 +49,11 @@ const WhyFreightShare = () => {
         <section className="bg-secondary/5 py-20 mb-24">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <div className="text-center mb-14">
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+              <div className="mb-14">
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4 text-center">
                   {t('whyFreightShare.scaleTitle')}
                 </h2>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-left">
                   {t('whyFreightShare.scaleSubtitle')}
                 </p>
               </div>
@@ -102,11 +106,11 @@ const WhyFreightShare = () => {
         {/* SECTION 3: What FreightShare Changes (Mechanism) */}
         <section className="container mx-auto px-4 mb-24">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+            <div className="mb-14">
+              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4 text-center">
                 {t('whyFreightShare.mechanismTitle')}
               </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-left">
                 {t('whyFreightShare.mechanismSubtitle')}
               </p>
             </div>
@@ -176,11 +180,11 @@ const WhyFreightShare = () => {
         <section className="bg-primary/5 py-20 mb-24">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <div className="text-center mb-14">
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+              <div className="mb-14">
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4 text-center">
                   {t('whyFreightShare.efficiencyTitle')}
                 </h2>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-left">
                   {t('whyFreightShare.efficiencySubtitle')}
                 </p>
               </div>
@@ -267,11 +271,11 @@ const WhyFreightShare = () => {
         {/* SECTION 5: Value for SMEs and Carriers */}
         <section className="container mx-auto px-4 mb-24">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+            <div className="mb-14">
+              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4 text-center">
                 {t('whyFreightShare.valueTitle')}
               </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-left">
                 {t('whyFreightShare.valueSubtitle')}
               </p>
             </div>
@@ -351,16 +355,16 @@ const WhyFreightShare = () => {
         {/* SECTION 6: Downstream Effects */}
         <section className="container mx-auto px-4 mb-24">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-muted/30 border border-border rounded-2xl p-8 text-center">
+            <div className="bg-muted/30 border border-border rounded-2xl p-8">
               <div className="flex justify-center mb-4">
                 <div className="p-3 rounded-xl bg-primary/10">
                   <ShoppingCart className="h-6 w-6 text-primary" />
                 </div>
               </div>
-              <h3 className="text-xl font-heading font-semibold text-foreground mb-4">
+              <h3 className="text-xl font-heading font-semibold text-foreground mb-4 text-center">
                 {t('whyFreightShare.downstreamTitle')}
               </h3>
-              <p className="text-muted-foreground max-w-xl mx-auto">
+              <p className="text-muted-foreground max-w-xl mx-auto text-left">
                 {t('whyFreightShare.downstreamText')}
               </p>
             </div>
