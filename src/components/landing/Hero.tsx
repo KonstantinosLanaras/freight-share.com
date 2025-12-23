@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Route, Search } from 'lucide-react';
+import { ArrowRight, Route, Search, Warehouse, Truck } from 'lucide-react';
 import heroMapBackground from '@/assets/hero-map-background.png';
-import logisticsIllustration from '@/assets/logistics-illustration.png';
 
 export const Hero = () => {
   const { t } = useTranslation();
@@ -55,29 +54,59 @@ export const Hero = () => {
               </Link>
             </p>
 
-            {/* Logistics Illustration */}
-            <div className="pt-8 lg:pt-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <img 
-                src={logisticsIllustration} 
-                alt="Direct freight connections between shippers and carriers" 
-                className="w-full max-w-3xl mx-auto"
-              />
-            </div>
+            {/* Role Selection Cards - BlaBlaCar Style */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10 lg:pt-14 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              {/* Shipper Card */}
+              <Link 
+                to="/auth?role=shipper"
+                className="group relative bg-card hover:bg-accent/50 border border-border hover:border-primary/30 rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1"
+              >
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Warehouse className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-heading font-bold text-foreground mb-2">
+                      {t('hero.shipperCard.title')}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {t('hero.shipperCard.description')}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 pt-2">
+                    {t('hero.shipperCard.subtitle')}
+                  </p>
+                </div>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowRight className="h-5 w-5 text-primary" />
+                </div>
+              </Link>
 
-            {/* Value Props */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pt-8 lg:pt-12 border-t border-border max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '0.35s' }}>
-              <div className="text-center md:text-left">
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.directConnections.title')}</div>
-                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.directConnections.description')}</div>
-              </div>
-              <div className="text-center md:text-left">
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.securePayments.title')}</div>
-                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.securePayments.description')}</div>
-              </div>
-              <div className="text-center md:text-left">
-                <div className="text-base lg:text-lg font-heading font-bold text-foreground mb-2">{t('features.transparentPricing.title')}</div>
-                <div className="text-sm text-muted-foreground leading-relaxed">{t('features.transparentPricing.description')}</div>
-              </div>
+              {/* Carrier Card */}
+              <Link 
+                to="/auth?role=carrier"
+                className="group relative bg-card hover:bg-accent/50 border border-border hover:border-primary/30 rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1"
+              >
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Truck className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-heading font-bold text-foreground mb-2">
+                      {t('hero.carrierCard.title')}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {t('hero.carrierCard.description')}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 pt-2">
+                    {t('hero.carrierCard.subtitle')}
+                  </p>
+                </div>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowRight className="h-5 w-5 text-primary" />
+                </div>
+              </Link>
             </div>
           </div>
         </div>
