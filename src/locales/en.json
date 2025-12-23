@@ -58,8 +58,8 @@
     "introHighlight": "Human-friendly logistics for everyone.",
     "forShippers": "For Shippers",
     "forCarriers": "For Carriers",
-    "shipperIntro": "Send goods anywhere in Europe — even small volumes",
-    "carrierIntro": "Browse loads, propose to carry, and grow your business",
+    "shipperIntro": "Post your shipments and find carriers across Europe",
+    "carrierIntro": "Browse loads, propose to carry, and fill your trucks",
     "shipper": {
       "step1": {
         "title": "Create your account",
@@ -67,45 +67,45 @@
       },
       "step2": {
         "title": "Post your load",
-        "description": "Tell us where you're shipping from, where to, and how many pallets. We'll handle the matching."
+        "description": "Tell us where you're shipping from, where to, and how many pallets. We'll find matching carriers."
       },
       "step3": {
-        "title": "Get matched with carriers",
-        "description": "Receive offers from verified carriers who are already driving your route. Compare prices easily."
+        "title": "Review carrier offers",
+        "description": "Receive proposals from verified carriers. Compare prices and choose the best match."
       },
       "step4": {
-        "title": "Track and communicate",
-        "description": "Follow your shipment in real-time. Message your carrier directly if needed."
+        "title": "Communicate directly",
+        "description": "Message your carrier directly to coordinate pickup times and any special requirements."
       },
       "step5": {
         "title": "Confirm delivery and pay",
-        "description": "When goods arrive safely, confirm delivery. Payment is released to the carrier automatically."
+        "description": "When goods arrive safely, confirm delivery. Payment is released to the carrier securely."
       }
     },
     "carrier": {
       "step1": {
         "title": "Create your account",
-        "description": "Register your company and complete a quick verification. Build trust with shippers."
+        "description": "Register your company and complete verification. Build trust with shippers."
       },
       "step2": {
         "title": "Browse available loads",
-        "description": "See all open shipments from verified shippers. Filter by origin, destination, and timing."
+        "description": "See all open shipments from verified shippers. Filter by origin, destination, and dates."
       },
       "step3": {
         "title": "Propose to carry",
-        "description": "Found a load that fits? Submit your offer with your price. Shippers choose the best match."
+        "description": "Found a load that fits your route? Submit your offer with your price. Shippers choose the best match."
       },
       "step4": {
-        "title": "Communicate and coordinate",
-        "description": "Chat with shippers directly. Agree on pickup times and any special requirements."
+        "title": "Coordinate with shipper",
+        "description": "Chat directly with shippers to agree on pickup times and any special requirements."
       },
       "step5": {
         "title": "Deliver and get paid",
         "description": "Complete the delivery. Once confirmed, payment is sent directly to you — no delays."
       },
       "optionalRoutes": {
-        "title": "Optionally: Share your route",
-        "description": "Publish your planned trips to receive matching opportunities automatically. Routes are optional — browsing loads is always available."
+        "title": "Optional: Publish your routes",
+        "description": "Share your planned trips to receive matching load suggestions automatically. Routes are optional — browsing loads is always available."
       }
     },
     "supportTitle": "Need help?",

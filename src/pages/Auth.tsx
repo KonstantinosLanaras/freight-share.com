@@ -13,8 +13,17 @@ type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
 
 const emailSchema = z.string().email('Please enter a valid email address');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
+
+// Rate limiting state
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
 const EUROPEAN_COUNTRIES = [
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
@@ -36,6 +45,8 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRoleSwitchWarning, setShowRoleSwitchWarning] = useState(false);
   const [intendedRole, setIntendedRole] = useState<UserRole | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -93,6 +104,16 @@ export default function Auth() {
     setIsSubmitting(true);
 
     try {
+      // Check rate limiting for login
+      if (mode === 'login') {
+        if (lockoutUntil && Date.now() < lockoutUntil) {
+          const remainingMinutes = Math.ceil((lockoutUntil - Date.now()) / 60000);
+          toast.error(`Too many failed attempts. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // Validate inputs
       emailSchema.parse(formData.email);
       passwordSchema.parse(formData.password);
@@ -135,12 +156,20 @@ export default function Auth() {
         const { error } = await signIn(formData.email, formData.password);
         
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('Invalid email or password. Please try again.');
+          const newAttempts = loginAttempts + 1;
+          setLoginAttempts(newAttempts);
+          
+          if (newAttempts >= MAX_ATTEMPTS) {
+            setLockoutUntil(Date.now() + LOCKOUT_DURATION);
+            toast.error(`Too many failed attempts. Account locked for 15 minutes.`);
+          } else if (error.message.includes('Invalid login credentials')) {
+            toast.error(`Invalid email or password. ${MAX_ATTEMPTS - newAttempts} attempts remaining.`);
           } else {
             toast.error(error.message);
           }
         } else {
+          setLoginAttempts(0);
+          setLockoutUntil(null);
           toast.success('Welcome back!');
           // Redirect will happen automatically via useEffect
         }
