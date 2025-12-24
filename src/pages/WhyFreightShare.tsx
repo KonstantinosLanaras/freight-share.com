@@ -30,7 +30,6 @@ const WhyFreightShare = () => {
         {/* SECTION 1: Headline */}
         <section className="container mx-auto px-4 mb-6">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-primary font-medium mb-2 uppercase tracking-wide text-sm">{t('whyFreightShare.tagline')}</p>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground leading-tight">
               Logistics Built for SMEs
             </h1>
