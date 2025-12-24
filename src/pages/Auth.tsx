@@ -4,26 +4,45 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Truck, Package, ArrowLeft, Mail, Lock, User, Building, Loader2, Globe, ShieldCheck, Users, Banknote } from 'lucide-react';
+import { Truck, Package, ArrowLeft, Mail, User, Building, Loader2, Globe, ShieldCheck, Users, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
+import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
+import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
 
 const emailSchema = z.string().email('Please enter a valid email address');
-const passwordSchema = z.string()
-  .min(8, 'Password must be at least 8 characters')
-  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-  .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 
-// Rate limiting state
+// Rate limiting configuration
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const ATTEMPT_WINDOW = 5 * 60 * 1000; // 5 minute window for counting attempts
+
+// Get stored rate limit data
+const getRateLimitData = (): { attempts: number[]; lockoutUntil: number | null } => {
+  try {
+    const stored = localStorage.getItem('auth_rate_limit');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { attempts: [], lockoutUntil: null };
+};
+
+// Save rate limit data
+const saveRateLimitData = (data: { attempts: number[]; lockoutUntil: number | null }) => {
+  try {
+    localStorage.setItem('auth_rate_limit', JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+};
 
 const EUROPEAN_COUNTRIES = [
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
@@ -38,15 +57,12 @@ export default function Auth() {
   const navigate = useNavigate();
   const { user, role: userRole, signUp, signIn, signOut, loading: authLoading } = useAuth();
   
-  // Default to login mode - login is the primary entry point
   const [mode, setMode] = useState<AuthMode>('login');
   const [role, setRole] = useState<UserRole | null>(null);
   const [step, setStep] = useState<'role' | 'details'>('role');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRoleSwitchWarning, setShowRoleSwitchWarning] = useState(false);
   const [intendedRole, setIntendedRole] = useState<UserRole | null>(null);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -56,19 +72,17 @@ export default function Auth() {
     country: '',
   });
 
-  // Handle role switching - if user is logged in and trying to access different role
+  // Handle role switching
   useEffect(() => {
     if (user && userRole) {
       const roleParam = searchParams.get('role');
       
-      // If user is trying to access a different role
       if (roleParam && roleParam !== userRole) {
         setShowRoleSwitchWarning(true);
         setIntendedRole(roleParam as UserRole);
         return;
       }
       
-      // Redirect to appropriate dashboard
       const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
       navigate(dashboardPath, { replace: true });
     }
@@ -78,9 +92,7 @@ export default function Auth() {
     const modeParam = searchParams.get('mode');
     const roleParam = searchParams.get('role');
     
-    // Only set mode if not showing role switch warning
     if (!showRoleSwitchWarning) {
-      // Default to login - only go to signup if explicitly requested
       if (modeParam === 'signup') {
         setMode('signup');
         if (roleParam === 'shipper' || roleParam === 'carrier') {
@@ -88,7 +100,6 @@ export default function Auth() {
           setStep('details');
         }
       } else {
-        // Default to login for any other case
         setMode('login');
       }
     }
@@ -99,27 +110,81 @@ export default function Auth() {
     setStep('details');
   };
 
+  const checkRateLimit = (): { allowed: boolean; remainingAttempts?: number; lockoutMinutes?: number } => {
+    const data = getRateLimitData();
+    const now = Date.now();
+    
+    // Check if currently locked out
+    if (data.lockoutUntil && now < data.lockoutUntil) {
+      const remainingMinutes = Math.ceil((data.lockoutUntil - now) / 60000);
+      return { allowed: false, lockoutMinutes: remainingMinutes };
+    }
+    
+    // Clear lockout if expired
+    if (data.lockoutUntil && now >= data.lockoutUntil) {
+      data.lockoutUntil = null;
+      data.attempts = [];
+      saveRateLimitData(data);
+    }
+    
+    // Filter attempts within the window
+    const recentAttempts = data.attempts.filter(t => now - t < ATTEMPT_WINDOW);
+    const remaining = MAX_ATTEMPTS - recentAttempts.length;
+    
+    return { allowed: true, remainingAttempts: remaining };
+  };
+
+  const recordFailedAttempt = () => {
+    const data = getRateLimitData();
+    const now = Date.now();
+    
+    // Filter and add new attempt
+    const recentAttempts = data.attempts.filter(t => now - t < ATTEMPT_WINDOW);
+    recentAttempts.push(now);
+    data.attempts = recentAttempts;
+    
+    // Check if should lock out
+    if (recentAttempts.length >= MAX_ATTEMPTS) {
+      data.lockoutUntil = now + LOCKOUT_DURATION;
+    }
+    
+    saveRateLimitData(data);
+    return data.lockoutUntil !== null;
+  };
+
+  const clearRateLimit = () => {
+    saveRateLimitData({ attempts: [], lockoutUntil: null });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Check rate limiting for login
+      // Rate limiting for login
       if (mode === 'login') {
-        if (lockoutUntil && Date.now() < lockoutUntil) {
-          const remainingMinutes = Math.ceil((lockoutUntil - Date.now()) / 60000);
-          toast.error(`Too many failed attempts. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`);
+        const rateCheck = checkRateLimit();
+        if (!rateCheck.allowed) {
+          toast.error(`Too many failed attempts. Please try again in ${rateCheck.lockoutMinutes} minute${rateCheck.lockoutMinutes !== 1 ? 's' : ''}.`);
           setIsSubmitting(false);
           return;
         }
       }
 
-      // Validate inputs
+      // Validate email
       emailSchema.parse(formData.email);
-      passwordSchema.parse(formData.password);
       
       if (mode === 'signup') {
+        // Validate name
         nameSchema.parse(formData.name);
+        
+        // Validate password with comprehensive checks
+        const passwordValidation = validatePassword(formData.password, formData.email, formData.name);
+        if (!passwordValidation.valid) {
+          toast.error(passwordValidation.error);
+          setIsSubmitting(false);
+          return;
+        }
         
         if (!role) {
           toast.error('Please select a role');
@@ -150,28 +215,24 @@ export default function Auth() {
           }
         } else {
           toast.success('Account created successfully!');
-          // Redirect will happen automatically via useEffect
         }
       } else {
         const { error } = await signIn(formData.email, formData.password);
         
         if (error) {
-          const newAttempts = loginAttempts + 1;
-          setLoginAttempts(newAttempts);
+          const isLocked = recordFailedAttempt();
+          const rateCheck = checkRateLimit();
           
-          if (newAttempts >= MAX_ATTEMPTS) {
-            setLockoutUntil(Date.now() + LOCKOUT_DURATION);
+          if (isLocked) {
             toast.error(`Too many failed attempts. Account locked for 15 minutes.`);
           } else if (error.message.includes('Invalid login credentials')) {
-            toast.error(`Invalid email or password. ${MAX_ATTEMPTS - newAttempts} attempts remaining.`);
+            toast.error(`Invalid email or password. ${rateCheck.remainingAttempts} attempt${rateCheck.remainingAttempts !== 1 ? 's' : ''} remaining.`);
           } else {
             toast.error(error.message);
           }
         } else {
-          setLoginAttempts(0);
-          setLockoutUntil(null);
+          clearRateLimit();
           toast.success('Welcome back!');
-          // Redirect will happen automatically via useEffect
         }
       }
     } catch (err) {
@@ -200,7 +261,6 @@ export default function Auth() {
     }
   };
 
-  // Show loading while checking auth state
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -209,7 +269,6 @@ export default function Auth() {
     );
   }
 
-  // Show role switch warning if user is logged in but trying to access different role
   if (showRoleSwitchWarning && user && userRole) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -424,6 +483,7 @@ export default function Auth() {
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
                           disabled={isSubmitting}
+                          autoComplete="name"
                         />
                       </div>
                     </div>
@@ -461,6 +521,7 @@ export default function Auth() {
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                           disabled={isSubmitting}
+                          autoComplete="organization"
                         />
                       </div>
                     </div>
@@ -480,23 +541,28 @@ export default function Auth() {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                       disabled={isSubmitting}
+                      autoComplete="email"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {mode === 'login' && (
+                      <ForgotPasswordDialog />
+                    )}
+                  </div>
+                  <div className="mt-1">
+                    <PasswordInput
                       id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      className="pl-10"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      required
+                      onChange={(value) => setFormData({ ...formData, password: value })}
                       disabled={isSubmitting}
+                      showRequirements={mode === 'signup'}
+                      showStrength={mode === 'signup'}
+                      email={formData.email}
+                      name={formData.name}
                     />
                   </div>
                 </div>
