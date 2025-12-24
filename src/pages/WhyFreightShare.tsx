@@ -26,21 +26,24 @@ const WhyFreightShare = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="pt-20 pb-12">
+      <main className="pt-16 pb-10">
         {/* SECTION 1: Headline */}
-        <section className="container mx-auto px-4 mb-10">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-primary font-medium mb-3 uppercase tracking-wide text-sm text-center">{t('whyFreightShare.tagline')}</p>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground leading-tight text-center">
-              {t('whyFreightShare.title')}
+        <section className="container mx-auto px-4 mb-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-primary font-medium mb-2 uppercase tracking-wide text-sm">{t('whyFreightShare.tagline')}</p>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground leading-tight">
+              Logistics Built for SMEs
             </h1>
+            <p className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-foreground/80 mt-1">
+              Not for Intermediaries
+            </p>
           </div>
         </section>
 
         {/* SECTION 2: What's in it for you (Benefits) */}
-        <section className="container mx-auto px-4 mb-14">
+        <section className="container mx-auto px-4 mb-10">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-6 text-center">
+            <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-5 text-left">
               What's in it for you
             </h2>
 
@@ -117,10 +120,10 @@ const WhyFreightShare = () => {
         </section>
 
         {/* SECTION 3: The Scale of Inefficiency */}
-        <section className="bg-secondary/5 py-12 mb-14">
+        <section className="bg-secondary/5 py-10 mb-10">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <div className="mb-8">
+              <div className="mb-5">
                 <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-3 text-center">
                   {t('whyFreightShare.scaleTitle')}
                 </h2>
@@ -175,9 +178,9 @@ const WhyFreightShare = () => {
         </section>
 
         {/* SECTION 4: How FreightShare Works (Mechanism) */}
-        <section className="container mx-auto px-4 mb-14">
+        <section className="container mx-auto px-4 mb-10">
           <div className="max-w-5xl mx-auto">
-            <div className="mb-8">
+            <div className="mb-5">
               <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-3 text-center">
                 {t('whyFreightShare.mechanismTitle')}
               </h2>
@@ -248,10 +251,10 @@ const WhyFreightShare = () => {
         </section>
 
         {/* SECTION 5: Efficiency → Competitiveness → Lower Emissions */}
-        <section className="bg-primary/5 py-12 mb-14">
+        <section className="bg-primary/5 py-10 mb-10">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <div className="mb-8">
+              <div className="mb-5">
                 <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-3 text-center">
                   {t('whyFreightShare.efficiencyTitle')}
                 </h2>
@@ -340,7 +343,7 @@ const WhyFreightShare = () => {
         </section>
 
         {/* SECTION 6: Downstream Effects */}
-        <section className="container mx-auto px-4 mb-14">
+        <section className="container mx-auto px-4 mb-10">
           <div className="max-w-3xl mx-auto">
             <div className="bg-muted/30 border border-border rounded-xl p-6">
               <div className="flex justify-center mb-3">
@@ -359,7 +362,7 @@ const WhyFreightShare = () => {
         </section>
 
         {/* SECTION 7: CTA */}
-        <section className="container mx-auto px-4 mb-14">
+        <section className="container mx-auto px-4 mb-10">
           <div className="max-w-4xl mx-auto">
             <div className="bg-secondary rounded-xl p-8 md:p-10 text-center">
               <div className="flex justify-center mb-4">
@@ -383,9 +386,9 @@ const WhyFreightShare = () => {
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" className="border-2 border-primary-foreground/80 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground focus:ring-2 focus:ring-primary-foreground/50" asChild>
-                  <Link to="/auth?mode=signup&role=carrier" className="gap-2">
-                    <Route className="h-4 w-4" />
-                    {t('hero.postRoute')}
+                  <Link to="/find-loads" className="gap-2">
+                    <Truck className="h-4 w-4" />
+                    {t('hero.browseLoads')}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
