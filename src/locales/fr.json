@@ -128,8 +128,8 @@
   "cta": {
     "title": "Prêt à expédier plus intelligemment ?",
     "description": "Rejoignez le marché qui place les expéditeurs et les transporteurs en premier.",
-    "postLoad": "Publier un chargement",
-    "postRoute": "Publier un itinéraire"
+    "postLoad": "Publier une demande de transport",
+    "postRoute": "Voir les demandes de transport"
   },
   "footer": {
     "tagline": "Connecter directement expéditeurs et transporteurs à travers l'Europe.",
