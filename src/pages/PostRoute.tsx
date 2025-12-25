@@ -26,15 +26,14 @@ const countries = [
 ];
 
 const vehicleTypes = [
-  'Standard Trailer (13.6m)',
-  'Mega Trailer (3m height)',
-  'Refrigerated (Reefer)',
-  'Curtainsider',
-  'Box Trailer',
-  'Flatbed',
-  'Tanker',
-  'Low Loader',
-  'Double Deck'
+  { value: 'standard_truck', label: 'Standard Trailer (13.6m)' },
+  { value: 'box_truck', label: 'Box Truck' },
+  { value: 'refrigerated_truck', label: 'Refrigerated (Reefer)' },
+  { value: 'curtain_sider', label: 'Curtain Sider' },
+  { value: 'flatbed', label: 'Flatbed' },
+  { value: 'tanker', label: 'Tanker' },
+  { value: 'livestock_carrier', label: 'Livestock Carrier' },
+  { value: 'car_transporter', label: 'Car Transporter' },
 ];
 
 export default function PostRoute() {
@@ -49,10 +48,11 @@ export default function PostRoute() {
     destinationCity: '',
     destinationCountry: '',
     departureStart: '',
+    departureTime: '',
     departureEnd: '',
     arrivalStart: '',
     arrivalEnd: '',
-    vehicleConstraints: '',
+    vehicleType: '',
     notes: '',
   });
 
@@ -91,6 +91,21 @@ export default function PostRoute() {
       return;
     }
 
+    if (!formData.vehicleType) {
+      toast.error('Please select a vehicle type');
+      return;
+    }
+
+    if (!formData.arrivalStart) {
+      toast.error('Please enter an expected arrival date');
+      return;
+    }
+
+    if (!formData.departureTime) {
+      toast.error('Please enter a departure time');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -105,10 +120,12 @@ export default function PostRoute() {
           destination_country: formData.destinationCountry,
           departure_date_from: formData.departureStart,
           departure_date_to: formData.departureEnd,
-          arrival_date_from: formData.arrivalStart || null,
+          departure_time: formData.departureTime || null,
+          arrival_date_from: formData.arrivalStart,
           arrival_date_to: formData.arrivalEnd || null,
           available_pallets: parseInt(formData.originPallets),
-          vehicle_constraints: formData.vehicleConstraints || null,
+          vehicle_type: formData.vehicleType,
+          vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
           notes: formData.notes || null,
           status: 'planned',
         })
@@ -285,7 +302,7 @@ export default function PostRoute() {
                         </Select>
                       </div>
                       <div>
-                        <Label>Capacity at Stop</Label>
+                        <Label>Available pallets at stop</Label>
                         <Input
                           type="number"
                           min="0"
@@ -364,8 +381,8 @@ export default function PostRoute() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label className="text-base font-medium">Departure Window</Label>
-                <div className="grid sm:grid-cols-2 gap-4 mt-2">
+                <Label className="text-base font-medium">Departure Window <span className="text-destructive">*</span></Label>
+                <div className="grid sm:grid-cols-3 gap-4 mt-2">
                   <div>
                     <Label htmlFor="departureStart" className="text-sm text-muted-foreground">Earliest Departure</Label>
                     <Input
@@ -374,6 +391,18 @@ export default function PostRoute() {
                       className="mt-1"
                       value={formData.departureStart}
                       onChange={(e) => setFormData({ ...formData, departureStart: e.target.value })}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="departureTime" className="text-sm text-muted-foreground">Departure Time</Label>
+                    <Input
+                      id="departureTime"
+                      type="time"
+                      className="mt-1"
+                      value={formData.departureTime}
+                      onChange={(e) => setFormData({ ...formData, departureTime: e.target.value })}
                       required
                       disabled={isSubmitting}
                     />
@@ -394,7 +423,8 @@ export default function PostRoute() {
               </div>
 
               <div>
-                <Label className="text-base font-medium">Arrival Window (Optional)</Label>
+                <Label className="text-base font-medium">Arrival Window <span className="text-destructive">*</span></Label>
+                <p className="text-sm text-muted-foreground mb-2">Earliest arrival is required for matching</p>
                 <div className="grid sm:grid-cols-2 gap-4 mt-2">
                   <div>
                     <Label htmlFor="arrivalStart" className="text-sm text-muted-foreground">Earliest Arrival</Label>
@@ -404,11 +434,12 @@ export default function PostRoute() {
                       className="mt-1"
                       value={formData.arrivalStart}
                       onChange={(e) => setFormData({ ...formData, arrivalStart: e.target.value })}
+                      required
                       disabled={isSubmitting}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="arrivalEnd" className="text-sm text-muted-foreground">Latest Arrival</Label>
+                    <Label htmlFor="arrivalEnd" className="text-sm text-muted-foreground">Latest Arrival (optional)</Label>
                     <Input
                       id="arrivalEnd"
                       type="date"
@@ -430,22 +461,22 @@ export default function PostRoute() {
                 <Truck className="h-5 w-5 text-carrier" />
                 Vehicle & Additional Info
               </CardTitle>
-              <CardDescription>Optional details about your truck and any notes</CardDescription>
+              <CardDescription>Vehicle type is required for cargo matching</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="vehicleConstraints">Vehicle Type</Label>
+                <Label htmlFor="vehicleType">Vehicle Type <span className="text-destructive">*</span></Label>
                 <Select
-                  value={formData.vehicleConstraints}
-                  onValueChange={(value) => setFormData({ ...formData, vehicleConstraints: value })}
+                  value={formData.vehicleType}
+                  onValueChange={(value) => setFormData({ ...formData, vehicleType: value })}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select vehicle type (optional)" />
+                    <SelectValue placeholder="Select vehicle type" />
                   </SelectTrigger>
                   <SelectContent>
                     {vehicleTypes.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

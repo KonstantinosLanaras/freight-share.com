@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      cargo_vehicle_compatibility: {
+        Row: {
+          cargo_type: string
+          compatibility_note: string | null
+          id: string
+          is_compatible: boolean
+          vehicle_type: string
+        }
+        Insert: {
+          cargo_type: string
+          compatibility_note?: string | null
+          id?: string
+          is_compatible?: boolean
+          vehicle_type: string
+        }
+        Update: {
+          cargo_type?: string
+          compatibility_note?: string | null
+          id?: string
+          is_compatible?: boolean
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       carrier_verifications: {
         Row: {
           carrier_id: string
@@ -49,6 +73,59 @@ export type Database = {
           submitted_at?: string | null
         }
         Relationships: []
+      }
+      detailed_ratings: {
+        Row: {
+          accuracy_score: number
+          comment: string | null
+          communication_score: number
+          created_at: string
+          id: string
+          overall_score: number | null
+          rated_id: string
+          rater_id: string
+          rater_role: string
+          reliability_score: number
+          shipment_id: string
+          timeliness_score: number
+        }
+        Insert: {
+          accuracy_score: number
+          comment?: string | null
+          communication_score: number
+          created_at?: string
+          id?: string
+          overall_score?: number | null
+          rated_id: string
+          rater_id: string
+          rater_role: string
+          reliability_score: number
+          shipment_id: string
+          timeliness_score: number
+        }
+        Update: {
+          accuracy_score?: number
+          comment?: string | null
+          communication_score?: number
+          created_at?: string
+          id?: string
+          overall_score?: number | null
+          rated_id?: string
+          rater_id?: string
+          rater_role?: string
+          reliability_score?: number
+          shipment_id?: string
+          timeliness_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detailed_ratings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loads: {
         Row: {
@@ -344,6 +421,7 @@ export type Database = {
           created_at: string
           departure_date_from: string
           departure_date_to: string
+          departure_time: string | null
           destination_city: string
           destination_country: string
           id: string
@@ -354,6 +432,7 @@ export type Database = {
           status: Database["public"]["Enums"]["route_status"]
           updated_at: string
           vehicle_constraints: string | null
+          vehicle_type: string | null
         }
         Insert: {
           arrival_date_from?: string | null
@@ -363,6 +442,7 @@ export type Database = {
           created_at?: string
           departure_date_from: string
           departure_date_to: string
+          departure_time?: string | null
           destination_city: string
           destination_country: string
           id?: string
@@ -373,6 +453,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
           vehicle_constraints?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           arrival_date_from?: string | null
@@ -382,6 +463,7 @@ export type Database = {
           created_at?: string
           departure_date_from?: string
           departure_date_to?: string
+          departure_time?: string | null
           destination_city?: string
           destination_country?: string
           id?: string
@@ -392,6 +474,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
           vehicle_constraints?: string | null
+          vehicle_type?: string | null
         }
         Relationships: []
       }
@@ -583,6 +666,15 @@ export type Database = {
         | "picked_up"
         | "delivered"
         | "completed"
+      vehicle_type:
+        | "standard_truck"
+        | "refrigerated_truck"
+        | "flatbed"
+        | "box_truck"
+        | "curtain_sider"
+        | "tanker"
+        | "livestock_carrier"
+        | "car_transporter"
       verification_status: "unverified" | "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
@@ -732,6 +824,16 @@ export const Constants = {
         "picked_up",
         "delivered",
         "completed",
+      ],
+      vehicle_type: [
+        "standard_truck",
+        "refrigerated_truck",
+        "flatbed",
+        "box_truck",
+        "curtain_sider",
+        "tanker",
+        "livestock_carrier",
+        "car_transporter",
       ],
       verification_status: ["unverified", "pending", "verified", "rejected"],
     },

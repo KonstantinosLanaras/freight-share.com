@@ -259,7 +259,7 @@ export default function ShipperDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
-                    Good morning, {firstName}! 👋
+                    Welcome back, {firstName}! 👋
                   </h1>
                   <p className="text-muted-foreground mt-1">
                     Here's what's happening with your shipments today.

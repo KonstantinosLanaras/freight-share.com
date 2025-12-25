@@ -16,11 +16,15 @@ import {
   Search,
   Filter,
   Eye,
-  Truck
+  Truck,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Load {
   id: string;
@@ -51,11 +55,30 @@ export default function FindLoads() {
   const [searchOrigin, setSearchOrigin] = useState('');
   const [searchDestination, setSearchDestination] = useState('');
   const [cargoFilter, setCargoFilter] = useState<string>('all');
+  const [carrierVehicleType, setCarrierVehicleType] = useState<VehicleType | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     fetchLoads();
-  }, []);
+    fetchCarrierVehicle();
+  }, [user]);
+
+  const fetchCarrierVehicle = async () => {
+    if (!user) return;
+    // Get carrier's most recent route vehicle type
+    const { data } = await supabase
+      .from('routes')
+      .select('vehicle_type')
+      .eq('carrier_id', user.id)
+      .not('vehicle_type', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (data?.vehicle_type) {
+      setCarrierVehicleType(data.vehicle_type as VehicleType);
+    }
+  };
 
   const fetchLoads = async () => {
     try {
@@ -190,19 +213,49 @@ export default function FindLoads() {
             <div className="text-sm text-muted-foreground mb-4">
               {filteredLoads.length} load{filteredLoads.length !== 1 ? 's' : ''} available
             </div>
-            {filteredLoads.map((load) => (
-              <Card key={load.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <Badge className="bg-primary/10 text-primary">
-                          {load.cargo_type}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          Posted {format(new Date(load.created_at), 'MMM d, yyyy')}
-                        </span>
-                      </div>
+            {filteredLoads.map((load) => {
+              const cargoType = load.cargo_type as CargoType;
+              const compatibility = carrierVehicleType 
+                ? checkCompatibility(cargoType, carrierVehicleType) 
+                : null;
+              
+              return (
+                <Card key={load.id} className={`hover:shadow-md transition-shadow ${compatibility && !compatibility.compatible ? 'border-warning/50' : ''}`}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Badge className="bg-primary/10 text-primary">
+                            {load.cargo_type}
+                          </Badge>
+                          {compatibility && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  {compatibility.compatible ? (
+                                    <Badge variant="outline" className="text-success border-success/50">
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Compatible
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-warning border-warning/50">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      Incompatible
+                                    </Badge>
+                                  )}
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {compatibility.compatible 
+                                    ? `Your ${vehicleTypeLabels[carrierVehicleType!]} can carry this cargo`
+                                    : compatibility.note || 'Not compatible with your vehicle type'}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                          <span className="text-sm text-muted-foreground">
+                            Posted {format(new Date(load.created_at), 'MMM d, yyyy')}
+                          </span>
+                        </div>
 
                       <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
                         <MapPin className="h-5 w-5 text-primary" />
@@ -242,7 +295,8 @@ export default function FindLoads() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
