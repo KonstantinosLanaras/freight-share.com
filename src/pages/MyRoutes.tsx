@@ -350,9 +350,9 @@ export default function MyRoutes() {
                                   {route.route_stops
                                     .sort((a, b) => a.stop_order - b.stop_order)
                                     .map((stop) => (
-                                      <Badge key={stop.id} variant="secondary" className="text-xs">
-                                        {stop.city}, {stop.country} ({stop.available_pallets} pallets)
-                                      </Badge>
+                                                  <Badge key={stop.id} variant="secondary" className="text-xs">
+                                                    {stop.city}, {stop.country} ({stop.available_pallets} available pallets)
+                                                  </Badge>
                                     ))}
                                 </div>
                               </div>

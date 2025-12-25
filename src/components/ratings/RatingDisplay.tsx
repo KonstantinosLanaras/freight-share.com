@@ -63,6 +63,7 @@ interface DetailedRatingDisplayProps {
   reliability: number;
   accuracy: number;
   raterRole: 'shipper' | 'carrier';
+  comment?: string | null;
 }
 
 const carrierLabels = {
@@ -85,6 +86,7 @@ export function DetailedRatingDisplay({
   reliability,
   accuracy,
   raterRole,
+  comment,
 }: DetailedRatingDisplayProps) {
   const labels = raterRole === 'carrier' ? carrierLabels : shipperLabels;
   const categories = [
@@ -93,9 +95,16 @@ export function DetailedRatingDisplay({
     { key: 'reliability', score: reliability },
     { key: 'accuracy', score: accuracy },
   ];
+  const overallScore = (timeliness + communication + reliability + accuracy) / 4;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+        <span className="font-medium">Overall</span>
+        <div className="flex items-center gap-2">
+          <RatingDisplay overallScore={overallScore} size="md" />
+        </div>
+      </div>
       {categories.map(({ key, score }) => (
         <div key={key} className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
@@ -104,6 +113,11 @@ export function DetailedRatingDisplay({
           <RatingDisplay overallScore={score} size="sm" showLabel={false} />
         </div>
       ))}
+      {comment && (
+        <div className="pt-3 border-t border-border">
+          <p className="text-sm text-muted-foreground italic">"{comment}"</p>
+        </div>
+      )}
     </div>
   );
 }
