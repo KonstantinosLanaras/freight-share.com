@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { DetailedRatingForm, DetailedRatingDisplay } from '@/components/ratings';
 
 // Mock shipment data - in real app, fetch from DB
 const shipment = {
@@ -72,9 +75,45 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function ShipmentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { user, role } = useAuth();
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [existingRating, setExistingRating] = useState<any>(null);
+  const [otherPartyRating, setOtherPartyRating] = useState<any>(null);
   
   const backPath = role === 'carrier' ? '/dashboard/carrier/shipments' : '/dashboard/shipper/shipments';
+
+  // Check if user has already rated and fetch other party's rating
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!user || !id) return;
+      
+      // Check if user already rated
+      const { data: myRating } = await supabase
+        .from('detailed_ratings')
+        .select('*')
+        .eq('shipment_id', id)
+        .eq('rater_id', user.id)
+        .maybeSingle();
+      
+      setExistingRating(myRating);
+      
+      // Fetch the other party's rating of us
+      const { data: theirRating } = await supabase
+        .from('detailed_ratings')
+        .select('*')
+        .eq('shipment_id', id)
+        .eq('rated_id', user.id)
+        .maybeSingle();
+      
+      setOtherPartyRating(theirRating);
+    };
+    
+    fetchRatings();
+  }, [user, id]);
+
+  const canRate = shipment.status === 'completed' && !existingRating;
+  const ratedPartyId = role === 'carrier' ? 'shipper-id' : 'carrier-id'; // In real app, get from shipment data
+  const ratedPartyName = role === 'carrier' ? shipment.shipper.name : shipment.carrier.name;
 
   return (
     <div className="min-h-screen bg-background">
@@ -285,6 +324,70 @@ export default function ShipmentDetails() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Rating Section - Only show for completed shipments */}
+            {shipment.status === 'completed' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-warning" />
+                    Ratings & Reviews
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Show rating form or existing rating */}
+                  {showRatingForm && user ? (
+                    <DetailedRatingForm
+                      shipmentId={id || ''}
+                      raterId={user.id}
+                      ratedId={ratedPartyId}
+                      raterRole={role as 'shipper' | 'carrier'}
+                      ratedName={ratedPartyName}
+                      onSuccess={() => {
+                        setShowRatingForm(false);
+                        setExistingRating({ submitted: true });
+                      }}
+                      onCancel={() => setShowRatingForm(false)}
+                    />
+                  ) : existingRating ? (
+                    <div className="p-4 bg-success/10 rounded-lg">
+                      <div className="flex items-center gap-2 text-success">
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="font-medium">You've already rated this shipment</span>
+                      </div>
+                    </div>
+                  ) : canRate ? (
+                    <div className="text-center py-4">
+                      <Star className="h-10 w-10 text-warning mx-auto mb-3" />
+                      <p className="text-muted-foreground mb-4">
+                        Rate your experience with the {role === 'carrier' ? 'shipper' : 'carrier'}
+                      </p>
+                      <Button onClick={() => setShowRatingForm(true)}>
+                        <Star className="h-4 w-4 mr-2" />
+                        Leave a Rating
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  {/* Show rating received from other party */}
+                  {otherPartyRating && (
+                    <div className="pt-4 border-t border-border">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                        Rating from {role === 'carrier' ? 'Shipper' : 'Carrier'}
+                      </h4>
+                      <DetailedRatingDisplay
+                        timeliness={otherPartyRating.timeliness_score}
+                        communication={otherPartyRating.communication_score}
+                        reliability={otherPartyRating.reliability_score}
+                        accuracy={otherPartyRating.accuracy_score}
+                        comment={otherPartyRating.comment}
+                        raterRole={otherPartyRating.rater_role}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Parties & Actions */}
