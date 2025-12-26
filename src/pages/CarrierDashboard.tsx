@@ -281,7 +281,7 @@ export default function CarrierDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
-                    Welcome back, {firstName}! 🚚
+                    Hi, {firstName}! 🚚
                   </h1>
                   <p className="text-muted-foreground mt-1">
                     Browse available loads and find work that fits your schedule.
