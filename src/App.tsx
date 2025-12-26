@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ScrollToTop } from "@/hooks/useScrollToTop";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -12,6 +13,7 @@ import CarrierDashboard from "./pages/CarrierDashboard";
 import PostLoad from "./pages/PostLoad";
 import PostRoute from "./pages/PostRoute";
 import MyRoutes from "./pages/MyRoutes";
+import RouteDetails from "./pages/RouteDetails";
 import BrowseRoutes from "./pages/BrowseRoutes";
 import FindLoads from "./pages/FindLoads";
 import ShipperLoads from "./pages/ShipperLoads";
@@ -37,6 +39,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/why-freightshare" element={<WhyFreightShare />} />
@@ -83,6 +86,11 @@ const App = () => (
             <Route path="/dashboard/carrier/routes" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <MyRoutes />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/routes/:id" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <RouteDetails />
               </ProtectedRoute>
             } />
             <Route path="/dashboard/carrier/find-loads" element={
