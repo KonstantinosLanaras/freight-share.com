@@ -18,7 +18,9 @@ import {
   Edit,
   Trash2,
   Eye,
-  MoreVertical
+  MoreVertical,
+  Download,
+  Printer
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -30,6 +32,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { exportLoadsToCSV, printLoads } from '@/lib/exportUtils';
 
 interface Load {
   id: string;
@@ -109,6 +112,25 @@ export default function ShipperLoads() {
   const draftLoads = loads.filter(l => l.status === 'draft');
   const activeLoads = loads.filter(l => ['posted', 'accepted'].includes(l.status));
   const pastLoads = loads.filter(l => ['paid', 'picked_up', 'delivered', 'completed', 'cancelled'].includes(l.status));
+
+  const handleExportCSV = () => {
+    const exportData = pastLoads.map(load => ({
+      ...load,
+      delivery_date_from: load.pickup_date_from,
+      delivery_date_to: load.pickup_date_to,
+    }));
+    exportLoadsToCSV(exportData);
+    toast.success('Loads exported to CSV');
+  };
+
+  const handlePrint = () => {
+    const exportData = pastLoads.map(load => ({
+      ...load,
+      delivery_date_from: load.pickup_date_from,
+      delivery_date_to: load.pickup_date_to,
+    }));
+    printLoads(exportData);
+  };
 
   const formatDateRange = (from: string, to: string) => {
     const fromDate = new Date(from);
@@ -293,9 +315,21 @@ export default function ShipperLoads() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
-                  {pastLoads.map(load => renderLoadCard(load, false))}
-                </div>
+                <>
+                  <div className="flex justify-end gap-2 mb-4">
+                    <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export CSV
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handlePrint}>
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    {pastLoads.map(load => renderLoadCard(load, false))}
+                  </div>
+                </>
               )}
             </TabsContent>
           </Tabs>

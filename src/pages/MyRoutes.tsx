@@ -20,7 +20,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Eye
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -268,6 +269,10 @@ export default function MyRoutes() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => navigate(`/route/${route.id}`)}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => navigate(`/dashboard/carrier/routes/${route.id}/edit`)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit Route
