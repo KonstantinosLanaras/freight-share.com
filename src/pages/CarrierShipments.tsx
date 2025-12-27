@@ -15,11 +15,18 @@ import {
   Euro,
   CheckCircle,
   AlertTriangle,
-  Eye
+  Eye,
+  Download,
+  CreditCard,
+  Play,
+  FileCheck,
+  Clock
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { exportShipmentsToCSV } from '@/lib/exportUtils';
 
 interface Shipment {
   id: string;
@@ -41,15 +48,25 @@ interface Shipment {
   };
 }
 
-const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  accepted: { label: 'Accepted', icon: CheckCircle, color: 'bg-blue-100 text-blue-800' },
-  paid: { label: 'Paid', icon: Euro, color: 'bg-primary/10 text-primary' },
-  picked_up: { label: 'Picked Up', icon: Truck, color: 'bg-purple-100 text-purple-800' },
-  in_transit: { label: 'In Transit', icon: Truck, color: 'bg-orange-100 text-orange-800' },
-  delivered: { label: 'Delivered', icon: CheckCircle, color: 'bg-primary/10 text-primary' },
-  completed: { label: 'Completed', icon: CheckCircle, color: 'bg-primary/20 text-primary' },
-  cancelled: { label: 'Cancelled', icon: AlertTriangle, color: 'bg-destructive/10 text-destructive' },
-  disputed: { label: 'Disputed', icon: AlertTriangle, color: 'bg-warning/10 text-warning' },
+// Active = shipment in progress / awaiting steps
+// In process = verification + transfer of money in progress (platform-controlled)
+// Executed = completed and settled
+const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string; category: 'active' | 'in_process' | 'executed' | 'disputed' }> = {
+  accepted: { label: 'Active', icon: Play, color: 'bg-blue-100 text-blue-800', category: 'active' },
+  paid: { label: 'In Process', icon: CreditCard, color: 'bg-amber-100 text-amber-800', category: 'in_process' },
+  picked_up: { label: 'In Process', icon: Truck, color: 'bg-amber-100 text-amber-800', category: 'in_process' },
+  in_transit: { label: 'In Process', icon: Truck, color: 'bg-amber-100 text-amber-800', category: 'in_process' },
+  delivered: { label: 'In Process', icon: CheckCircle, color: 'bg-amber-100 text-amber-800', category: 'in_process' },
+  completed: { label: 'Executed', icon: FileCheck, color: 'bg-emerald-100 text-emerald-800', category: 'executed' },
+  cancelled: { label: 'Cancelled', icon: AlertTriangle, color: 'bg-destructive/10 text-destructive', category: 'disputed' },
+  disputed: { label: 'Disputed', icon: AlertTriangle, color: 'bg-warning/10 text-warning', category: 'disputed' },
+};
+
+const paymentStatusConfig: Record<string, { label: string; color: string }> = {
+  pending: { label: 'Pending', color: 'bg-muted text-muted-foreground' },
+  paid: { label: 'Paid', color: 'bg-blue-100 text-blue-800' },
+  completed: { label: 'Released', color: 'bg-emerald-100 text-emerald-800' },
+  refunded: { label: 'Refunded', color: 'bg-orange-100 text-orange-800' },
 };
 
 export default function CarrierShipments() {
@@ -117,12 +134,34 @@ export default function CarrierShipments() {
     }
   };
 
-  const activeShipments = shipments.filter(s => 
-    ['accepted', 'paid', 'picked_up', 'in_transit'].includes(s.status)
+  // New status categories: Active, In Process, Executed
+  const activeShipments = shipments.filter(s => s.status === 'accepted');
+  const inProcessShipments = shipments.filter(s => 
+    ['paid', 'picked_up', 'in_transit', 'delivered'].includes(s.status)
   );
-  const completedShipments = shipments.filter(s => 
-    ['delivered', 'completed'].includes(s.status)
+  const executedShipments = shipments.filter(s => s.status === 'completed');
+  const disputedShipments = shipments.filter(s => 
+    ['cancelled', 'disputed'].includes(s.status)
   );
+
+  const handleExportExecuted = () => {
+    const exportData = executedShipments.map(s => ({
+      id: s.id,
+      status: s.status,
+      payment_status: s.payment_status,
+      final_price: s.final_price,
+      created_at: s.created_at,
+      origin_city: s.load?.origin_city || '',
+      origin_country: s.load?.origin_country || '',
+      destination_city: s.load?.destination_city || '',
+      destination_country: s.load?.destination_country || '',
+      pallets: s.load?.pallets || 0,
+      cargo_type: 'general',
+      shipper_name: s.shipper?.company_name || '',
+    }));
+    exportShipmentsToCSV(exportData);
+    toast.success('Executed shipments exported to CSV');
+  };
 
   const formatDateRange = (from: string, to: string) => {
     const fromDate = new Date(from);
@@ -135,6 +174,7 @@ export default function CarrierShipments() {
 
   const renderShipmentCard = (shipment: Shipment) => {
     const status = statusConfig[shipment.status] || statusConfig.accepted;
+    const paymentStatus = paymentStatusConfig[shipment.payment_status] || paymentStatusConfig.pending;
     const StatusIcon = status.icon;
 
     return (
@@ -146,6 +186,10 @@ export default function CarrierShipments() {
                 <Badge className={status.color}>
                   <StatusIcon className="h-3 w-3 mr-1" />
                   {status.label}
+                </Badge>
+                <Badge className={paymentStatus.color}>
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  {paymentStatus.label}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   {format(new Date(shipment.created_at), 'MMM d, yyyy')}
@@ -178,9 +222,6 @@ export default function CarrierShipments() {
             <div className="flex flex-col items-end gap-3">
               <div className="text-right">
                 <div className="text-2xl font-bold text-foreground">€{shipment.final_price}</div>
-                <div className="text-sm text-muted-foreground">
-                  Payment: {shipment.payment_status}
-                </div>
               </div>
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/shipment/${shipment.id}`}>
@@ -226,12 +267,20 @@ export default function CarrierShipments() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="active" className="flex items-center gap-2">
-                <Truck className="h-4 w-4" />
+                <Play className="h-4 w-4" />
                 Active ({activeShipments.length})
               </TabsTrigger>
-              <TabsTrigger value="completed" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Completed ({completedShipments.length})
+              <TabsTrigger value="in_process" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                In Process ({inProcessShipments.length})
+              </TabsTrigger>
+              <TabsTrigger value="executed" className="flex items-center gap-2">
+                <FileCheck className="h-4 w-4" />
+                Executed ({executedShipments.length})
+              </TabsTrigger>
+              <TabsTrigger value="disputed" className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Disputed ({disputedShipments.length})
               </TabsTrigger>
             </TabsList>
 
@@ -239,9 +288,9 @@ export default function CarrierShipments() {
               {activeShipments.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <Truck className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <Play className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-foreground mb-2">No active shipments</h3>
-                    <p className="text-muted-foreground mb-4">Your active deliveries will appear here</p>
+                    <p className="text-muted-foreground mb-4">Shipments awaiting action will appear here</p>
                     <Button variant="default" asChild>
                       <Link to="/dashboard/carrier/find-loads">Find Loads</Link>
                     </Button>
@@ -254,18 +303,58 @@ export default function CarrierShipments() {
               )}
             </TabsContent>
 
-            <TabsContent value="completed">
-              {completedShipments.length === 0 ? (
+            <TabsContent value="in_process">
+              {inProcessShipments.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <CheckCircle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No completed shipments</h3>
-                    <p className="text-muted-foreground">Completed deliveries will appear here</p>
+                    <Clock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No shipments in process</h3>
+                    <p className="text-muted-foreground">Shipments with payment verification in progress will appear here</p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {completedShipments.map(renderShipmentCard)}
+                  {inProcessShipments.map(renderShipmentCard)}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="executed">
+              {executedShipments.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <FileCheck className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No executed shipments</h3>
+                    <p className="text-muted-foreground">Completed and settled shipments will appear here</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex justify-end gap-2 mb-4">
+                    <Button variant="outline" size="sm" onClick={handleExportExecuted}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export for Financial Statements
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    {executedShipments.map(renderShipmentCard)}
+                  </div>
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="disputed">
+              {disputedShipments.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <AlertTriangle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No disputes</h3>
+                    <p className="text-muted-foreground">Disputed or cancelled shipments will appear here</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {disputedShipments.map(renderShipmentCard)}
                 </div>
               )}
             </TabsContent>
