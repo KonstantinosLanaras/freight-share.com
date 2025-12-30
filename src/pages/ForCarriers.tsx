@@ -13,17 +13,17 @@ const ForCarriers = () => {
       <Navbar />
       
       {/* Hero Section - Editorial Style */}
-      <section className="pt-28 pb-16 md:pt-32 md:pb-20">
+      <section className="pt-24 pb-12 md:pt-28 md:pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-carrier/10 rounded-full text-carrier text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-carrier/10 rounded-full text-carrier text-sm font-medium mb-6">
               <Truck className="h-4 w-4" />
               {t('forCarriers.badge')}
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-4 leading-tight">
               {t('forCarriers.title')}
             </h1>
-            <p className="text-lg text-muted-foreground mb-10">
+            <p className="text-lg text-muted-foreground mb-8">
               {t('forCarriers.subtitle')}
             </p>
             <Button size="lg" className="bg-carrier hover:bg-carrier/90 text-carrier-foreground" asChild>
@@ -37,17 +37,16 @@ const ForCarriers = () => {
       </section>
 
       {/* Outcomes Section - Editorial Layout */}
-      <section className="py-16 md:py-20 border-t border-border">
+      <section className="py-12 md:py-16 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-10">
-              What you gain as a carrier
+            <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-8">
+              {t('forCarriers.outcomesTitle')}
             </h2>
             
-            <div className="space-y-10">
-              {/* Outcome 1 */}
+            <div className="space-y-8">
               <div>
-                <h3 className="font-heading font-medium text-foreground mb-2">
+                <h3 className="font-heading font-medium text-foreground mb-1">
                   {t('forCarriers.benefits.revenue.title')}
                 </h3>
                 <p className="text-muted-foreground">
@@ -55,9 +54,8 @@ const ForCarriers = () => {
                 </p>
               </div>
               
-              {/* Outcome 2 */}
               <div>
-                <h3 className="font-heading font-medium text-foreground mb-2">
+                <h3 className="font-heading font-medium text-foreground mb-1">
                   {t('forCarriers.benefits.efficiency.title')}
                 </h3>
                 <p className="text-muted-foreground">
@@ -65,9 +63,8 @@ const ForCarriers = () => {
                 </p>
               </div>
               
-              {/* Outcome 3 */}
               <div>
-                <h3 className="font-heading font-medium text-foreground mb-2">
+                <h3 className="font-heading font-medium text-foreground mb-1">
                   {t('forCarriers.benefits.direct.title')}
                 </h3>
                 <p className="text-muted-foreground">
@@ -79,25 +76,13 @@ const ForCarriers = () => {
         </div>
       </section>
 
-      {/* Final CTA - Contextual, Reduced Weight */}
-      <section className="py-16 md:py-20 border-t border-border">
+      {/* Low-emphasis impact note */}
+      <section className="py-8 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <p className="text-sm text-muted-foreground mb-6">
-              {t('forCarriers.microReinforcement')}
+            <p className="text-sm text-muted-foreground">
+              {t('forCarriers.impactNote')}
             </p>
-            <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-4">
-              {t('forCarriers.ctaTitle')}
-            </h2>
-            <p className="text-muted-foreground mb-8">
-              {t('forCarriers.ctaSubtitle')}
-            </p>
-            <Button variant="outline" size="lg" className="border-carrier text-carrier hover:bg-carrier/10" asChild>
-              <Link to="/auth?mode=signup&role=carrier">
-                {t('forCarriers.cta')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
