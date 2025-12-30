@@ -82,13 +82,12 @@ export default function BrowseRoutes() {
 
   const fetchRoutes = async () => {
     try {
-      // Fetch routes with stops
+      // Fetch routes with stops - show all planned/active routes
       const { data: routesData, error: routesError } = await supabase
         .from('routes')
         .select(`*, route_stops (*)`)
         .in('status', ['planned', 'active'])
-        .gte('departure_date_to', new Date().toISOString().split('T')[0])
-        .order('departure_date_from', { ascending: true });
+        .order('departure_date_from', { ascending: false });
 
       if (routesError) throw routesError;
 
