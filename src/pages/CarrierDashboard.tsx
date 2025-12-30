@@ -20,13 +20,17 @@ import {
   Loader2,
   ShieldCheck,
   ShieldAlert,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  Clock,
+  XCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { CarrierVerificationForm } from '@/components/verification/CarrierVerificationForm';
+import { DeviationRequestCard } from '@/components/routes/DeviationRequestCard';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -62,14 +66,37 @@ interface Profile {
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
 }
 
+interface DeviationRequest {
+  id: string;
+  route_id: string;
+  shipper_id: string;
+  carrier_id: string;
+  pickup_address: string;
+  pallets_required: number;
+  preferred_time_from: string;
+  preferred_time_to: string;
+  deviation_description: string;
+  notes: string | null;
+  status: 'pending' | 'accepted' | 'rejected' | 'counter_offer';
+  carrier_response: string | null;
+  counter_offer_price: number | null;
+  counter_offer_conditions: string | null;
+  created_at: string;
+  shipper?: {
+    full_name: string | null;
+    company_name: string | null;
+  };
+}
+
 export default function CarrierDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [availableLoads, setAvailableLoads] = useState<Load[]>([]);
+  const [deviationRequests, setDeviationRequests] = useState<DeviationRequest[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
-  const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0 });
+  const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0, pendingRequests: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -114,12 +141,37 @@ export default function CarrierDashboard() {
 
       setAvailableLoads(loadsData || []);
 
+      // Fetch deviation requests for carrier
+      const { data: requestsData } = await supabase
+        .from('deviation_requests')
+        .select('*')
+        .eq('carrier_id', user.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch shipper profiles for requests
+      const shipperIds = [...new Set(requestsData?.map(r => r.shipper_id) || [])];
+      const { data: shipperProfiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, company_name')
+        .in('id', shipperIds);
+
+      const shipperMap = new Map(shipperProfiles?.map(p => [p.id, p]) || []);
+      const requestsWithShippers = requestsData?.map(req => ({
+        ...req,
+        shipper: shipperMap.get(req.shipper_id) || null
+      })) || [];
+
+      setDeviationRequests(requestsWithShippers as DeviationRequest[]);
+
       // Calculate stats
       setStats({
         activeRoutes: routesData?.length || 0,
         matchedLoads: loadsData?.length || 0,
         completed: 0,
-        totalEarned: 0
+        totalEarned: 0,
+        pendingRequests: requestsData?.length || 0
       });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -420,6 +472,31 @@ export default function CarrierDashboard() {
               </div>
 
               <div className="grid lg:grid-cols-2 gap-6">
+                {/* Pending Pickup Requests - Priority */}
+                {deviationRequests.length > 0 && (
+                  <Card className="lg:col-span-2 border-warning/30 bg-warning/5">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageSquare className="h-5 w-5 text-warning" />
+                        Pending Pickup Requests
+                        <Badge variant="secondary">{deviationRequests.length}</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {deviationRequests.map((request) => (
+                          <DeviationRequestCard
+                            key={request.id}
+                            request={request}
+                            isCarrier={true}
+                            onUpdate={fetchData}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Available Loads - Primary */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">

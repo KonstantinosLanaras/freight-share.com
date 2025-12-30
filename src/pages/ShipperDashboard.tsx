@@ -19,7 +19,9 @@ import {
   Loader2,
   ShieldCheck,
   MapPin,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  XCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +49,26 @@ interface Profile {
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
 }
 
+interface PickupRequest {
+  id: string;
+  route_id: string;
+  pickup_address: string;
+  pallets_required: number;
+  preferred_time_from: string;
+  preferred_time_to: string;
+  deviation_description: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'counter_offer';
+  counter_offer_price: number | null;
+  counter_offer_conditions: string | null;
+  created_at: string;
+  route?: {
+    origin_city: string;
+    origin_country: string;
+    destination_city: string;
+    destination_country: string;
+  };
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   posted: { label: 'Posted', className: 'status-posted' },
   accepted: { label: 'Accepted', className: 'status-accepted' },
@@ -59,10 +81,11 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function ShipperDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loads, setLoads] = useState<Load[]>([]);
+  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
-  const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0 });
+  const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0, pickupRequests: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -96,6 +119,29 @@ export default function ShipperDashboard() {
       if (error) throw error;
       setLoads(loadsData || []);
 
+      // Fetch pickup requests made by this shipper
+      const { data: requestsData } = await supabase
+        .from('deviation_requests')
+        .select('*')
+        .eq('shipper_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch route info for each request
+      const routeIds = [...new Set(requestsData?.map(r => r.route_id) || [])];
+      const { data: routesData } = await supabase
+        .from('routes')
+        .select('id, origin_city, origin_country, destination_city, destination_country')
+        .in('id', routeIds);
+
+      const routeMap = new Map(routesData?.map(r => [r.id, r]) || []);
+      const requestsWithRoutes = requestsData?.map(req => ({
+        ...req,
+        route: routeMap.get(req.route_id) || null
+      })) || [];
+
+      setPickupRequests(requestsWithRoutes as PickupRequest[]);
+
       // Calculate stats
       const allLoads = loadsData || [];
       const active = allLoads.filter(l => ['posted', 'accepted', 'paid', 'picked_up'].includes(l.status)).length;
@@ -103,9 +149,10 @@ export default function ShipperDashboard() {
       const totalSpent = allLoads
         .filter(l => l.status === 'completed' && l.price)
         .reduce((sum, l) => sum + (l.price || 0), 0);
+      const pendingPickups = requestsData?.filter(r => r.status === 'pending' || r.status === 'counter_offer').length || 0;
 
       // Count pending offers (would need to join with offers table)
-      setStats({ active, pending: 0, completed, totalSpent });
+      setStats({ active, pending: 0, completed, totalSpent, pickupRequests: pendingPickups });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -375,6 +422,78 @@ export default function ShipperDashboard() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Pickup Requests Status */}
+              {pickupRequests.length > 0 && (
+                <Card className="mb-6">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      My Pickup Requests
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/routes">
+                        Browse Routes
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {pickupRequests.map((request) => (
+                        <div 
+                          key={request.id}
+                          className={`p-4 rounded-xl border ${
+                            request.status === 'accepted' ? 'bg-success/5 border-success/30' :
+                            request.status === 'rejected' ? 'bg-destructive/5 border-destructive/30' :
+                            request.status === 'counter_offer' ? 'bg-primary/5 border-primary/30' :
+                            'bg-muted/50 border-border'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-foreground">
+                                  {request.route?.origin_city} → {request.route?.destination_city}
+                                </span>
+                                <Badge 
+                                  variant={
+                                    request.status === 'accepted' ? 'default' :
+                                    request.status === 'rejected' ? 'destructive' :
+                                    request.status === 'counter_offer' ? 'secondary' :
+                                    'outline'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {request.status === 'counter_offer' ? 'Counter Offer' : 
+                                   request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                </Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {request.pallets_required} pallets · {request.pickup_address.slice(0, 50)}...
+                              </div>
+                              {request.status === 'counter_offer' && request.counter_offer_price && (
+                                <div className="mt-2 text-sm">
+                                  <span className="font-medium text-primary">Counter offer: €{request.counter_offer_price}</span>
+                                  {request.counter_offer_conditions && (
+                                    <span className="text-muted-foreground"> - {request.counter_offer_conditions}</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center">
+                              {request.status === 'pending' && <Clock className="h-4 w-4 text-muted-foreground" />}
+                              {request.status === 'accepted' && <CheckCircle className="h-4 w-4 text-success" />}
+                              {request.status === 'rejected' && <XCircle className="h-4 w-4 text-destructive" />}
+                              {request.status === 'counter_offer' && <MessageSquare className="h-4 w-4 text-primary" />}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Recent Loads */}
               <Card>
