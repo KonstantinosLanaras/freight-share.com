@@ -184,39 +184,47 @@
   },
   "impactPage": {
     "title": "Impact & Responsabilité",
-    "subtitle": "Comment la conception du marché crée de la valeur sociale et environnementale.",
+    "subtitle": "Ce document décrit les inefficacités du marché que FreightShare adresse, les décisions de conception intégrées à la plateforme et leurs implications sociales et environnementales. L'impact est présenté comme une conséquence d'une meilleure structure de marché — pas comme une initiative séparée.",
     "problem": {
       "title": "Le problème du marché",
-      "fragmentation": "La logistique routière européenne est très fragmentée. Les petits expéditeurs peinent à accéder à des tarifs compétitifs, tandis que les transporteurs font souvent rouler des camions sous-utilisés.",
-      "emptyMiles": "Les données de l'industrie suggèrent que 20 à 30% des kilomètres parcourus sont à vide ou significativement sous-utilisés. Cette inefficacité coûte de l'argent et produit des émissions inutiles.",
-      "opacity": "L'opacité des prix et les couches d'intermédiaires ajoutent des coûts sans valeur ajoutée, affectant particulièrement les PME qui manquent de pouvoir de négociation."
+      "fragmentation": "Le fret routier européen se caractérise par une fragmentation significative. Plus de 90% des entreprises de transport routier dans l'UE exploitent moins de 10 véhicules, créant une base d'approvisionnement très dispersée avec une visibilité limitée sur la capacité disponible. (Source : Commission européenne, Secteur du transport routier de marchandises de l'UE, 2022)",
+      "emptyMiles": "Les estimations de l'industrie indiquent que 20 à 30% des kilomètres-camions en Europe sont parcourus à vide ou avec des charges partielles. Cela représente une inefficacité structurelle dans la façon dont la capacité est adaptée à la demande, entraînant des coûts plus élevés par envoi et une consommation de carburant inutile. (Source : IRU, Statistiques du fret routier de la Commission européenne)",
+      "smeAccess": "Les petites et moyennes entreprises paient généralement 15 à 30% de plus pour des services logistiques équivalents par rapport aux grands expéditeurs. Cette prime reflète un pouvoir de négociation réduit, un accès limité aux marchés spot et une dépendance aux intermédiaires pour l'approvisionnement en capacité. (Source : Études d'accès logistique des PME de l'UE, OCDE)",
+      "opacity": "La tarification dans le fret routier reste largement opaque. Les tarifs de fret sont souvent négociés bilatéralement, ce qui rend difficile pour les petits participants de comparer les coûts ou d'identifier les prix du marché. Des marges d'intermédiaires de 10 à 25% sont courantes dans les transactions de courtage, ajoutant des coûts sans ajouter de capacité de transport. (Source : Rapports de l'industrie du transit, Ti Insights)"
     },
     "design": {
       "title": "Choix de conception",
-      "intro": "FreightShare est construit autour de quatre décisions structurelles qui répondent à ces inefficacités :",
-      "choice1": "Correspondance directe entre expéditeurs et transporteurs, supprimant les marges d'intermédiaires",
-      "choice2": "Tarification transparente visible avant engagement",
-      "choice3": "Expédition au niveau palette rendant les petits volumes économiquement viables",
-      "choice4": "Correspondance basée sur les itinéraires qui remplit la capacité existante plutôt que d'ajouter des camions"
+      "intro": "L'architecture de la plateforme reflète quatre décisions structurelles destinées à remédier aux inefficacités décrites ci-dessus. Ce ne sont pas des fonctionnalités au sens marketing — ce sont des contraintes et des mécanismes qui façonnent la façon dont les transactions se produisent.",
+      "choice1Title": "Correspondance directe",
+      "choice1Desc": "Les expéditeurs et les transporteurs transactent directement. Il n'y a pas de couche intermédiaire capturant une marge entre les parties. Cela réduit le coût total de la transaction et augmente la transparence des prix pour les deux parties.",
+      "choice2Title": "Tarification visible",
+      "choice2Desc": "Toute la tarification est divulguée avant engagement. Les transporteurs voient les budgets des expéditeurs ou soumettent des offres que les expéditeurs peuvent comparer. Il n'y a pas de négociation cachée ni d'avantage tarifaire basé sur les relations.",
+      "choice3Title": "Granularité au niveau palette",
+      "choice3Desc": "Les envois peuvent être publiés au niveau palette, pas seulement en camions complets. Cela permet aux transporteurs de consolider des charges partielles et rend la logistique professionnelle accessible aux expéditeurs avec des volumes plus petits.",
+      "choice4Title": "Correspondance basée sur les itinéraires",
+      "choice4Desc": "Les transporteurs peuvent publier des itinéraires planifiés et recevoir des suggestions de chargements correspondants. Ce mécanisme privilégie le remplissage de la capacité existante plutôt que la création de nouveaux trajets, réduisant les kilomètres à vide."
     },
     "social": {
       "title": "Impact social",
-      "access": "Les PME accèdent à des options d'expédition auparavant réservées aux grandes entreprises avec des équipes logistiques dédiées ou des relations avec des courtiers.",
-      "pricing": "La tarification transparente signifie que toutes les parties voient les mêmes tarifs. Pas d'avantage de négociation basé sur la taille ou l'historique des relations.",
-      "intermediaries": "Les connexions directes réduisent la dépendance aux courtiers et transitaires, permettant à plus de valeur de rester avec les parties qui font le travail."
+      "access": "En permettant un accès direct à un pool de transporteurs vérifiés, la plateforme réduit le désavantage structurel auquel font face les PME. Les petits expéditeurs peuvent accéder au même marché que les grands acteurs sans nécessiter de personnel logistique dédié, de relations avec des courtiers ou d'engagements de volume.",
+      "pricing": "La transparence des prix profite aux deux parties. Les expéditeurs voient plusieurs offres et peuvent comparer les tarifs. Les transporteurs sont en concurrence sur le prix et la fiabilité plutôt que sur l'accès relationnel. Cela crée un marché plus efficace avec une asymétrie d'information réduite.",
+      "intermediaries": "La désintermédiation signifie qu'une plus grande partie de la valeur de la transaction reste avec l'expéditeur et le transporteur. C'est particulièrement significatif pour les transporteurs indépendants, qui dépendent souvent des courtiers pour l'accès aux chargements et acceptent des tarifs nets plus bas en conséquence."
     },
     "environmental": {
       "title": "Impact environnemental",
-      "capacity": "Faire correspondre les chargements aux itinéraires déjà en cours signifie une meilleure utilisation des camions. Quand les camions roulent plus pleins, moins de kilomètres totaux sont nécessaires par unité expédiée.",
-      "emptyTrips": "La correspondance basée sur les itinéraires réduit les trajets retour à vide. Les transporteurs peuvent trouver des chargements qui correspondent à leurs horaires existants plutôt que de rouler à vide.",
-      "emissions": "Ces gains d'efficacité se traduisent directement par des émissions plus faibles par envoi. Aucun nouveau camion n'est ajouté — la capacité existante est simplement mieux utilisée."
+      "intro": "Le fret routier représente environ 6% des émissions totales de gaz à effet de serre de l'UE et environ 27% des émissions de CO₂ liées au transport. (Source : Agence européenne pour l'environnement, 2023). Les gains d'efficacité dans ce secteur ont des implications environnementales directes.",
+      "capacity": "Faire correspondre les chargements aux itinéraires existants améliore l'utilisation des camions. Des facteurs de charge plus élevés signifient que moins de kilomètres-véhicules sont nécessaires pour déplacer le même volume de marchandises. C'est le principal mécanisme par lequel la plateforme contribue à la réduction des émissions.",
+      "emptyTrips": "La correspondance basée sur les itinéraires aborde directement le problème des trajets à vide. Les transporteurs revenant de livraisons peuvent trouver des chargements de retour, réduisant la proportion de kilomètres parcourus sans cargaison.",
+      "emissions": "Ces gains d'efficacité se traduisent par des émissions plus faibles par tonne-kilomètre. Il est important de noter que cela est réalisé grâce à une meilleure utilisation des véhicules existants, pas en ajoutant de capacité de transport. Le bénéfice environnemental est une conséquence de l'efficacité opérationnelle, pas une initiative de durabilité séparée."
     },
     "disclaimer": {
-      "title": "Ce que nous ne prétendons pas",
-      "text": "FreightShare ne prétend pas résoudre le changement climatique ou transformer l'industrie de la logistique. Nous opérons au sein de l'infrastructure existante et apportons des améliorations progressives grâce à une meilleure correspondance et transparence. Les avantages environnementaux sont une conséquence de l'efficacité opérationnelle, pas une initiative de durabilité séparée."
+      "title": "Ce que FreightShare ne prétend pas",
+      "text1": "FreightShare ne prétend pas résoudre le changement climatique, décarboner la logistique ou transformer l'industrie du fret. La plateforme opère au sein de l'infrastructure existante et apporte des améliorations progressives grâce à une meilleure correspondance et une transparence des prix.",
+      "text2": "Les bénéfices environnementaux sont proportionnels à l'adoption de la plateforme et au degré auquel les correspondances améliorent les résultats contrefactuels. Nous n'exagérons pas l'impact et ne faisons pas de déclarations qui ne peuvent pas être mesurées.",
+      "text3": "Les chiffres cités dans ce document sont tirés de sources publiques et représentent des estimations à l'échelle de l'industrie, pas des mesures spécifiques à la plateforme. Lorsque les données sont incertaines, des fourchettes sont fournies."
     },
     "cta": {
-      "title": "Prêt à expédier plus efficacement ?"
+      "text": "Pour plus de détails sur le fonctionnement de la plateforme, consultez la page Comment ça marche."
     }
   },
   "auth": {

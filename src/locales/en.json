@@ -186,39 +186,47 @@
   },
   "impactPage": {
     "title": "Impact & Responsibility",
-    "subtitle": "How market design creates social and environmental value.",
+    "subtitle": "This document outlines the market inefficiencies that FreightShare addresses, the design decisions embedded in the platform, and their social and environmental implications. Impact is framed as a consequence of better market structure — not as a separate initiative.",
     "problem": {
       "title": "The Market Problem",
-      "fragmentation": "European road logistics is highly fragmented. Small shippers struggle to access competitive rates, while carriers often run trucks below capacity.",
-      "emptyMiles": "Industry data suggests 20-30% of truck kilometers are driven empty or significantly underutilized. This inefficiency costs money and produces unnecessary emissions.",
-      "opacity": "Pricing opacity and intermediary layers add costs without adding value, particularly affecting SMEs who lack bargaining power."
+      "fragmentation": "European road freight is characterised by significant fragmentation. Over 90% of road haulage firms in the EU operate fewer than 10 vehicles, creating a highly dispersed supply base with limited visibility into available capacity. (Source: European Commission, EU Road Freight Transport Sector, 2022)",
+      "emptyMiles": "Industry estimates indicate that 20–30% of truck-kilometres in Europe are driven empty or with partial loads. This represents a structural inefficiency in how capacity is matched to demand, resulting in higher costs per shipment and unnecessary fuel consumption. (Source: IRU, European Commission Road Freight Statistics)",
+      "smeAccess": "Small and medium enterprises typically pay 15–30% more for equivalent logistics services compared to large shippers. This premium reflects reduced bargaining power, limited access to spot markets, and reliance on intermediaries for capacity sourcing. (Source: EU SME Logistics Access Studies, OECD)",
+      "opacity": "Pricing in road freight remains largely opaque. Freight rates are often negotiated bilaterally, making it difficult for smaller participants to benchmark costs or identify market-rate pricing. Intermediary margins of 10–25% are common in brokered transactions, adding cost without adding transport capacity. (Source: Freight Forwarding Industry Reports, Ti Insights)"
     },
     "design": {
       "title": "Design Choices",
-      "intro": "FreightShare is built around four structural decisions that address these inefficiencies:",
-      "choice1": "Direct matching between shippers and carriers, removing intermediary margins",
-      "choice2": "Transparent pricing visible before commitment",
-      "choice3": "Pallet-level shipping that makes small volumes economically viable",
-      "choice4": "Route-based matching that fills existing capacity rather than adding trucks"
+      "intro": "The platform's architecture reflects four structural decisions intended to address the inefficiencies described above. These are not features in the marketing sense — they are constraints and mechanisms that shape how transactions occur.",
+      "choice1Title": "Direct matching",
+      "choice1Desc": "Shippers and carriers transact directly. There is no intermediary layer capturing margin between the parties. This reduces total transaction cost and increases price transparency for both sides.",
+      "choice2Title": "Visible pricing",
+      "choice2Desc": "All pricing is disclosed before commitment. Carriers see shipper budgets or submit offers that shippers can compare. There is no hidden negotiation or relationship-based pricing advantage.",
+      "choice3Title": "Pallet-level granularity",
+      "choice3Desc": "Shipments can be posted at pallet level, not just full truckloads. This allows carriers to consolidate partial loads and makes professional logistics accessible to shippers with smaller volumes.",
+      "choice4Title": "Route-based matching",
+      "choice4Desc": "Carriers can publish planned routes and receive matching load suggestions. This mechanism prioritises filling existing capacity over creating new trips, reducing deadhead kilometres."
     },
     "social": {
       "title": "Social Impact",
-      "access": "SMEs gain access to shipping options previously available only to large enterprises with dedicated logistics teams or broker relationships.",
-      "pricing": "Transparent pricing means all parties see the same rates. No negotiation advantage based on size or relationship history.",
-      "intermediaries": "Direct connections reduce dependency on freight brokers and forwarders, allowing more value to stay with the parties doing the work."
+      "access": "By enabling direct access to a pool of verified carriers, the platform reduces the structural disadvantage faced by SMEs. Smaller shippers can access the same market as larger players without requiring dedicated logistics staff, broker relationships, or volume commitments.",
+      "pricing": "Price transparency benefits both sides. Shippers see multiple offers and can benchmark rates. Carriers compete on price and reliability rather than relationship access. This creates a more efficient market with lower information asymmetry.",
+      "intermediaries": "Disintermediation means more of the transaction value stays with the shipper and carrier. This is particularly significant for independent carriers, who often depend on brokers for load access and accept lower net rates as a result."
     },
     "environmental": {
       "title": "Environmental Impact",
-      "capacity": "Matching loads to routes already running means better truck utilization. When trucks run fuller, fewer total kilometers are needed per unit shipped.",
-      "emptyTrips": "Route-based matching reduces empty return trips. Carriers can find loads that fit their existing schedules rather than deadheading.",
-      "emissions": "These efficiency gains translate directly to lower emissions per shipment. No new trucks are added — existing capacity is simply used better."
+      "intro": "Road freight accounts for approximately 6% of total EU greenhouse gas emissions and around 27% of transport-related CO₂ emissions. (Source: European Environment Agency, 2023). Efficiency gains in this sector have direct environmental implications.",
+      "capacity": "Matching loads to existing routes improves truck utilisation. Higher load factors mean fewer vehicle-kilometres are required to move the same volume of goods. This is the primary mechanism through which the platform contributes to emissions reduction.",
+      "emptyTrips": "Route-based matching addresses the empty-running problem directly. Carriers returning from deliveries can find backhaul loads, reducing the proportion of kilometres driven without cargo.",
+      "emissions": "These efficiency gains translate to lower emissions per tonne-kilometre. Importantly, this is achieved through better use of existing vehicles, not by adding transport capacity. The environmental benefit is a consequence of operational efficiency, not a separate sustainability initiative."
     },
     "disclaimer": {
-      "title": "What We Don't Claim",
-      "text": "FreightShare does not claim to solve climate change or transform the logistics industry. We operate within existing infrastructure and make incremental improvements through better matching and transparency. Environmental benefits are a consequence of operational efficiency, not a separate sustainability initiative."
+      "title": "What FreightShare Does Not Claim",
+      "text1": "FreightShare does not claim to solve climate change, decarbonise logistics, or transform the freight industry. The platform operates within existing infrastructure and makes incremental improvements through better matching and price transparency.",
+      "text2": "Environmental benefits are proportional to platform adoption and the degree to which matches improve on counterfactual outcomes. We do not overstate impact or make claims that cannot be measured.",
+      "text3": "The figures cited in this document are drawn from public sources and represent industry-wide estimates, not platform-specific measurements. Where data is uncertain, ranges are provided."
     },
     "cta": {
-      "title": "Ready to ship more efficiently?"
+      "text": "For details on how the platform works, see the How It Works page."
     }
   },
   "auth": {
