@@ -11,12 +11,10 @@ export default function Terms() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl font-heading font-bold text-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-2">FreightShare B.V.</p>
+              <h1 className="text-4xl font-heading font-bold text-foreground mb-8">
                 Terms of Service
               </h1>
-              <p className="text-muted-foreground mb-8">
-                Last updated: December 2024
-              </p>
 
               <Card>
                 <CardContent className="p-8 prose prose-neutral dark:prose-invert max-w-none">
@@ -24,12 +22,16 @@ export default function Terms() {
                     1. Agreement to Terms
                   </h2>
                   <p className="text-muted-foreground">
-                    By accessing or using the FreightShare platform ("Platform"), you agree to be bound by these 
-                    Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Platform.
+                    By accessing or using the FreightShare platform (the "Platform"), you agree to be bound by these 
+                    Terms of Service (the "Terms"). If you do not agree to these Terms, you may not access or use the Platform.
                   </p>
                   <p className="text-muted-foreground">
-                    FreightShare operates as a marketplace connecting shippers with carriers. We facilitate 
-                    transactions but are not a party to the transport agreements between users.
+                    The Platform is intended exclusively for business users acting in the course of their trade or profession.
+                  </p>
+                  <p className="text-muted-foreground">
+                    FreightShare operates a digital marketplace connecting shippers with carriers. FreightShare facilitates 
+                    interactions and provides technical tools but is not a party to transport, logistics, or carriage 
+                    agreements entered into between users.
                   </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
@@ -37,97 +39,103 @@ export default function Terms() {
                   </h2>
                   
                   <h3 className="text-xl font-semibold text-foreground">2.1 Shippers</h3>
-                  <p className="text-muted-foreground">As a Shipper, you agree to:</p>
+                  <p className="text-muted-foreground">As a shipper, you agree to:</p>
                   <ul className="text-muted-foreground">
-                    <li>Provide accurate and complete information about your loads</li>
-                    <li>Ensure goods are properly packaged and ready for pickup</li>
-                    <li>Pay for services through our secure payment system</li>
-                    <li>Confirm delivery in a timely manner to release carrier payments</li>
-                    <li>Comply with all applicable laws regarding the goods being shipped</li>
+                    <li>Provide accurate and complete information about shipments</li>
+                    <li>Ensure goods are properly packaged and ready for collection</li>
+                    <li>Pay for services through the Platform's payment flow</li>
+                    <li>Confirm delivery in a timely manner where required</li>
+                    <li>Comply with all applicable laws and regulations relating to the goods shipped</li>
                   </ul>
+                  <p className="text-muted-foreground">
+                    Shippers remain solely responsible for the legality, classification, and documentation of goods.
+                  </p>
 
                   <h3 className="text-xl font-semibold text-foreground">2.2 Carriers</h3>
-                  <p className="text-muted-foreground">As a Carrier, you agree to:</p>
+                  <p className="text-muted-foreground">As a carrier, you agree to:</p>
                   <ul className="text-muted-foreground">
-                    <li>Complete business verification before accepting paid shipments</li>
-                    <li>Maintain valid transport licenses, insurance, and vehicle registrations</li>
-                    <li>Provide accurate route and capacity information</li>
-                    <li>Handle goods with due care and professionalism</li>
+                    <li>Complete business verification prior to accepting paid shipments</li>
+                    <li>Maintain valid licenses, insurance, and vehicle registrations</li>
+                    <li>Provide accurate route, capacity, and availability information</li>
+                    <li>Handle goods with due care and professional diligence</li>
                     <li>Complete deliveries within agreed timeframes</li>
-                    <li>Maintain appropriate insurance coverage for transported goods</li>
+                    <li>Maintain appropriate insurance coverage at all times</li>
                   </ul>
+                  <p className="text-muted-foreground">
+                    Carriers remain solely responsible for compliance with applicable transport, safety, and regulatory requirements.
+                  </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     3. Payment Terms
                   </h2>
-                  <p className="text-muted-foreground">
-                    FreightShare facilitates conditional payment execution between parties. FreightShare does not hold funds; 
-                    payments are executed automatically based on predefined contractual triggers.
-                  </p>
                   
-                  <h3 className="text-xl font-semibold text-foreground">3.1 Payment Model</h3>
+                  <h3 className="text-xl font-semibold text-foreground">3.1 Platform Payment Model</h3>
+                  <p className="text-muted-foreground">
+                    FreightShare provides technical tools that enable conditional payment execution via a licensed 
+                    third-party payment service provider.
+                  </p>
+                  <p className="text-muted-foreground">FreightShare:</p>
                   <ul className="text-muted-foreground">
-                    <li><strong>Payment Authorisation:</strong> When a shipper accepts an offer, payment is authorised but not captured</li>
-                    <li><strong>Conditional Execution:</strong> Payment is executed automatically upon delivery confirmation</li>
-                    <li><strong>Direct Transfer:</strong> Funds transfer directly from shipper to carrier via our payment service provider</li>
-                    <li><strong>Platform Fee:</strong> A transparent service fee is deducted at execution, disclosed at booking</li>
+                    <li>does not process, store, safeguard, or control user funds</li>
+                    <li>does not have access to payment credentials</li>
+                    <li>is not a bank, payment institution, escrow agent, or guarantor</li>
+                  </ul>
+                  <p className="text-muted-foreground">Payment mechanics:</p>
+                  <ul className="text-muted-foreground">
+                    <li><strong>Payment authorisation:</strong> when a shipper accepts an offer, payment is authorised but not captured</li>
+                    <li><strong>Conditional execution:</strong> payment is executed by the payment service provider upon confirmation of agreed trigger conditions</li>
+                    <li><strong>Direct transfer:</strong> funds transfer directly from shipper to carrier</li>
+                    <li><strong>Platform fee:</strong> a transparent service fee is deducted at execution and disclosed prior to booking</li>
                   </ul>
                   
                   <h3 className="text-xl font-semibold text-foreground">3.2 Delivery Confirmation Triggers</h3>
                   <p className="text-muted-foreground">
-                    Payment execution is triggered by any of the following conditions:
+                    Payment execution is triggered by one of the following predefined conditions:
                   </p>
                   <ul className="text-muted-foreground">
-                    <li>Digital delivery confirmation by the shipper via the platform</li>
-                    <li>Signed CMR or eCMR document upload</li>
+                    <li>Digital delivery confirmation by the shipper via the Platform</li>
+                    <li>Upload of a signed CMR or eCMR</li>
                     <li>Automatic confirmation if no dispute is raised within 48 hours of carrier-marked delivery</li>
                   </ul>
                   <p className="text-muted-foreground">
-                    <em>Note: FreightShare verifies that the agreed confirmation condition occurred. We do not verify 
-                    the physical condition of goods.</em>
+                    FreightShare verifies only whether the agreed trigger condition occurred. FreightShare does not 
+                    verify the physical condition, completeness, or quality of goods, nor the legal validity of 
+                    uploaded documents, and relies on user representations.
                   </p>
                   
-                  <h3 className="text-xl font-semibold text-foreground">3.3 Platform Role</h3>
+                  <h3 className="text-xl font-semibold text-foreground">3.3 Platform Role Clarification</h3>
                   <p className="text-muted-foreground">
-                    FreightShare operates as a technical facilitator of conditional payment execution. We are not:
-                  </p>
-                  <ul className="text-muted-foreground">
-                    <li>A bank or payment institution</li>
-                    <li>An escrow agent</li>
-                    <li>A guarantor of goods quality or delivery</li>
-                  </ul>
-                  <p className="text-muted-foreground">
-                    We are a platform facilitating conditional payment execution between parties, based on 
-                    predefined contractual triggers defined in the shipment agreement.
+                    FreightShare operates as a technical facilitator of conditional payment execution. FreightShare 
+                    does not guarantee delivery, payment, cargo condition, or regulatory compliance.
                   </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     4. Dispute Resolution
                   </h2>
-                  <p className="text-muted-foreground">
-                    FreightShare provides a dispute window to protect both parties:
-                  </p>
                   <ul className="text-muted-foreground">
-                    <li><strong>Dispute Window:</strong> Disputes must be raised within 48 hours of carrier-marked delivery</li>
-                    <li>If a dispute is raised, payment execution is paused pending resolution</li>
-                    <li>Both parties must provide documentation and evidence when requested</li>
-                    <li>FreightShare determines only whether the trigger condition was met, not the quality of goods or service</li>
-                    <li>Our decisions on payment trigger disputes are binding while using our platform</li>
-                    <li>Users retain the right to pursue legal remedies independently for matters beyond trigger verification</li>
+                    <li>Disputes must be raised within 48 hours of carrier-marked delivery</li>
+                    <li>If a dispute is raised, payment execution is paused</li>
+                    <li>Both parties may be required to provide documentation</li>
                   </ul>
+                  <p className="text-muted-foreground">
+                    FreightShare determines only whether payment trigger conditions were met. Such determinations 
+                    apply solely for payment execution on the Platform and do not limit either party's right to 
+                    pursue independent legal remedies.
+                  </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     5. Liability Boundaries
                   </h2>
-                  <p className="text-muted-foreground">
-                    FreightShare provides a platform for connecting users but:
-                  </p>
+                  <p className="text-muted-foreground">FreightShare:</p>
                   <ul className="text-muted-foreground">
-                    <li>Is not responsible for the actions of shippers or carriers</li>
-                    <li>Does not guarantee the condition, legality, or safety of goods transported</li>
-                    <li>Is not liable for delays, damage, or loss during transport</li>
-                    <li>Carriers are responsible for their own insurance and liability coverage</li>
-                    <li>Maximum platform liability is limited to fees paid to FreightShare</li>
+                    <li>is not responsible for actions or omissions of users</li>
+                    <li>does not guarantee legality, condition, or safety of goods</li>
+                    <li>is not liable for delay, loss, or damage during transport</li>
+                  </ul>
+                  <p className="text-muted-foreground">To the maximum extent permitted by law:</p>
+                  <ul className="text-muted-foreground">
+                    <li>FreightShare excludes liability for indirect, incidental, or consequential damages</li>
+                    <li>FreightShare's total liability is limited to fees paid to FreightShare in the preceding 12 months</li>
                   </ul>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
@@ -137,41 +145,39 @@ export default function Terms() {
                   <ul className="text-muted-foreground">
                     <li>Ship illegal or prohibited goods</li>
                     <li>Provide false or misleading information</li>
-                    <li>Circumvent platform payments to avoid fees</li>
+                    <li>Circumvent Platform payments or fees</li>
                     <li>Harass, threaten, or defraud other users</li>
-                    <li>Create multiple accounts to manipulate the system</li>
-                    <li>Use the platform for any unlawful purpose</li>
+                    <li>Scrape, reverse engineer, or automate access to the Platform</li>
+                    <li>Use the Platform for unlawful purposes</li>
                   </ul>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     7. Account Termination
                   </h2>
                   <p className="text-muted-foreground">
-                    FreightShare reserves the right to suspend or terminate accounts that violate these Terms. 
-                    Users may also close their accounts at any time, subject to completion of any pending transactions.
+                    FreightShare may suspend or terminate accounts at its sole discretion for violations of these Terms. 
+                    Users may close accounts subject to completion of pending transactions.
                   </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     8. Modifications to Terms
                   </h2>
                   <p className="text-muted-foreground">
-                    We may modify these Terms at any time. Users will be notified of material changes and 
-                    continued use of the platform constitutes acceptance of modified Terms.
+                    FreightShare may update these Terms. Material changes will be notified. Continued use constitutes acceptance.
                   </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
-                    9. Governing Law
+                    9. Governing Law and Jurisdiction
                   </h2>
                   <p className="text-muted-foreground">
-                    These Terms are governed by the laws of the Netherlands. Any disputes will be subject to the 
-                    exclusive jurisdiction of the courts of Rotterdam, Netherlands.
+                    These Terms are governed by the laws of the Netherlands. Exclusive jurisdiction lies with the 
+                    courts of Rotterdam, Netherlands.
                   </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     10. Contact
                   </h2>
                   <p className="text-muted-foreground">
-                    For questions about these Terms, contact us at:<br />
                     Email: legal@freightshare.eu<br />
                     Address: FreightShare B.V., 123 Logistics Ave, Rotterdam, Netherlands
                   </p>
