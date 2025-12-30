@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
 const Research = () => {
-  // Placeholder URL - to be replaced with actual Google Forms link
-  const surveyUrl = "#";
+  // Google Forms survey URL
+  const surveyUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfRJv6yFbARmxEfJLuglGe0vd4osE6PE7VBuXcuTBfAgIdVVw/viewform?usp=header";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
