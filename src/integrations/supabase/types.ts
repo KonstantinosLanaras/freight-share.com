@@ -127,6 +127,71 @@ export type Database = {
           },
         ]
       }
+      deviation_requests: {
+        Row: {
+          carrier_id: string
+          carrier_response: string | null
+          counter_offer_conditions: string | null
+          counter_offer_price: number | null
+          created_at: string
+          deviation_description: string
+          id: string
+          notes: string | null
+          pallets_required: number
+          pickup_address: string
+          preferred_time_from: string
+          preferred_time_to: string
+          route_id: string
+          shipper_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          carrier_response?: string | null
+          counter_offer_conditions?: string | null
+          counter_offer_price?: number | null
+          created_at?: string
+          deviation_description: string
+          id?: string
+          notes?: string | null
+          pallets_required: number
+          pickup_address: string
+          preferred_time_from: string
+          preferred_time_to: string
+          route_id: string
+          shipper_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          carrier_response?: string | null
+          counter_offer_conditions?: string | null
+          counter_offer_price?: number | null
+          created_at?: string
+          deviation_description?: string
+          id?: string
+          notes?: string | null
+          pallets_required?: number
+          pickup_address?: string
+          preferred_time_from?: string
+          preferred_time_to?: string
+          route_id?: string
+          shipper_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deviation_requests_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loads: {
         Row: {
           cargo_type: Database["public"]["Enums"]["cargo_type"]
@@ -381,6 +446,7 @@ export type Database = {
           country: string
           created_at: string
           id: string
+          planned_datetime: string | null
           route_id: string
           stop_order: number
         }
@@ -390,6 +456,7 @@ export type Database = {
           country: string
           created_at?: string
           id?: string
+          planned_datetime?: string | null
           route_id: string
           stop_order: number
         }
@@ -399,6 +466,7 @@ export type Database = {
           country?: string
           created_at?: string
           id?: string
+          planned_datetime?: string | null
           route_id?: string
           stop_order?: number
         }
@@ -424,9 +492,11 @@ export type Database = {
           departure_time: string | null
           destination_city: string
           destination_country: string
+          flexibility_note: string | null
           id: string
           is_active: boolean
           notes: string | null
+          open_to_extra_stops: boolean
           origin_city: string
           origin_country: string
           status: Database["public"]["Enums"]["route_status"]
@@ -445,9 +515,11 @@ export type Database = {
           departure_time?: string | null
           destination_city: string
           destination_country: string
+          flexibility_note?: string | null
           id?: string
           is_active?: boolean
           notes?: string | null
+          open_to_extra_stops?: boolean
           origin_city: string
           origin_country: string
           status?: Database["public"]["Enums"]["route_status"]
@@ -466,9 +538,11 @@ export type Database = {
           departure_time?: string | null
           destination_city?: string
           destination_country?: string
+          flexibility_note?: string | null
           id?: string
           is_active?: boolean
           notes?: string | null
+          open_to_extra_stops?: boolean
           origin_city?: string
           origin_country?: string
           status?: Database["public"]["Enums"]["route_status"]

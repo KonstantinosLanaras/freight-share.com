@@ -19,7 +19,9 @@ import {
   ArrowRight,
   FileText,
   User,
-  Loader2
+  Loader2,
+  Plus,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +38,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
+import { DeviationRequestForm } from '@/components/routes/DeviationRequestForm';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -63,6 +66,8 @@ interface Route {
   vehicle_type: string | null;
   vehicle_constraints: string | null;
   notes: string | null;
+  open_to_extra_stops: boolean;
+  flexibility_note: string | null;
   created_at: string;
   carrier_id: string;
   route_stops?: RouteStop[];
@@ -82,6 +87,7 @@ export default function RouteDetails() {
   const [route, setRoute] = useState<Route | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deviationRequestOpen, setDeviationRequestOpen] = useState(false);
   const [carrierProfile, setCarrierProfile] = useState<{ full_name: string | null; company_name: string | null } | null>(null);
 
   useEffect(() => {
@@ -366,6 +372,32 @@ export default function RouteDetails() {
               </CardContent>
             </Card>
 
+            {/* Flexibility */}
+            {route.open_to_extra_stops && (
+              <Card className="border-success/30 bg-success/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5 text-success" />
+                    Open to Extra Stops
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {route.flexibility_note && (
+                    <p className="text-muted-foreground">{route.flexibility_note}</p>
+                  )}
+                  {!isOwner && user && route.available_pallets > 0 && (
+                    <Button 
+                      className="mt-4 w-full" 
+                      onClick={() => setDeviationRequestOpen(true)}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Request Pickup on This Route
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Notes */}
             {route.notes && (
               <Card>
@@ -497,6 +529,19 @@ export default function RouteDetails() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Deviation Request Form */}
+      {route && user && (
+        <DeviationRequestForm
+          open={deviationRequestOpen}
+          onOpenChange={setDeviationRequestOpen}
+          routeId={route.id}
+          carrierId={route.carrier_id}
+          shipperId={user.id}
+          maxPallets={route.available_pallets}
+          onSuccess={() => fetchRoute()}
+        />
+      )}
     </div>
   );
 }

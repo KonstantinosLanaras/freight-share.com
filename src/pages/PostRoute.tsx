@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info } from 'lucide-react';
@@ -16,6 +17,7 @@ interface RouteStop {
   city: string;
   country: string;
   availablePallets: string;
+  plannedDateTime: string;
 }
 
 const countries = [
@@ -45,8 +47,10 @@ export default function PostRoute() {
     originCity: '',
     originCountry: '',
     originPallets: '',
+    originPlannedDateTime: '',
     destinationCity: '',
     destinationCountry: '',
+    destinationPlannedDateTime: '',
     departureStart: '',
     departureTime: '',
     departureEnd: '',
@@ -54,12 +58,14 @@ export default function PostRoute() {
     arrivalEnd: '',
     vehicleType: '',
     notes: '',
+    openToExtraStops: false,
+    flexibilityNote: '',
   });
 
   const addStop = () => {
     setStops([
       ...stops,
-      { id: crypto.randomUUID(), city: '', country: '', availablePallets: '' }
+      { id: crypto.randomUUID(), city: '', country: '', availablePallets: '', plannedDateTime: '' }
     ]);
   };
 
@@ -106,6 +112,29 @@ export default function PostRoute() {
       return;
     }
 
+    if (!formData.originPlannedDateTime) {
+      toast.error('Please enter a planned departure date/time for origin');
+      return;
+    }
+
+    if (!formData.destinationPlannedDateTime) {
+      toast.error('Please enter a planned arrival date/time for destination');
+      return;
+    }
+
+    // Validate stops have planned datetime
+    for (const stop of stops) {
+      if (!stop.plannedDateTime) {
+        toast.error('Please enter planned date/time for all stops');
+        return;
+      }
+    }
+
+    if (formData.openToExtraStops && !formData.flexibilityNote.trim()) {
+      toast.error('Please describe your flexibility for extra stops');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -128,6 +157,8 @@ export default function PostRoute() {
           vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
           notes: formData.notes || null,
           status: 'planned',
+          open_to_extra_stops: formData.openToExtraStops,
+          flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
         })
         .select()
         .single();
@@ -142,6 +173,7 @@ export default function PostRoute() {
           country: stop.country,
           available_pallets: parseInt(stop.availablePallets) || 0,
           stop_order: index + 1,
+          planned_datetime: stop.plannedDateTime ? new Date(stop.plannedDateTime).toISOString() : null,
         }));
 
         const { error: stopsError } = await supabase
@@ -201,9 +233,9 @@ export default function PostRoute() {
               <CardDescription>Where does your journey begin?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="originCity">City</Label>
+                  <Label htmlFor="originCity">City <span className="text-destructive">*</span></Label>
                   <Input
                     id="originCity"
                     placeholder="e.g., Rotterdam"
@@ -215,7 +247,7 @@ export default function PostRoute() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="originCountry">Country</Label>
+                  <Label htmlFor="originCountry">Country <span className="text-destructive">*</span></Label>
                   <Select
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
@@ -232,7 +264,7 @@ export default function PostRoute() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="originPallets">Available Pallets</Label>
+                  <Label htmlFor="originPallets">Available Pallets <span className="text-destructive">*</span></Label>
                   <Input
                     id="originPallets"
                     type="number"
@@ -242,6 +274,18 @@ export default function PostRoute() {
                     className="mt-1"
                     value={formData.originPallets}
                     onChange={(e) => setFormData({ ...formData, originPallets: e.target.value })}
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="originPlannedDateTime">Planned Departure <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="originPlannedDateTime"
+                    type="datetime-local"
+                    className="mt-1"
+                    value={formData.originPlannedDateTime}
+                    onChange={(e) => setFormData({ ...formData, originPlannedDateTime: e.target.value })}
                     required
                     disabled={isSubmitting}
                   />
@@ -272,9 +316,9 @@ export default function PostRoute() {
                       <X className="h-4 w-4" />
                     </button>
                     <div className="text-sm font-medium text-muted-foreground mb-3">Stop {index + 1}</div>
-                    <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
-                        <Label>City</Label>
+                        <Label>City <span className="text-destructive">*</span></Label>
                         <Input
                           placeholder="e.g., Düsseldorf"
                           className="mt-1"
@@ -285,7 +329,7 @@ export default function PostRoute() {
                         />
                       </div>
                       <div>
-                        <Label>Country</Label>
+                        <Label>Country <span className="text-destructive">*</span></Label>
                         <Select
                           value={stop.country}
                           onValueChange={(value) => updateStop(stop.id, 'country', value)}
@@ -302,7 +346,7 @@ export default function PostRoute() {
                         </Select>
                       </div>
                       <div>
-                        <Label>Available pallets at stop</Label>
+                        <Label>Available pallets <span className="text-destructive">*</span></Label>
                         <Input
                           type="number"
                           min="0"
@@ -310,6 +354,17 @@ export default function PostRoute() {
                           className="mt-1"
                           value={stop.availablePallets}
                           onChange={(e) => updateStop(stop.id, 'availablePallets', e.target.value)}
+                          required
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <Label>Planned time <span className="text-destructive">*</span></Label>
+                        <Input
+                          type="datetime-local"
+                          className="mt-1"
+                          value={stop.plannedDateTime}
+                          onChange={(e) => updateStop(stop.id, 'plannedDateTime', e.target.value)}
                           required
                           disabled={isSubmitting}
                         />
@@ -336,9 +391,9 @@ export default function PostRoute() {
               <CardDescription>Where does your journey end?</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="destinationCity">City</Label>
+                  <Label htmlFor="destinationCity">City <span className="text-destructive">*</span></Label>
                   <Input
                     id="destinationCity"
                     placeholder="e.g., Munich"
@@ -350,7 +405,7 @@ export default function PostRoute() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="destinationCountry">Country</Label>
+                  <Label htmlFor="destinationCountry">Country <span className="text-destructive">*</span></Label>
                   <Select
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
@@ -365,6 +420,18 @@ export default function PostRoute() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="destinationPlannedDateTime">Planned Arrival <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="destinationPlannedDateTime"
+                    type="datetime-local"
+                    className="mt-1"
+                    value={formData.destinationPlannedDateTime}
+                    onChange={(e) => setFormData({ ...formData, destinationPlannedDateTime: e.target.value })}
+                    required
+                    disabled={isSubmitting}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -451,6 +518,55 @@ export default function PostRoute() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Route Flexibility */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-carrier" />
+                Route Flexibility
+              </CardTitle>
+              <CardDescription>Can you accommodate additional pickup stops along your route?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="openToExtraStops"
+                  checked={formData.openToExtraStops}
+                  onCheckedChange={(checked) => setFormData({ ...formData, openToExtraStops: checked === true })}
+                  disabled={isSubmitting}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="openToExtraStops"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    Open to additional pickup stops
+                  </label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow shippers to request pickup deviations from your planned route
+                  </p>
+                </div>
+              </div>
+
+              {formData.openToExtraStops && (
+                <div>
+                  <Label htmlFor="flexibilityNote">
+                    Describe your flexibility <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="flexibilityNote"
+                    placeholder="e.g., Can deviate up to 50km from route, max 2 extra stops, flexible on timing within 2-hour windows..."
+                    className="mt-1 min-h-[80px]"
+                    value={formData.flexibilityNote}
+                    onChange={(e) => setFormData({ ...formData, flexibilityNote: e.target.value })}
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
