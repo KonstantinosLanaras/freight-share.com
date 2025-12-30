@@ -54,9 +54,9 @@ export default function About() {
                   Just transparent, efficient freight matching.
                 </p>
                 <p className="text-muted-foreground">
-                  Our platform ensures secure payments through escrow, verified business partners, and 
-                  a trusted resolution center when issues arise. We're the neutral third party that 
-                  makes direct connections safe and reliable.
+                  Our platform ensures secure conditional payments, verified business partners, and 
+                  a dispute resolution process when issues arise. Payments are executed automatically 
+                  upon delivery confirmation — we facilitate the transaction, not hold funds.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
