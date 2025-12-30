@@ -98,15 +98,9 @@ const HowItWorksPage = () => {
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3 text-center">
               {t('howItWorks.pageTitle')}
             </h1>
-            <p className="text-base text-muted-foreground mb-6 max-w-2xl mx-auto text-center">
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto text-center">
               {t('howItWorks.pageSubtitle')}
             </p>
-            
-            <div className="max-w-3xl mx-auto">
-              <p className="text-muted-foreground text-left leading-relaxed">
-                {t('howItWorks.introText')}
-              </p>
-            </div>
           </div>
         </div>
       </section>
