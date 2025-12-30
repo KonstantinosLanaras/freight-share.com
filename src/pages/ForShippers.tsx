@@ -76,16 +76,6 @@ const ForShippers = () => {
         </div>
       </section>
 
-      {/* Low-emphasis impact note */}
-      <section className="py-8 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <p className="text-sm text-muted-foreground">
-              {t('forShippers.impactNote')}
-            </p>
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>
