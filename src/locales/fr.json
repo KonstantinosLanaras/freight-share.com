@@ -126,7 +126,8 @@
     "title": "Prêt à expédier plus intelligemment ?",
     "description": "Rejoignez le marché qui place les expéditeurs et les transporteurs en premier.",
     "postLoad": "Publier une demande de transport",
-    "postRoute": "Voir les demandes de transport"
+    "postRoute": "Voir les demandes de transport",
+    "microReinforcement": "Chaque correspondance remplit la capacité existante — efficace par conception."
   },
   "footer": {
     "tagline": "Connecter directement expéditeurs et transporteurs à travers l'Europe.",
@@ -135,11 +136,66 @@
     "findLoads": "Trouver des chargements",
     "company": "Entreprise",
     "about": "À propos",
+    "impact": "Impact & Responsabilité",
     "contact": "Contact",
     "legal": "Mentions légales",
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
     "rights": "Tous droits réservés."
+  },
+  "impact": {
+    "title": "Conçu pour l'efficacité",
+    "subtitle": "Des choix de conception qui créent de la valeur sociale et environnementale.",
+    "social": {
+      "title": "Social",
+      "point1": "Accès au marché pour les PME et transporteurs indépendants",
+      "point2": "Tarification transparente sans marges d'intermédiaires",
+      "point3": "Les connexions directes réduisent la dépendance aux courtiers"
+    },
+    "environmental": {
+      "title": "Environnemental",
+      "point1": "Meilleure utilisation de la capacité de camion existante",
+      "point2": "Moins de trajets retour à vide grâce à la correspondance d'itinéraires",
+      "point3": "Réduction des émissions sans ajouter de volume de transport"
+    },
+    "learnMore": "En savoir plus sur notre impact"
+  },
+  "impactPage": {
+    "title": "Impact & Responsabilité",
+    "subtitle": "Comment la conception du marché crée de la valeur sociale et environnementale.",
+    "problem": {
+      "title": "Le problème du marché",
+      "fragmentation": "La logistique routière européenne est très fragmentée. Les petits expéditeurs peinent à accéder à des tarifs compétitifs, tandis que les transporteurs font souvent rouler des camions sous-utilisés.",
+      "emptyMiles": "Les données de l'industrie suggèrent que 20 à 30% des kilomètres parcourus sont à vide ou significativement sous-utilisés. Cette inefficacité coûte de l'argent et produit des émissions inutiles.",
+      "opacity": "L'opacité des prix et les couches d'intermédiaires ajoutent des coûts sans valeur ajoutée, affectant particulièrement les PME qui manquent de pouvoir de négociation."
+    },
+    "design": {
+      "title": "Choix de conception",
+      "intro": "FreightShare est construit autour de quatre décisions structurelles qui répondent à ces inefficacités :",
+      "choice1": "Correspondance directe entre expéditeurs et transporteurs, supprimant les marges d'intermédiaires",
+      "choice2": "Tarification transparente visible avant engagement",
+      "choice3": "Expédition au niveau palette rendant les petits volumes économiquement viables",
+      "choice4": "Correspondance basée sur les itinéraires qui remplit la capacité existante plutôt que d'ajouter des camions"
+    },
+    "social": {
+      "title": "Impact social",
+      "access": "Les PME accèdent à des options d'expédition auparavant réservées aux grandes entreprises avec des équipes logistiques dédiées ou des relations avec des courtiers.",
+      "pricing": "La tarification transparente signifie que toutes les parties voient les mêmes tarifs. Pas d'avantage de négociation basé sur la taille ou l'historique des relations.",
+      "intermediaries": "Les connexions directes réduisent la dépendance aux courtiers et transitaires, permettant à plus de valeur de rester avec les parties qui font le travail."
+    },
+    "environmental": {
+      "title": "Impact environnemental",
+      "capacity": "Faire correspondre les chargements aux itinéraires déjà en cours signifie une meilleure utilisation des camions. Quand les camions roulent plus pleins, moins de kilomètres totaux sont nécessaires par unité expédiée.",
+      "emptyTrips": "La correspondance basée sur les itinéraires réduit les trajets retour à vide. Les transporteurs peuvent trouver des chargements qui correspondent à leurs horaires existants plutôt que de rouler à vide.",
+      "emissions": "Ces gains d'efficacité se traduisent directement par des émissions plus faibles par envoi. Aucun nouveau camion n'est ajouté — la capacité existante est simplement mieux utilisée."
+    },
+    "disclaimer": {
+      "title": "Ce que nous ne prétendons pas",
+      "text": "FreightShare ne prétend pas résoudre le changement climatique ou transformer l'industrie de la logistique. Nous opérons au sein de l'infrastructure existante et apportons des améliorations progressives grâce à une meilleure correspondance et transparence. Les avantages environnementaux sont une conséquence de l'efficacité opérationnelle, pas une initiative de durabilité séparée."
+    },
+    "cta": {
+      "title": "Prêt à expédier plus efficacement ?"
+    }
   },
   "auth": {
     "welcomeBack": "Bon retour",
@@ -332,5 +388,56 @@
     "en": "English",
     "fr": "Français",
     "el": "Ελληνικά"
+  },
+  "howItWorksPreview": {
+    "seeFullGuide": "Voir le guide complet"
+  },
+  "forShippers": {
+    "badge": "Pour les expéditeurs",
+    "title": "Expédiez des marchandises à travers l'Europe — tout volume",
+    "subtitle": "Accédez à des transporteurs vérifiés sur des itinéraires existants. Tarification transparente. Sans intermédiaires.",
+    "cta": "Commencer",
+    "learnHow": "Voir comment ça marche",
+    "benefits": {
+      "access": {
+        "title": "Accédez aux marchés européens",
+        "description": "Expédiez vers des destinations à travers l'Europe sans avoir besoin de camions complets."
+      },
+      "pricing": {
+        "title": "Tarification prévisible",
+        "description": "Voyez les prix à l'avance. Suivez les envois. Pas de frais cachés."
+      },
+      "verified": {
+        "title": "Transporteurs vérifiés",
+        "description": "Tous les transporteurs sont des entreprises vérifiées avec des accréditations documentées."
+      }
+    },
+    "microReinforcement": "Chaque envoi utilise la capacité de camion existante — réduisant les kilomètres à vide à travers l'Europe.",
+    "ctaTitle": "Commencez à expédier plus intelligemment",
+    "ctaSubtitle": "Publiez votre premier chargement et recevez des offres de transporteurs vérifiés."
+  },
+  "forCarriers": {
+    "badge": "Pour les transporteurs",
+    "title": "Remplissez l'espace vide sur les itinéraires que vous effectuez déjà",
+    "subtitle": "Connectez-vous directement avec les expéditeurs qui ont besoin de vos itinéraires. Augmentez vos revenus par trajet.",
+    "cta": "Commencer",
+    "learnHow": "Voir comment ça marche",
+    "benefits": {
+      "revenue": {
+        "title": "Monétisez la capacité inutilisée",
+        "description": "Transformez les positions de palettes vides en revenus sur les itinéraires que vous effectuez déjà."
+      },
+      "efficiency": {
+        "title": "Améliorez la rentabilité des itinéraires",
+        "description": "Augmentez les revenus par trajet sans ajouter de complexité opérationnelle."
+      },
+      "direct": {
+        "title": "Accès direct à la demande",
+        "description": "Connectez-vous avec les expéditeurs qui ont besoin de vos itinéraires — pas d'intermédiaire requis."
+      }
+    },
+    "microReinforcement": "Une meilleure utilisation signifie moins d'émissions par unité expédiée.",
+    "ctaTitle": "Commencez à gagner plus",
+    "ctaSubtitle": "Publiez vos itinéraires et recevez des opportunités de chargements correspondantes."
   }
 }

@@ -63,6 +63,11 @@ export const CTA = () => {
                 {t('nav.logIn')}
               </Link>
             </p>
+            
+            {/* Micro-reinforcement */}
+            <p className="text-xs text-white/50 mt-4 max-w-md mx-auto">
+              {t('cta.microReinforcement')}
+            </p>
           </div>
         </div>
       </div>
