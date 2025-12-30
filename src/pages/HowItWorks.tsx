@@ -111,7 +111,7 @@ const HowItWorksPage = () => {
           <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
             
             {/* Shipper Path */}
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border overflow-hidden flex flex-col">
               <div className="bg-shipper/10 p-6 border-b border-border">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-shipper/20 flex items-center justify-center">
@@ -126,7 +126,7 @@ const HowItWorksPage = () => {
                 </p>
               </div>
               
-              <div className="p-6 md:p-8">
+              <div className="p-6 md:p-8 flex flex-col flex-grow">
                 <div className="space-y-6">
                   {shipperSteps.map((step, index) => (
                     <div key={step.titleKey} className="flex gap-4">
@@ -151,6 +151,9 @@ const HowItWorksPage = () => {
                   ))}
                 </div>
                 
+                {/* Spacer to push CTA to bottom */}
+                <div className="flex-grow" />
+                
                 {/* Shipper CTA */}
                 <div className="mt-8 pt-6 border-t border-border space-y-3">
                   <Button className="w-full bg-shipper hover:bg-shipper/90 text-shipper-foreground" size="lg" asChild>
@@ -169,7 +172,7 @@ const HowItWorksPage = () => {
             </div>
 
             {/* Carrier Path */}
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border overflow-hidden flex flex-col">
               <div className="bg-carrier/10 p-6 border-b border-border">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-carrier/20 flex items-center justify-center">
@@ -184,7 +187,7 @@ const HowItWorksPage = () => {
                 </p>
               </div>
               
-              <div className="p-6 md:p-8">
+              <div className="p-6 md:p-8 flex flex-col flex-grow">
                 <div className="space-y-6">
                   {carrierSteps.map((step, index) => (
                     <div key={step.titleKey} className="flex gap-4">
@@ -225,6 +228,9 @@ const HowItWorksPage = () => {
                     </div>
                   </div>
                 </div>
+                
+                {/* Spacer to push CTA to bottom */}
+                <div className="flex-grow" />
                 
                 {/* Carrier CTA */}
                 <div className="mt-8 pt-6 border-t border-border space-y-3">
