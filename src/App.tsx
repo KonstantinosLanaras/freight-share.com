@@ -23,6 +23,8 @@ import ShipmentDetails from "./pages/ShipmentDetails";
 import HelpCenter from "./pages/HelpCenter";
 import HowItWorksPage from "./pages/HowItWorks";
 import Impact from "./pages/Impact";
+import ForShippers from "./pages/ForShippers";
+import ForCarriers from "./pages/ForCarriers";
 import AdminPanel from "./pages/AdminPanel";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/impact" element={<Impact />} />
+            <Route path="/for-shippers" element={<ForShippers />} />
+            <Route path="/for-carriers" element={<ForCarriers />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />

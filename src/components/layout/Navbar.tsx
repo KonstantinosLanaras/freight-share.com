@@ -66,13 +66,13 @@ export const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="center" className="bg-popover border border-border">
                 <DropdownMenuItem asChild>
-                  <Link to="/auth?mode=signup&role=shipper" className="cursor-pointer">
+                  <Link to="/for-shippers" className="cursor-pointer">
                     <Package className="h-4 w-4 mr-2" />
                     {t('nav.forShippers')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/auth?mode=signup&role=carrier" className="cursor-pointer">
+                  <Link to="/for-carriers" className="cursor-pointer">
                     <Truck className="h-4 w-4 mr-2" />
                     {t('nav.forCarriers')}
                   </Link>
@@ -164,7 +164,7 @@ export const Navbar = () => {
               <div className="px-4 py-2">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">{t('nav.solutions')}</p>
                 <Link 
-                  to="/auth?mode=signup&role=shipper" 
+                  to="/for-shippers" 
                   className="flex items-center gap-2 px-2 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -172,7 +172,7 @@ export const Navbar = () => {
                   {t('nav.forShippers')}
                 </Link>
                 <Link 
-                  to="/auth?mode=signup&role=carrier" 
+                  to="/for-carriers" 
                   className="flex items-center gap-2 px-2 py-2 text-sm font-medium hover:bg-muted rounded-lg"
                   onClick={() => setIsOpen(false)}
                 >
