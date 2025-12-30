@@ -19,7 +19,8 @@ import {
   Eye,
   Lock,
   Building2,
-  CheckCircle
+  CheckCircle,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +44,8 @@ interface Route {
   status: RouteStatus;
   vehicle_constraints: string | null;
   notes: string | null;
+  open_to_extra_stops: boolean;
+  flexibility_note: string | null;
   route_stops?: RouteStop[];
   carrier?: {
     company_name: string | null;
@@ -82,18 +85,33 @@ export default function BrowseRoutes() {
 
   const fetchRoutes = async () => {
     try {
-      // Fetch routes with stops - only show routes that haven't departed yet
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Fetch routes - visibility logic:
+      // If open_to_extra_stops is false: visible until departure_date_to
+      // If open_to_extra_stops is true: visible until arrival_date_to (or departure_date_to if no arrival)
       const { data: routesData, error: routesError } = await supabase
         .from('routes')
         .select(`*, route_stops (*)`)
         .in('status', ['planned', 'active'])
-        .gte('departure_date_to', new Date().toISOString().split('T')[0])
         .order('departure_date_from', { ascending: true });
 
       if (routesError) throw routesError;
 
+      // Filter routes based on visibility rules
+      const visibleRoutes = routesData?.filter(route => {
+        if (route.open_to_extra_stops) {
+          // Visible until arrival date
+          const arrivalDate = route.arrival_date_to || route.arrival_date_from || route.departure_date_to;
+          return arrivalDate >= today;
+        } else {
+          // Visible until departure date
+          return route.departure_date_to >= today;
+        }
+      }) || [];
+
       // Fetch carrier profiles separately
-      const carrierIds = [...new Set(routesData?.map(r => r.carrier_id) || [])];
+      const carrierIds = [...new Set(visibleRoutes.map(r => r.carrier_id))];
       const { data: profilesData } = await supabase
         .from('profiles')
         .select('id, company_name, verification_status')
@@ -101,10 +119,10 @@ export default function BrowseRoutes() {
 
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
 
-      const routesWithCarriers = routesData?.map(route => ({
+      const routesWithCarriers = visibleRoutes.map(route => ({
         ...route,
         carrier: profilesMap.get(route.carrier_id) || null
-      })) || [];
+      }));
 
       setRoutes(routesWithCarriers as Route[]);
     } catch (error) {
@@ -363,7 +381,21 @@ export default function BrowseRoutes() {
                           <Package className="h-4 w-4 text-primary" />
                           <span>{route.available_pallets} pallets available</span>
                         </div>
+                        {route.open_to_extra_stops && (
+                          <Badge variant="outline" className="text-xs border-success text-success">
+                            <Plus className="h-3 w-3 mr-1" />
+                            Open to extra stops
+                          </Badge>
+                        )}
                       </div>
+
+                      {/* Flexibility Note */}
+                      {route.open_to_extra_stops && route.flexibility_note && (
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <div className="text-xs text-muted-foreground mb-1 font-medium">Flexibility</div>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{route.flexibility_note}</p>
+                        </div>
+                      )}
 
                       {/* Stops */}
                       {route.route_stops && route.route_stops.length > 0 && (
