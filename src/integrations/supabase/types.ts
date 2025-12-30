@@ -194,13 +194,16 @@ export type Database = {
       }
       loads: {
         Row: {
+          cargo_notes: string | null
           cargo_type: Database["public"]["Enums"]["cargo_type"]
           created_at: string
           delivery_date_from: string
           delivery_date_to: string
           destination_city: string
           destination_country: string
+          height_cm: number | null
           id: string
+          length_cm: number | null
           notes: string | null
           origin_city: string
           origin_country: string
@@ -210,17 +213,25 @@ export type Database = {
           price: number | null
           pricing_type: Database["public"]["Enums"]["pricing_type"]
           shipper_id: string
+          space_ldm: number | null
+          space_type: string
+          space_value: number
           status: Database["public"]["Enums"]["shipment_status"]
           updated_at: string
+          weight_kg: number
+          width_cm: number | null
         }
         Insert: {
+          cargo_notes?: string | null
           cargo_type?: Database["public"]["Enums"]["cargo_type"]
           created_at?: string
           delivery_date_from: string
           delivery_date_to: string
           destination_city: string
           destination_country: string
+          height_cm?: number | null
           id?: string
+          length_cm?: number | null
           notes?: string | null
           origin_city: string
           origin_country: string
@@ -230,17 +241,25 @@ export type Database = {
           price?: number | null
           pricing_type?: Database["public"]["Enums"]["pricing_type"]
           shipper_id: string
+          space_ldm?: number | null
+          space_type?: string
+          space_value?: number
           status?: Database["public"]["Enums"]["shipment_status"]
           updated_at?: string
+          weight_kg?: number
+          width_cm?: number | null
         }
         Update: {
+          cargo_notes?: string | null
           cargo_type?: Database["public"]["Enums"]["cargo_type"]
           created_at?: string
           delivery_date_from?: string
           delivery_date_to?: string
           destination_city?: string
           destination_country?: string
+          height_cm?: number | null
           id?: string
+          length_cm?: number | null
           notes?: string | null
           origin_city?: string
           origin_country?: string
@@ -250,8 +269,13 @@ export type Database = {
           price?: number | null
           pricing_type?: Database["public"]["Enums"]["pricing_type"]
           shipper_id?: string
+          space_ldm?: number | null
+          space_type?: string
+          space_value?: number
           status?: Database["public"]["Enums"]["shipment_status"]
           updated_at?: string
+          weight_kg?: number
+          width_cm?: number | null
         }
         Relationships: []
       }
@@ -495,10 +519,15 @@ export type Database = {
           flexibility_note: string | null
           id: string
           is_active: boolean
+          max_deviation_km: number | null
+          max_payload_kg: number
           notes: string | null
           open_to_extra_stops: boolean
           origin_city: string
           origin_country: string
+          space_ldm: number | null
+          space_type: string
+          space_value: number
           status: Database["public"]["Enums"]["route_status"]
           updated_at: string
           vehicle_constraints: string | null
@@ -518,10 +547,15 @@ export type Database = {
           flexibility_note?: string | null
           id?: string
           is_active?: boolean
+          max_deviation_km?: number | null
+          max_payload_kg?: number
           notes?: string | null
           open_to_extra_stops?: boolean
           origin_city: string
           origin_country: string
+          space_ldm?: number | null
+          space_type?: string
+          space_value?: number
           status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
           vehicle_constraints?: string | null
@@ -541,10 +575,15 @@ export type Database = {
           flexibility_note?: string | null
           id?: string
           is_active?: boolean
+          max_deviation_km?: number | null
+          max_payload_kg?: number
           notes?: string | null
           open_to_extra_stops?: boolean
           origin_city?: string
           origin_country?: string
+          space_ldm?: number | null
+          space_type?: string
+          space_value?: number
           status?: Database["public"]["Enums"]["route_status"]
           updated_at?: string
           vehicle_constraints?: string | null

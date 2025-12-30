@@ -7,10 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { SpaceInput, type SpaceType } from '@/components/capacity';
+import { calculateLdm } from '@/lib/capacityUtils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface RouteStop {
   id: string;
@@ -43,10 +46,13 @@ export default function PostRoute() {
   const { user } = useAuth();
   const [stops, setStops] = useState<RouteStop[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [spaceType, setSpaceType] = useState<SpaceType>('epe');
+  const [spaceValue, setSpaceValue] = useState('');
+  const [maxPayloadKg, setMaxPayloadKg] = useState('');
+  const [maxDeviationKm, setMaxDeviationKm] = useState('');
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
-    originPallets: '',
     originPlannedDateTime: '',
     destinationCity: '',
     destinationCountry: '',
@@ -92,8 +98,15 @@ export default function PostRoute() {
       return;
     }
 
-    if (!formData.originPallets || parseInt(formData.originPallets) < 1) {
-      toast.error('Please enter available pallet capacity');
+    // Validate space input
+    if (!spaceValue || parseFloat(spaceValue) <= 0) {
+      toast.error('Please enter available space capacity');
+      return;
+    }
+
+    // Validate payload
+    if (!maxPayloadKg || parseFloat(maxPayloadKg) <= 0) {
+      toast.error('Please enter maximum payload weight');
       return;
     }
 
@@ -138,6 +151,9 @@ export default function PostRoute() {
     setIsSubmitting(true);
 
     try {
+      // Calculate LDM for internal storage
+      const spaceLdm = calculateLdm(spaceType, parseFloat(spaceValue) || 0);
+
       // Create the route with new fields
       const { data: routeData, error: routeError } = await supabase
         .from('routes')
@@ -152,13 +168,19 @@ export default function PostRoute() {
           departure_time: formData.departureTime || null,
           arrival_date_from: formData.arrivalStart,
           arrival_date_to: formData.arrivalEnd || null,
-          available_pallets: parseInt(formData.originPallets),
+          available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
           vehicle_type: formData.vehicleType,
           vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
           notes: formData.notes || null,
           status: 'planned',
           open_to_extra_stops: formData.openToExtraStops,
           flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
+          // New capacity fields
+          space_type: spaceType,
+          space_value: parseFloat(spaceValue) || 0,
+          space_ldm: spaceLdm,
+          max_payload_kg: parseFloat(maxPayloadKg) || 0,
+          max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
         })
         .select()
         .single();
@@ -233,7 +255,7 @@ export default function PostRoute() {
               <CardDescription>Where does your journey begin?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="originCity">City <span className="text-destructive">*</span></Label>
                   <Input
@@ -262,21 +284,6 @@ export default function PostRoute() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div>
-                  <Label htmlFor="originPallets">Available Pallets <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="originPallets"
-                    type="number"
-                    min="1"
-                    max="66"
-                    placeholder="e.g., 24"
-                    className="mt-1"
-                    value={formData.originPallets}
-                    onChange={(e) => setFormData({ ...formData, originPallets: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
                 </div>
                 <div>
                   <Label htmlFor="originPlannedDateTime">Planned Departure <span className="text-destructive">*</span></Label>
@@ -437,6 +444,58 @@ export default function PostRoute() {
             </CardContent>
           </Card>
 
+          {/* Capacity - Space & Payload */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-carrier" />
+                Available Capacity
+              </CardTitle>
+              <CardDescription>How much space and weight can you carry?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <SpaceInput
+                spaceType={spaceType}
+                spaceValue={spaceValue}
+                onSpaceTypeChange={setSpaceType}
+                onSpaceValueChange={setSpaceValue}
+                disabled={isSubmitting}
+                showDimensions={false}
+                label="How much space is available?"
+              />
+              
+              <div className="pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="maxPayload">
+                    Maximum payload (kg) <span className="text-destructive">*</span>
+                  </Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Maximum additional weight you can carry</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Input
+                  id="maxPayload"
+                  type="number"
+                  min="1"
+                  step="100"
+                  placeholder="e.g., 24000"
+                  value={maxPayloadKg}
+                  onChange={(e) => setMaxPayloadKg(e.target.value)}
+                  disabled={isSubmitting}
+                  className="mt-1"
+                  required
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Dates */}
           <Card>
             <CardHeader>
@@ -552,20 +611,47 @@ export default function PostRoute() {
               </div>
 
               {formData.openToExtraStops && (
-                <div>
-                  <Label htmlFor="flexibilityNote">
-                    Describe your flexibility <span className="text-destructive">*</span>
-                  </Label>
-                  <Textarea
-                    id="flexibilityNote"
-                    placeholder="e.g., Can deviate up to 50km from route, max 2 extra stops, flexible on timing within 2-hour windows..."
-                    className="mt-1 min-h-[80px]"
-                    value={formData.flexibilityNote}
-                    onChange={(e) => setFormData({ ...formData, flexibilityNote: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
+                <>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="maxDeviation">Maximum deviation (km)</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>How far you're willing to deviate from your planned route</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Input
+                      id="maxDeviation"
+                      type="number"
+                      min="1"
+                      placeholder="e.g., 50"
+                      className="mt-1 max-w-[150px]"
+                      value={maxDeviationKm}
+                      onChange={(e) => setMaxDeviationKm(e.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="flexibilityNote">
+                      Describe your flexibility <span className="text-destructive">*</span>
+                    </Label>
+                    <Textarea
+                      id="flexibilityNote"
+                      placeholder="e.g., Can deviate up to 50km from route, max 2 extra stops, flexible on timing within 2-hour windows..."
+                      className="mt-1 min-h-[80px]"
+                      value={formData.flexibilityNote}
+                      onChange={(e) => setFormData({ ...formData, flexibilityNote: e.target.value })}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
