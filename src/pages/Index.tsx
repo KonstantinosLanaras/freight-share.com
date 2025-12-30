@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/landing/Hero';
 import { Features } from '@/components/landing/Features';
 import { HowItWorks } from '@/components/landing/HowItWorks';
+import { ImpactSection } from '@/components/landing/ImpactSection';
 import { CTA } from '@/components/landing/CTA';
 
 const Index = () => {
@@ -13,6 +14,7 @@ const Index = () => {
         <Hero />
         <Features />
         <HowItWorks />
+        <ImpactSection />
         <CTA />
       </main>
       <Footer />

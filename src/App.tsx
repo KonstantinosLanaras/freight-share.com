@@ -21,8 +21,8 @@ import ShipperShipments from "./pages/ShipperShipments";
 import CarrierShipments from "./pages/CarrierShipments";
 import ShipmentDetails from "./pages/ShipmentDetails";
 import HelpCenter from "./pages/HelpCenter";
-import WhyFreightShare from "./pages/WhyFreightShare";
 import HowItWorksPage from "./pages/HowItWorks";
+import Impact from "./pages/Impact";
 import AdminPanel from "./pages/AdminPanel";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
@@ -42,8 +42,8 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/why-freightshare" element={<WhyFreightShare />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/impact" element={<Impact />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />
