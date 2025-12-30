@@ -13,7 +13,7 @@ const Impact = () => {
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
               Impact & Responsibility
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed italic">
               FreightShare is inspired by the belief that improving access to European markets for SMEs strengthens competition and contributes to fairer prices for households.
             </p>
           </div>
