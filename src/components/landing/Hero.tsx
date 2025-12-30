@@ -17,11 +17,13 @@ export const Hero = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          <div className="space-y-6 lg:space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
-              <Route className="h-4 w-4" />
-              {t('hero.tagline')}
-            </div>
+          {/* Vertical buffer for breathing room below header */}
+          <div className="pt-4 md:pt-6 lg:pt-8">
+            <div className="space-y-6 lg:space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium animate-fade-in">
+                <Route className="h-4 w-4" />
+                {t('hero.tagline')}
+              </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-foreground leading-tight animate-slide-up">
               {t('hero.title')}{' '}
@@ -107,6 +109,7 @@ export const Hero = () => {
                   <ArrowRight className="h-5 w-5 text-primary" />
                 </div>
               </Link>
+              </div>
             </div>
           </div>
         </div>
