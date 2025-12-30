@@ -26,68 +26,6 @@ const Impact = () => {
         <article className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
 
-            {/* Target KPIs Section */}
-            <section className="mb-14">
-              <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-2">
-                {t('impactPage.kpis.title')}
-              </h2>
-              <div className="h-px bg-border mb-8" />
-              
-              <div className="space-y-10">
-                {/* KPI 1 */}
-                <div>
-                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-                    {t('impactPage.kpis.utilisation.value')}
-                  </div>
-                  <p className="text-foreground font-medium mb-1">
-                    {t('impactPage.kpis.utilisation.description')}
-                  </p>
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('impactPage.kpis.utilisation.caveat')}
-                  </p>
-                </div>
-
-                {/* KPI 2 */}
-                <div>
-                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-                    {t('impactPage.kpis.emptyReduction.value')}
-                  </div>
-                  <p className="text-foreground font-medium mb-1">
-                    {t('impactPage.kpis.emptyReduction.description')}
-                  </p>
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('impactPage.kpis.emptyReduction.caveat')}
-                  </p>
-                </div>
-
-                {/* KPI 3 */}
-                <div>
-                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-                    {t('impactPage.kpis.smeSavings.value')}
-                  </div>
-                  <p className="text-foreground font-medium mb-1">
-                    {t('impactPage.kpis.smeSavings.description')}
-                  </p>
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('impactPage.kpis.smeSavings.caveat')}
-                  </p>
-                </div>
-
-                {/* KPI 4 */}
-                <div>
-                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-                    {t('impactPage.kpis.emissions.value')}
-                  </div>
-                  <p className="text-foreground font-medium mb-1">
-                    {t('impactPage.kpis.emissions.description')}
-                  </p>
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('impactPage.kpis.emissions.caveat')}
-                  </p>
-                </div>
-              </div>
-            </section>
-            
             {/* Section 1: The Market Problem */}
             <section className="mb-14">
               <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-2">
@@ -103,7 +41,29 @@ const Impact = () => {
               </div>
             </section>
 
-            {/* Section 2: Design Choices */}
+            {/* Section 2: Economic Context */}
+            <section className="mb-14">
+              <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-2">
+                Economic Context: Households, SMEs, and Market Competition
+              </h2>
+              <div className="h-px bg-border mb-6" />
+              
+              <div className="space-y-5 text-muted-foreground leading-relaxed">
+                <p>
+                  SMEs account for over <strong className="text-foreground">99%</strong> of EU non-financial businesses and form the structural backbone of the European economy (European Commission, 2022). 
+                  During the COVID-19 pandemic, <strong className="text-foreground">hundreds of thousands</strong> of SMEs and self-employed businesses across Europe were forced to close (SMEunited, 2021). 
+                  Those that survived experienced revenue declines in the range of <strong className="text-foreground">20–40%</strong> during peak disruption, with liquidity stress concentrated among smaller operators (OECD / McKinsey).
+                </p>
+                <p>
+                  At the household level, food and essential goods prices increased by <strong className="text-foreground">20–30%</strong> in parts of the Eurozone between 2019 and 2023 (Eurostat). 
+                  Real household purchasing power declined across multiple EU member states, with inflation eroding income gains (European Central Bank). 
+                  These cost pressures disproportionately affected lower-income households, who allocate a larger share of spending to essentials (Financial Times). 
+                  Improving market competition, reducing transaction inefficiencies, and enabling SMEs to source internationally are structural mechanisms that can support price discipline and economic resilience — without guaranteeing specific outcomes.
+                </p>
+              </div>
+            </section>
+
+            {/* Section 3: Design Choices */}
             <section className="mb-14">
               <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-2">
                 {t('impactPage.design.title')}
