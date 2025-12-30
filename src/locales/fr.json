@@ -161,6 +161,11 @@
         "value": "10–25%",
         "label": "de la valeur logistique captée par les intermédiaires",
         "source": "Source : Rapports de transitaires"
+      },
+      "co2Emissions": {
+        "value": "Majeur",
+        "label": "Le fret routier est l'un des plus grands contributeurs aux émissions de CO₂",
+        "source": "Source : Commission européenne, Eurostat"
       }
     },
     "social": {
