@@ -426,10 +426,10 @@
   },
   "forShippers": {
     "badge": "For Shippers",
-    "title": "Ship goods across Europe — any volume",
-    "subtitle": "Access verified carriers on existing routes. Transparent pricing. No intermediaries.",
+    "title": "Ship goods across Europe, on your terms",
+    "subtitle": "Flexible volumes. Transparent pricing. Verified carriers.",
     "cta": "Get Started",
-    "learnHow": "See how it works",
+    "outcomesTitle": "What you gain as a shipper",
     "benefits": {
       "access": {
         "title": "Access European markets",
@@ -444,16 +444,14 @@
         "description": "All carriers are verified businesses with documented credentials."
       }
     },
-    "microReinforcement": "Every shipment uses existing truck capacity — reducing empty miles across Europe.",
-    "ctaTitle": "Start shipping smarter",
-    "ctaSubtitle": "Post your first load and receive offers from verified carriers."
+    "impactNote": "Using existing routes helps reduce empty mileage."
   },
   "forCarriers": {
     "badge": "For Carriers",
-    "title": "Fill empty space on routes you already drive",
-    "subtitle": "Connect directly with shippers who need your routes. Increase revenue per trip.",
+    "title": "Turn spare capacity into revenue",
+    "subtitle": "Access verified shipments that match your existing routes.",
     "cta": "Get Started",
-    "learnHow": "See how it works",
+    "outcomesTitle": "What you gain as a carrier",
     "benefits": {
       "revenue": {
         "title": "Monetise unused capacity",
@@ -468,8 +466,6 @@
         "description": "Connect with shippers who need your routes — no intermediary required."
       }
     },
-    "microReinforcement": "Better utilisation means lower emissions per unit shipped.",
-    "ctaTitle": "Start earning more",
-    "ctaSubtitle": "Post your routes and receive matching load opportunities."
+    "impactNote": "Better utilisation means lower emissions per unit shipped."
   }
 }

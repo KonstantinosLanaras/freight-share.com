@@ -424,10 +424,10 @@
   },
   "forShippers": {
     "badge": "Pour les expéditeurs",
-    "title": "Expédiez des marchandises à travers l'Europe — tout volume",
-    "subtitle": "Accédez à des transporteurs vérifiés sur des itinéraires existants. Tarification transparente. Sans intermédiaires.",
+    "title": "Expédiez des marchandises à travers l'Europe, à votre façon",
+    "subtitle": "Volumes flexibles. Tarification transparente. Transporteurs vérifiés.",
     "cta": "Commencer",
-    "learnHow": "Voir comment ça marche",
+    "outcomesTitle": "Ce que vous gagnez en tant qu'expéditeur",
     "benefits": {
       "access": {
         "title": "Accédez aux marchés européens",
@@ -442,16 +442,14 @@
         "description": "Tous les transporteurs sont des entreprises vérifiées avec des accréditations documentées."
       }
     },
-    "microReinforcement": "Chaque envoi utilise la capacité de camion existante — réduisant les kilomètres à vide à travers l'Europe.",
-    "ctaTitle": "Commencez à expédier plus intelligemment",
-    "ctaSubtitle": "Publiez votre premier chargement et recevez des offres de transporteurs vérifiés."
+    "impactNote": "L'utilisation d'itinéraires existants contribue à réduire les kilomètres à vide."
   },
   "forCarriers": {
     "badge": "Pour les transporteurs",
-    "title": "Remplissez l'espace vide sur les itinéraires que vous effectuez déjà",
-    "subtitle": "Connectez-vous directement avec les expéditeurs qui ont besoin de vos itinéraires. Augmentez vos revenus par trajet.",
+    "title": "Transformez la capacité inutilisée en revenus",
+    "subtitle": "Accédez à des expéditions vérifiées correspondant à vos itinéraires existants.",
     "cta": "Commencer",
-    "learnHow": "Voir comment ça marche",
+    "outcomesTitle": "Ce que vous gagnez en tant que transporteur",
     "benefits": {
       "revenue": {
         "title": "Monétisez la capacité inutilisée",
@@ -466,8 +464,6 @@
         "description": "Connectez-vous avec les expéditeurs qui ont besoin de vos itinéraires — pas d'intermédiaire requis."
       }
     },
-    "microReinforcement": "Une meilleure utilisation signifie moins d'émissions par unité expédiée.",
-    "ctaTitle": "Commencez à gagner plus",
-    "ctaSubtitle": "Publiez vos itinéraires et recevez des opportunités de chargements correspondantes."
+    "impactNote": "Une meilleure utilisation signifie moins d'émissions par unité expédiée."
   }
 }
