@@ -1,8 +1,10 @@
 {
   "nav": {
     "home": "Home",
-    "whyFreightShare": "Why FreightShare",
     "howItWorks": "How It Works",
+    "solutions": "Solutions",
+    "forShippers": "For Shippers",
+    "forCarriers": "For Carriers",
     "logIn": "Log In",
     "getStarted": "Get Started",
     "dashboard": "My Workspace",
@@ -138,11 +140,66 @@
     "findLoads": "Find Loads",
     "company": "Company",
     "about": "About",
+    "impact": "Impact & Responsibility",
     "contact": "Contact",
     "legal": "Legal",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "rights": "All rights reserved."
+  },
+  "impact": {
+    "title": "Built for Efficiency",
+    "subtitle": "Design choices that create social and environmental value.",
+    "social": {
+      "title": "Social",
+      "point1": "Market access for SMEs and independent carriers",
+      "point2": "Transparent pricing without intermediary margins",
+      "point3": "Direct connections reduce dependency on brokers"
+    },
+    "environmental": {
+      "title": "Environmental",
+      "point1": "Better utilization of existing truck capacity",
+      "point2": "Fewer empty return trips through route matching",
+      "point3": "Reduced emissions without adding transport volume"
+    },
+    "learnMore": "Learn more about our impact"
+  },
+  "impactPage": {
+    "title": "Impact & Responsibility",
+    "subtitle": "How market design creates social and environmental value.",
+    "problem": {
+      "title": "The Market Problem",
+      "fragmentation": "European road logistics is highly fragmented. Small shippers struggle to access competitive rates, while carriers often run trucks below capacity.",
+      "emptyMiles": "Industry data suggests 20-30% of truck kilometers are driven empty or significantly underutilized. This inefficiency costs money and produces unnecessary emissions.",
+      "opacity": "Pricing opacity and intermediary layers add costs without adding value, particularly affecting SMEs who lack bargaining power."
+    },
+    "design": {
+      "title": "Design Choices",
+      "intro": "FreightShare is built around four structural decisions that address these inefficiencies:",
+      "choice1": "Direct matching between shippers and carriers, removing intermediary margins",
+      "choice2": "Transparent pricing visible before commitment",
+      "choice3": "Pallet-level shipping that makes small volumes economically viable",
+      "choice4": "Route-based matching that fills existing capacity rather than adding trucks"
+    },
+    "social": {
+      "title": "Social Impact",
+      "access": "SMEs gain access to shipping options previously available only to large enterprises with dedicated logistics teams or broker relationships.",
+      "pricing": "Transparent pricing means all parties see the same rates. No negotiation advantage based on size or relationship history.",
+      "intermediaries": "Direct connections reduce dependency on freight brokers and forwarders, allowing more value to stay with the parties doing the work."
+    },
+    "environmental": {
+      "title": "Environmental Impact",
+      "capacity": "Matching loads to routes already running means better truck utilization. When trucks run fuller, fewer total kilometers are needed per unit shipped.",
+      "emptyTrips": "Route-based matching reduces empty return trips. Carriers can find loads that fit their existing schedules rather than deadheading.",
+      "emissions": "These efficiency gains translate directly to lower emissions per shipment. No new trucks are added — existing capacity is simply used better."
+    },
+    "disclaimer": {
+      "title": "What We Don't Claim",
+      "text": "FreightShare does not claim to solve climate change or transform the logistics industry. We operate within existing infrastructure and make incremental improvements through better matching and transparency. Environmental benefits are a consequence of operational efficiency, not a separate sustainability initiative."
+    },
+    "cta": {
+      "title": "Ready to ship more efficiently?"
+    }
   },
   "auth": {
     "welcomeBack": "Welcome back",

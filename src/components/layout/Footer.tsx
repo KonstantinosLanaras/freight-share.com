@@ -30,9 +30,8 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold mb-4">{t('footer.platform')}</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><a href="/#how-it-works" className="hover:text-secondary-foreground transition-colors">{t('nav.howItWorks')}</a></li>
-              <li><Link to="/why-freightshare" className="hover:text-secondary-foreground transition-colors">{t('nav.whyFreightShare')}</Link></li>
-              <li><Link to="/auth?mode=signup&role=shipper" className="hover:text-secondary-foreground transition-colors">{t('howItWorks.forShippers')}</Link></li>
-              <li><Link to="/auth?mode=signup&role=carrier" className="hover:text-secondary-foreground transition-colors">{t('howItWorks.forCarriers')}</Link></li>
+              <li><Link to="/auth?mode=signup&role=shipper" className="hover:text-secondary-foreground transition-colors">{t('nav.forShippers')}</Link></li>
+              <li><Link to="/auth?mode=signup&role=carrier" className="hover:text-secondary-foreground transition-colors">{t('nav.forCarriers')}</Link></li>
             </ul>
           </div>
 
@@ -41,6 +40,7 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold mb-4">{t('footer.company')}</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><Link to="/about" className="hover:text-secondary-foreground transition-colors">{t('footer.about')}</Link></li>
+              <li><Link to="/impact" className="hover:text-secondary-foreground transition-colors">{t('footer.impact')}</Link></li>
               <li><Link to="/terms" className="hover:text-secondary-foreground transition-colors">{t('footer.terms')}</Link></li>
               <li><Link to="/privacy" className="hover:text-secondary-foreground transition-colors">{t('footer.privacy')}</Link></li>
               <li><Link to="/contact" className="hover:text-secondary-foreground transition-colors">{t('footer.contact')}</Link></li>
