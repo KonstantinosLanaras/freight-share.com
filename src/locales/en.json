@@ -163,6 +163,11 @@
         "value": "10–25%",
         "label": "of logistics value captured by intermediaries as margin",
         "source": "Source: Freight Forwarding Reports"
+      },
+      "co2Emissions": {
+        "value": "Major",
+        "label": "Road freight is one of the largest transport-related CO₂ contributors",
+        "source": "Source: European Commission, Eurostat"
       }
     },
     "social": {

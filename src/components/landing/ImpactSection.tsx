@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Users, Leaf, ArrowRight, TrendingDown, Percent, BarChart3 } from 'lucide-react';
+import { Users, Leaf, ArrowRight, TrendingDown, Percent, BarChart3, CloudCog } from 'lucide-react';
 
 export const ImpactSection = () => {
   const { t } = useTranslation();
@@ -23,6 +23,12 @@ export const ImpactSection = () => {
       valueKey: 'impact.stats.intermediaryMargin.value',
       labelKey: 'impact.stats.intermediaryMargin.label',
       sourceKey: 'impact.stats.intermediaryMargin.source',
+    },
+    {
+      icon: CloudCog,
+      valueKey: 'impact.stats.co2Emissions.value',
+      labelKey: 'impact.stats.co2Emissions.label',
+      sourceKey: 'impact.stats.co2Emissions.source',
     },
   ];
 
@@ -51,7 +57,7 @@ export const ImpactSection = () => {
         </div>
 
         {/* Key Statistics with Sources */}
-        <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto mb-8">
           {stats.map((stat) => (
             <div key={stat.valueKey} className="bg-card rounded-lg border border-border p-4 text-center">
               <stat.icon className="h-5 w-5 text-primary mx-auto mb-2" />
