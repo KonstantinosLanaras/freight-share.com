@@ -224,7 +224,30 @@
       "text3": "Les chiffres cités dans ce document sont tirés de sources publiques et représentent des estimations à l'échelle de l'industrie, pas des mesures spécifiques à la plateforme. Lorsque les données sont incertaines, des fourchettes sont fournies."
     },
     "cta": {
-      "text": "Pour plus de détails sur le fonctionnement de la plateforme, consultez la page Comment ça marche."
+      "text": "Pour plus de détails sur le fonctionnement de la plateforme, consultez"
+    },
+    "kpis": {
+      "title": "KPIs Cibles",
+      "utilisation": {
+        "value": "≥85% taux de remplissage",
+        "description": "Taux d'utilisation moyen cible pour les envois correspondants sur la plateforme.",
+        "caveat": "Mesuré comme les emplacements de palettes remplis vs. la capacité disponible par itinéraire correspondant. La moyenne de l'industrie est ~60–70%."
+      },
+      "emptyReduction": {
+        "value": "15–25% de km à vide en moins",
+        "description": "Réduction des kilomètres à vide pour les transporteurs utilisant la correspondance basée sur les itinéraires.",
+        "caveat": "Comparé au comportement déclaré par le transporteur avant la plateforme. Sujet à la densité du corridor d'itinéraires et à l'adoption."
+      },
+      "smeSavings": {
+        "value": "10–20% de réduction des coûts",
+        "description": "Économies cibles pour les PME expéditrices par rapport aux tarifs intermédiés par les courtiers.",
+        "caveat": "Dépend de la disponibilité des itinéraires et de l'offre concurrentielle de transporteurs. Mesuré post-plateforme vs. benchmarks pré-plateforme."
+      },
+      "emissions": {
+        "value": "À définir g CO₂/tkm",
+        "description": "Réduction de l'intensité des émissions par tonne-kilomètre pour les envois correspondants sur la plateforme.",
+        "caveat": "À calculer une fois qu'un volume de transactions suffisant sera atteint. La méthodologie suivra les orientations du Protocole GES Scope 3."
+      }
     }
   },
   "auth": {

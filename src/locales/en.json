@@ -226,7 +226,30 @@
       "text3": "The figures cited in this document are drawn from public sources and represent industry-wide estimates, not platform-specific measurements. Where data is uncertain, ranges are provided."
     },
     "cta": {
-      "text": "For details on how the platform works, see the How It Works page."
+      "text": "For details on how the platform works, see"
+    },
+    "kpis": {
+      "title": "Target KPIs",
+      "utilisation": {
+        "value": "≥85% load factor",
+        "description": "Target average utilisation for matched shipments on the platform.",
+        "caveat": "Measured as pallet slots filled vs. available capacity per matched route. Baseline industry average is ~60–70%."
+      },
+      "emptyReduction": {
+        "value": "15–25% fewer empty km",
+        "description": "Reduction in deadhead kilometres for carriers using route-based matching.",
+        "caveat": "Compared to carrier-reported pre-platform behaviour. Subject to route corridor density and adoption."
+      },
+      "smeSavings": {
+        "value": "10–20% cost reduction",
+        "description": "Target savings for SME shippers compared to broker-intermediated rates.",
+        "caveat": "Dependent on route availability and competitive carrier supply. Measured post-platform vs. pre-platform benchmarks."
+      },
+      "emissions": {
+        "value": "TBD g CO₂/tkm",
+        "description": "Emissions intensity reduction per tonne-kilometre for platform-matched shipments.",
+        "caveat": "To be calculated once sufficient transaction volume is reached. Methodology will follow GHG Protocol Scope 3 guidance."
+      }
     }
   },
   "auth": {
