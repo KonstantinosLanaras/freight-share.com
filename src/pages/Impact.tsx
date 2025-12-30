@@ -1,7 +1,6 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const Impact = () => {
@@ -12,7 +11,7 @@ const Impact = () => {
       <Navbar />
       <main className="pt-24 pb-20">
         {/* Header */}
-        <header className="container mx-auto px-4 mb-16">
+        <header className="container mx-auto px-4 mb-12">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
               {t('impactPage.title')}
@@ -26,6 +25,68 @@ const Impact = () => {
         {/* Article Content */}
         <article className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
+
+            {/* Target KPIs Section */}
+            <section className="mb-14">
+              <h2 className="text-xl md:text-2xl font-heading font-semibold text-foreground mb-2">
+                {t('impactPage.kpis.title')}
+              </h2>
+              <div className="h-px bg-border mb-8" />
+              
+              <div className="space-y-10">
+                {/* KPI 1 */}
+                <div>
+                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
+                    {t('impactPage.kpis.utilisation.value')}
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    {t('impactPage.kpis.utilisation.description')}
+                  </p>
+                  <p className="text-sm text-muted-foreground italic">
+                    {t('impactPage.kpis.utilisation.caveat')}
+                  </p>
+                </div>
+
+                {/* KPI 2 */}
+                <div>
+                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
+                    {t('impactPage.kpis.emptyReduction.value')}
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    {t('impactPage.kpis.emptyReduction.description')}
+                  </p>
+                  <p className="text-sm text-muted-foreground italic">
+                    {t('impactPage.kpis.emptyReduction.caveat')}
+                  </p>
+                </div>
+
+                {/* KPI 3 */}
+                <div>
+                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
+                    {t('impactPage.kpis.smeSavings.value')}
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    {t('impactPage.kpis.smeSavings.description')}
+                  </p>
+                  <p className="text-sm text-muted-foreground italic">
+                    {t('impactPage.kpis.smeSavings.caveat')}
+                  </p>
+                </div>
+
+                {/* KPI 4 */}
+                <div>
+                  <div className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
+                    {t('impactPage.kpis.emissions.value')}
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    {t('impactPage.kpis.emissions.description')}
+                  </p>
+                  <p className="text-sm text-muted-foreground italic">
+                    {t('impactPage.kpis.emissions.caveat')}
+                  </p>
+                </div>
+              </div>
+            </section>
             
             {/* Section 1: The Market Problem */}
             <section className="mb-14">
@@ -109,21 +170,14 @@ const Impact = () => {
               </div>
             </section>
 
-            {/* Minimal CTA */}
+            {/* Subtle text link footer */}
             <footer className="pt-8 border-t border-border">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {t('impactPage.cta.text')}
-                </p>
-                <div className="flex gap-3">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/how-it-works">{t('nav.howItWorks')}</Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
-                  </Button>
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('impactPage.cta.text')}{' '}
+                <Link to="/how-it-works" className="text-primary hover:underline">
+                  {t('nav.howItWorks')}
+                </Link>
+              </p>
             </footer>
           </div>
         </article>
