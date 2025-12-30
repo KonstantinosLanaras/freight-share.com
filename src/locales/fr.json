@@ -146,6 +146,23 @@
   "impact": {
     "title": "Conçu pour l'efficacité",
     "subtitle": "Des choix de conception qui créent de la valeur sociale et environnementale.",
+    "stats": {
+      "emptyMiles": {
+        "value": "20–30%",
+        "label": "de la capacité des camions en Europe roule à vide ou sous-utilisée",
+        "source": "Source : Commission européenne, IRU"
+      },
+      "smePremium": {
+        "value": "~30%",
+        "label": "de plus par unité — ce que paient les PME pour le transport",
+        "source": "Source : Études logistiques PME UE"
+      },
+      "intermediaryMargin": {
+        "value": "10–25%",
+        "label": "de la valeur logistique captée par les intermédiaires",
+        "source": "Source : Rapports de transitaires"
+      }
+    },
     "social": {
       "title": "Social",
       "point1": "Accès au marché pour les PME et transporteurs indépendants",

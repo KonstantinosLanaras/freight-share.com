@@ -148,6 +148,23 @@
   "impact": {
     "title": "Built for Efficiency",
     "subtitle": "Design choices that create social and environmental value.",
+    "stats": {
+      "emptyMiles": {
+        "value": "20–30%",
+        "label": "of truck capacity in Europe runs empty or underutilised",
+        "source": "Source: European Commission, IRU"
+      },
+      "smePremium": {
+        "value": "~30%",
+        "label": "more per unit — what SMEs pay for transport vs large shippers",
+        "source": "Source: EU SME Logistics Studies"
+      },
+      "intermediaryMargin": {
+        "value": "10–25%",
+        "label": "of logistics value captured by intermediaries as margin",
+        "source": "Source: Freight Forwarding Reports"
+      }
+    },
     "social": {
       "title": "Social",
       "point1": "Market access for SMEs and independent carriers",

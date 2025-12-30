@@ -7,9 +7,9 @@ export const CTA = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-secondary">
+    <section className="py-16 bg-secondary">
       <div className="container mx-auto px-4">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-secondary p-8 md:p-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-secondary p-8 md:p-12">
           {/* Background Pattern */}
           <div 
             className="absolute inset-0 opacity-10"
