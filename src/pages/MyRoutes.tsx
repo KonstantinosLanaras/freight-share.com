@@ -247,133 +247,157 @@ export default function MyRoutes() {
                   Active & Planned Routes ({activeRoutes.length})
                 </h2>
                 <div className="grid gap-4">
-                  {activeRoutes.map((route) => (
-                    <Card key={route.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                {getStatusBadge(route.status)}
-                                {route.vehicle_constraints && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <Truck className="h-3 w-3 mr-1" />
-                                    {route.vehicle_constraints}
-                                  </Badge>
-                                )}
-                              </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => navigate(`/route/${route.id}`)}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View Details
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => navigate(`/dashboard/carrier/routes/${route.id}/edit`)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit Route
-                                  </DropdownMenuItem>
-                                  {route.status === 'planned' && (
-                                    <DropdownMenuItem onClick={() => updateRouteStatus(route.id, 'active')}>
-                                      <Play className="h-4 w-4 mr-2" />
-                                      Mark as Active
+                  {activeRoutes.map((route) => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const isDepartureDue = route.status === 'planned' && route.departure_date_to < today;
+                    const isArrivalDue = route.status === 'active' && route.arrival_date_to && route.arrival_date_to < today;
+                    
+                    return (
+                      <Card key={route.id} className={`hover:shadow-md transition-shadow ${isDepartureDue || isArrivalDue ? 'border-warning' : ''}`}>
+                        <CardContent className="p-6">
+                          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  {getStatusBadge(route.status)}
+                                  {route.vehicle_constraints && (
+                                    <Badge variant="outline" className="text-xs">
+                                      <Truck className="h-3 w-3 mr-1" />
+                                      {route.vehicle_constraints}
+                                    </Badge>
+                                  )}
+                                  {isDepartureDue && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      Departure overdue
+                                    </Badge>
+                                  )}
+                                  {isArrivalDue && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      Arrival overdue
+                                    </Badge>
+                                  )}
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => navigate(`/route/${route.id}`)}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
                                     </DropdownMenuItem>
-                                  )}
-                                  {route.status === 'active' && (
-                                    <>
-                                      <DropdownMenuItem onClick={() => updateRouteStatus(route.id, 'completed')}>
-                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                        Mark as Completed
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => updateRouteStatus(route.id, 'planned')}>
-                                        <Pause className="h-4 w-4 mr-2" />
-                                        Pause Route
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => updateRouteStatus(route.id, 'cancelled')} className="text-warning">
-                                    <XCircle className="h-4 w-4 mr-2" />
-                                    Cancel Route
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => {
-                                      setRouteToDelete(route.id);
-                                      setDeleteDialogOpen(true);
-                                    }}
-                                    className="text-destructive"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete Route
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-
-                            {/* Route Path */}
-                            <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-4">
-                              <span>{route.origin_city}, {route.origin_country}</span>
-                              {route.route_stops && route.route_stops.length > 0 && (
-                                <>
-                                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm text-muted-foreground">
-                                    {route.route_stops.length} stop{route.route_stops.length > 1 ? 's' : ''}
-                                  </span>
-                                </>
-                              )}
-                              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                              <span>{route.destination_city}, {route.destination_country}</span>
-                            </div>
-
-                            {/* Route Details */}
-                            <div className="grid sm:grid-cols-3 gap-4 text-sm">
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
-                                <span>Departure: {formatDateRange(route.departure_date_from, route.departure_date_to)}</span>
+                                    <DropdownMenuItem onClick={() => navigate(`/dashboard/carrier/routes/${route.id}/edit`)}>
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit Route
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => updateRouteStatus(route.id, 'cancelled')} className="text-warning">
+                                      <XCircle className="h-4 w-4 mr-2" />
+                                      Cancel Route
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        setRouteToDelete(route.id);
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                      className="text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete Route
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Package className="h-4 w-4" />
-                                <span>{route.available_pallets} pallets available</span>
+
+                              {/* Route Path */}
+                              <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-4">
+                                <span>{route.origin_city}, {route.origin_country}</span>
+                                {route.route_stops && route.route_stops.length > 0 && (
+                                  <>
+                                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">
+                                      {route.route_stops.length} stop{route.route_stops.length > 1 ? 's' : ''}
+                                    </span>
+                                  </>
+                                )}
+                                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                                <span>{route.destination_city}, {route.destination_country}</span>
                               </div>
-                              {route.arrival_date_from && (
+
+                              {/* Route Details */}
+                              <div className="grid sm:grid-cols-3 gap-4 text-sm">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Calendar className="h-4 w-4" />
-                                  <span>Arrival: {formatDateRange(route.arrival_date_from, route.arrival_date_to || route.arrival_date_from)}</span>
+                                  <span>Departure: {formatDateRange(route.departure_date_from, route.departure_date_to)}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Package className="h-4 w-4" />
+                                  <span>{route.available_pallets} pallets available</span>
+                                </div>
+                                {route.arrival_date_from && (
+                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>Arrival: {formatDateRange(route.arrival_date_from, route.arrival_date_to || route.arrival_date_from)}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Stops */}
+                              {route.route_stops && route.route_stops.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-border">
+                                  <div className="text-sm text-muted-foreground mb-2">Intermediate stops:</div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {route.route_stops
+                                      .sort((a, b) => a.stop_order - b.stop_order)
+                                      .map((stop) => (
+                                        <Badge key={stop.id} variant="secondary" className="text-xs">
+                                          {stop.city}, {stop.country} ({stop.available_pallets} available pallets)
+                                        </Badge>
+                                      ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Notes */}
+                              {route.notes && (
+                                <div className="mt-4 pt-4 border-t border-border">
+                                  <p className="text-sm text-muted-foreground">{route.notes}</p>
                                 </div>
                               )}
                             </div>
 
-                            {/* Stops */}
-                            {route.route_stops && route.route_stops.length > 0 && (
-                              <div className="mt-4 pt-4 border-t border-border">
-                                <div className="text-sm text-muted-foreground mb-2">Intermediate stops:</div>
-                                <div className="flex flex-wrap gap-2">
-                                  {route.route_stops
-                                    .sort((a, b) => a.stop_order - b.stop_order)
-                                    .map((stop) => (
-                                                  <Badge key={stop.id} variant="secondary" className="text-xs">
-                                                    {stop.city}, {stop.country} ({stop.available_pallets} available pallets)
-                                                  </Badge>
-                                    ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Notes */}
-                            {route.notes && (
-                              <div className="mt-4 pt-4 border-t border-border">
-                                <p className="text-sm text-muted-foreground">{route.notes}</p>
-                              </div>
-                            )}
+                            {/* Action Buttons */}
+                            <div className="flex flex-col gap-2 lg:ml-4 shrink-0">
+                              {route.status === 'planned' && (
+                                <Button 
+                                  variant={isDepartureDue ? "destructive" : "carrier"}
+                                  size="sm"
+                                  onClick={() => updateRouteStatus(route.id, 'active')}
+                                >
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Confirm Departure
+                                </Button>
+                              )}
+                              {route.status === 'active' && (
+                                <Button 
+                                  variant={isArrivalDue ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => updateRouteStatus(route.id, 'completed')}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Confirm Arrival
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             )}
