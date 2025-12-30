@@ -28,13 +28,13 @@ export const Features = () => {
   ];
 
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-14 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-3">
             {t('features.title')}
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-muted-foreground">
             {t('features.subtitle')}
           </p>
         </div>
