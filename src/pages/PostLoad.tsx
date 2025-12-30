@@ -7,10 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { SpaceInput, WeightInput, type SpaceType } from '@/components/capacity';
+import { calculateLdm } from '@/lib/capacityUtils';
 
 const cargoTypes = [
   { value: 'general', label: 'General Goods' },
@@ -33,6 +35,10 @@ export default function PostLoad() {
   const { user } = useAuth();
   const [openToOffers, setOpenToOffers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [spaceType, setSpaceType] = useState<SpaceType>('epe');
+  const [spaceValue, setSpaceValue] = useState('');
+  const [dimensions, setDimensions] = useState({ lengthCm: '', widthCm: '', heightCm: '' });
+  const [weightKg, setWeightKg] = useState('');
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
@@ -46,6 +52,7 @@ export default function PostLoad() {
     cargoType: 'general',
     fixedPrice: '',
     notes: '',
+    cargoNotes: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,9 +68,38 @@ export default function PostLoad() {
       return;
     }
 
+    // Validate space input
+    if (spaceType === 'dimensions') {
+      if (!dimensions.lengthCm || !dimensions.widthCm) {
+        toast.error('Please enter cargo dimensions (length and width are required)');
+        return;
+      }
+    } else {
+      if (!spaceValue || parseFloat(spaceValue) <= 0) {
+        toast.error('Please enter required space');
+        return;
+      }
+    }
+
+    // Validate weight
+    if (!weightKg || parseFloat(weightKg) <= 0) {
+      toast.error('Please enter total weight');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // Calculate LDM for internal storage
+      const spaceLdm = calculateLdm(
+        spaceType,
+        parseFloat(spaceValue) || 0,
+        spaceType === 'dimensions' ? {
+          lengthCm: parseFloat(dimensions.lengthCm) || 0,
+          widthCm: parseFloat(dimensions.widthCm) || 0,
+        } : undefined
+      );
+
       const { error } = await supabase.from('loads').insert({
         shipper_id: user.id,
         origin_city: formData.originCity,
@@ -74,11 +110,20 @@ export default function PostLoad() {
         pickup_date_to: formData.pickupDateEnd,
         delivery_date_from: formData.deliveryDateStart,
         delivery_date_to: formData.deliveryDateEnd,
-        pallets: parseInt(formData.pallets),
+        pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
         cargo_type: formData.cargoType as any,
         pricing_type: openToOffers ? 'open_to_offers' : 'fixed',
         price: openToOffers ? null : parseFloat(formData.fixedPrice) || null,
         notes: formData.notes || null,
+        // New capacity fields
+        space_type: spaceType,
+        space_value: parseFloat(spaceValue) || 0,
+        space_ldm: spaceLdm,
+        weight_kg: parseFloat(weightKg) || 0,
+        length_cm: spaceType === 'dimensions' ? parseFloat(dimensions.lengthCm) || null : null,
+        width_cm: spaceType === 'dimensions' ? parseFloat(dimensions.widthCm) || null : null,
+        height_cm: spaceType === 'dimensions' ? parseFloat(dimensions.heightCm) || null : null,
+        cargo_notes: formData.cargoNotes || null,
       });
 
       if (error) throw error;
@@ -257,6 +302,40 @@ export default function PostLoad() {
             </CardContent>
           </Card>
 
+          {/* Capacity - Space & Weight */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-primary" />
+                Capacity Requirements
+              </CardTitle>
+              <CardDescription>Specify space and weight for your shipment</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <SpaceInput
+                spaceType={spaceType}
+                spaceValue={spaceValue}
+                lengthCm={dimensions.lengthCm}
+                widthCm={dimensions.widthCm}
+                heightCm={dimensions.heightCm}
+                onSpaceTypeChange={setSpaceType}
+                onSpaceValueChange={setSpaceValue}
+                onDimensionsChange={setDimensions}
+                disabled={isSubmitting}
+                showDimensions={true}
+              />
+              
+              <div className="pt-4 border-t">
+                <WeightInput
+                  value={weightKg}
+                  onChange={setWeightKg}
+                  disabled={isSubmitting}
+                  required={true}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Cargo Details */}
           <Card>
             <CardHeader>
@@ -267,38 +346,35 @@ export default function PostLoad() {
               <CardDescription>Tell carriers what you're shipping</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="pallets">Number of Pallets</Label>
-                  <Input
-                    id="pallets"
-                    type="number"
-                    min="1"
-                    placeholder="e.g., 12"
-                    className="mt-1"
-                    value={formData.pallets}
-                    onChange={(e) => setFormData({ ...formData, pallets: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cargoType">Cargo Type</Label>
-                  <Select
-                    value={formData.cargoType}
-                    onValueChange={(value) => setFormData({ ...formData, cargoType: value })}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cargoTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="cargoType">Cargo Type</Label>
+                <Select
+                  value={formData.cargoType}
+                  onValueChange={(value) => setFormData({ ...formData, cargoType: value })}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cargoTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="cargoNotes">Cargo Notes (optional)</Label>
+                <Textarea
+                  id="cargoNotes"
+                  placeholder="e.g., Stackable, fragile items, irregular shape, requires special handling..."
+                  rows={2}
+                  value={formData.cargoNotes}
+                  onChange={(e) => setFormData({ ...formData, cargoNotes: e.target.value })}
+                  disabled={isSubmitting}
+                  className="mt-1"
+                />
               </div>
             </CardContent>
           </Card>
@@ -357,7 +433,7 @@ export default function PostLoad() {
             </CardHeader>
             <CardContent>
               <Textarea
-                placeholder="e.g., Loading dock available, forklift required, fragile handling needed..."
+                placeholder="e.g., Loading dock available, forklift required, specific timing requirements..."
                 rows={4}
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
