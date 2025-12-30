@@ -30,7 +30,7 @@ export default function Privacy() {
                     Protection Regulation (GDPR) and applicable EU data protection laws.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     2. Data Controller
                   </h2>
                   <p className="text-muted-foreground">
@@ -44,7 +44,7 @@ export default function Privacy() {
                     FreightShare has not appointed a Data Protection Officer, as this is not required under Article 37 GDPR.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     3. Personal Data Collected
                   </h2>
                   
@@ -68,7 +68,7 @@ export default function Privacy() {
                     <li><strong>Cookies:</strong> essential cookies and optional analytics cookies (with consent)</li>
                   </ul>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     4. Purposes of Processing
                   </h2>
                   <p className="text-muted-foreground">Personal data is processed to:</p>
@@ -81,7 +81,7 @@ export default function Privacy() {
                     <li>Comply with legal obligations</li>
                   </ul>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     5. Legal Basis
                   </h2>
                   <p className="text-muted-foreground">Processing is based on:</p>
@@ -95,7 +95,7 @@ export default function Privacy() {
                     FreightShare ensures legitimate interests do not override user rights.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     6. Data Sharing
                   </h2>
                   <p className="text-muted-foreground">Personal data may be shared with:</p>
@@ -111,7 +111,7 @@ export default function Privacy() {
                     FreightShare does not sell personal data.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     7. Data Retention
                   </h2>
                   <p className="text-muted-foreground">Data is retained only as long as necessary:</p>
@@ -123,7 +123,7 @@ export default function Privacy() {
                     Retention is based on commercial, tax, and transport law obligations.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     8. User Rights (GDPR)
                   </h2>
                   <p className="text-muted-foreground">
@@ -133,7 +133,7 @@ export default function Privacy() {
                     Requests are handled within one month.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     9. Security Measures
                   </h2>
                   <p className="text-muted-foreground">FreightShare implements:</p>
@@ -144,7 +144,7 @@ export default function Privacy() {
                     <li>Incident response procedures</li>
                   </ul>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     10. International Transfers
                   </h2>
                   <p className="text-muted-foreground">
@@ -152,7 +152,7 @@ export default function Privacy() {
                     safeguards, including Standard Contractual Clauses.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     11. Cookies
                   </h2>
                   <p className="text-muted-foreground">
@@ -160,7 +160,7 @@ export default function Privacy() {
                     with consent and managed via a cookie consent tool.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     12. Children
                   </h2>
                   <p className="text-muted-foreground">
@@ -168,28 +168,28 @@ export default function Privacy() {
                     collect data from children.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     13. Automated Decision-Making
                   </h2>
                   <p className="text-muted-foreground">
                     FreightShare does not engage in automated decision-making or profiling under Article 22 GDPR.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     14. Policy Changes
                   </h2>
                   <p className="text-muted-foreground">
                     Material changes will be communicated via email or platform notification.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     15. Supervisory Authority
                   </h2>
                   <p className="text-muted-foreground">
                     Users may lodge complaints with the Autoriteit Persoonsgegevens or their local authority.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     16. Contact
                   </h2>
                   <p className="text-muted-foreground">

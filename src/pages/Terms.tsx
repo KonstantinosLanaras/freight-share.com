@@ -34,7 +34,7 @@ export default function Terms() {
                     agreements entered into between users.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     2. User Roles and Responsibilities
                   </h2>
                   
@@ -65,7 +65,7 @@ export default function Terms() {
                     Carriers remain solely responsible for compliance with applicable transport, safety, and regulatory requirements.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     3. Payment Terms
                   </h2>
                   
@@ -109,7 +109,7 @@ export default function Terms() {
                     does not guarantee delivery, payment, cargo condition, or regulatory compliance.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     4. Dispute Resolution
                   </h2>
                   <ul className="text-muted-foreground">
@@ -123,7 +123,7 @@ export default function Terms() {
                     pursue independent legal remedies.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     5. Liability Boundaries
                   </h2>
                   <p className="text-muted-foreground">FreightShare:</p>
@@ -138,7 +138,7 @@ export default function Terms() {
                     <li>FreightShare's total liability is limited to fees paid to FreightShare in the preceding 12 months</li>
                   </ul>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     6. Prohibited Activities
                   </h2>
                   <p className="text-muted-foreground">Users may not:</p>
@@ -151,7 +151,7 @@ export default function Terms() {
                     <li>Use the Platform for unlawful purposes</li>
                   </ul>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     7. Account Termination
                   </h2>
                   <p className="text-muted-foreground">
@@ -159,14 +159,14 @@ export default function Terms() {
                     Users may close accounts subject to completion of pending transactions.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     8. Modifications to Terms
                   </h2>
                   <p className="text-muted-foreground">
                     FreightShare may update these Terms. Material changes will be notified. Continued use constitutes acceptance.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     9. Governing Law and Jurisdiction
                   </h2>
                   <p className="text-muted-foreground">
@@ -174,7 +174,7 @@ export default function Terms() {
                     courts of Rotterdam, Netherlands.
                   </p>
 
-                  <h2 className="text-2xl font-heading font-semibold text-foreground">
+                  <h2 className="text-2xl font-heading font-semibold text-foreground mt-8">
                     10. Contact
                   </h2>
                   <p className="text-muted-foreground">
