@@ -386,11 +386,11 @@
     "released": "Paiement libéré",
     "completed": "Paiement terminé",
     "payNow": "Payer maintenant",
-    "releasePayment": "Libérer le paiement",
-    "confirmDelivery": "Confirmer la livraison et libérer le paiement",
-    "escrowInfo": "Les fonds sont conservés en sécurité jusqu'à la confirmation de livraison",
-    "paymentSecured": "Paiement sécurisé",
-    "heldInEscrow": "retenu en séquestre"
+    "releasePayment": "Confirmer et exécuter le paiement",
+    "confirmDelivery": "Confirmer la livraison et exécuter le paiement",
+    "paymentInfo": "Le paiement est exécuté automatiquement à la confirmation de livraison",
+    "paymentAuthorised": "Paiement autorisé",
+    "executesOnDelivery": "exécuté à la confirmation de livraison"
   },
   "common": {
     "loading": "Chargement...",

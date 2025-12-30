@@ -56,8 +56,9 @@ serve(async (req) => {
       paymentIntent: session.payment_intent 
     });
 
-    if (session.payment_status === 'paid') {
-      // Update shipment payment status to 'paid' (funds held in escrow)
+    if (session.payment_status === 'paid' || session.status === 'complete') {
+      // Update shipment payment status to 'paid' (payment authorised, awaiting delivery confirmation)
+      // Note: With manual capture, funds are authorised but not yet captured
       const { error: updateError } = await supabaseClient
         .from('shipments')
         .update({

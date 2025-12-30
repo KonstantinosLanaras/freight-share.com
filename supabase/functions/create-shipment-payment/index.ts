@@ -59,7 +59,7 @@ serve(async (req) => {
     }
 
     // Create a Checkout session for the shipment payment
-    // This uses "payment" mode for a one-time escrow-style payment
+    // Using delayed capture: payment is authorised now, captured on delivery confirmation
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -69,7 +69,7 @@ serve(async (req) => {
             currency: 'eur',
             product_data: {
               name: `Shipment Payment - ${shipmentId}`,
-              description: description || `Payment for shipment ${shipmentId}`,
+              description: description || `Conditional payment for shipment ${shipmentId}`,
               metadata: {
                 shipment_id: shipmentId,
                 load_id: loadId || '',
@@ -83,12 +83,12 @@ serve(async (req) => {
       ],
       mode: "payment",
       payment_intent_data: {
-        capture_method: 'automatic', // Funds captured immediately but held
+        capture_method: 'manual', // Delayed capture - authorised now, captured on delivery
         metadata: {
           shipment_id: shipmentId,
           shipper_id: user.id,
           carrier_id: carrierId || '',
-          payment_type: 'escrow',
+          payment_type: 'conditional_transfer',
         },
       },
       metadata: {

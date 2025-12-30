@@ -58,30 +58,62 @@ export default function Terms() {
                   </ul>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
-                    3. Payment Terms and Escrow
+                    3. Payment Terms
                   </h2>
                   <p className="text-muted-foreground">
-                    FreightShare uses an escrow payment system to protect both parties:
+                    FreightShare facilitates conditional payment execution between parties. FreightShare does not hold funds; 
+                    payments are executed automatically based on predefined contractual triggers.
+                  </p>
+                  
+                  <h3 className="text-xl font-semibold text-foreground">3.1 Payment Model</h3>
+                  <ul className="text-muted-foreground">
+                    <li><strong>Payment Authorisation:</strong> When a shipper accepts an offer, payment is authorised but not captured</li>
+                    <li><strong>Conditional Execution:</strong> Payment is executed automatically upon delivery confirmation</li>
+                    <li><strong>Direct Transfer:</strong> Funds transfer directly from shipper to carrier via our payment service provider</li>
+                    <li><strong>Platform Fee:</strong> A transparent service fee is deducted at execution, disclosed at booking</li>
+                  </ul>
+                  
+                  <h3 className="text-xl font-semibold text-foreground">3.2 Delivery Confirmation Triggers</h3>
+                  <p className="text-muted-foreground">
+                    Payment execution is triggered by any of the following conditions:
                   </p>
                   <ul className="text-muted-foreground">
-                    <li><strong>Payment Holding:</strong> When a shipper accepts an offer, payment is securely held in escrow</li>
-                    <li><strong>Release Conditions:</strong> Payment is released to the carrier upon delivery confirmation by the shipper</li>
-                    <li><strong>Disputes:</strong> In case of disputes, funds remain in escrow until resolution</li>
-                    <li><strong>Platform Fees:</strong> FreightShare charges a service fee on completed transactions, disclosed at booking</li>
+                    <li>Digital delivery confirmation by the shipper via the platform</li>
+                    <li>Signed CMR or eCMR document upload</li>
+                    <li>Automatic confirmation if no dispute is raised within 48 hours of carrier-marked delivery</li>
                   </ul>
+                  <p className="text-muted-foreground">
+                    <em>Note: FreightShare verifies that the agreed confirmation condition occurred. We do not verify 
+                    the physical condition of goods.</em>
+                  </p>
+                  
+                  <h3 className="text-xl font-semibold text-foreground">3.3 Platform Role</h3>
+                  <p className="text-muted-foreground">
+                    FreightShare operates as a technical facilitator of conditional payment execution. We are not:
+                  </p>
+                  <ul className="text-muted-foreground">
+                    <li>A bank or payment institution</li>
+                    <li>An escrow agent</li>
+                    <li>A guarantor of goods quality or delivery</li>
+                  </ul>
+                  <p className="text-muted-foreground">
+                    We are a platform facilitating conditional payment execution between parties, based on 
+                    predefined contractual triggers defined in the shipment agreement.
+                  </p>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">
                     4. Dispute Resolution
                   </h2>
                   <p className="text-muted-foreground">
-                    FreightShare acts as a neutral third party in disputes between shippers and carriers:
+                    FreightShare provides a dispute window to protect both parties:
                   </p>
                   <ul className="text-muted-foreground">
-                    <li>Disputes must be reported through the Resolution Center within 48 hours of delivery</li>
+                    <li><strong>Dispute Window:</strong> Disputes must be raised within 48 hours of carrier-marked delivery</li>
+                    <li>If a dispute is raised, payment execution is paused pending resolution</li>
                     <li>Both parties must provide documentation and evidence when requested</li>
-                    <li>FreightShare will review disputes and make fair determinations</li>
-                    <li>Our decisions on payment disputes are binding while using our platform</li>
-                    <li>Users retain the right to pursue legal remedies independently</li>
+                    <li>FreightShare determines only whether the trigger condition was met, not the quality of goods or service</li>
+                    <li>Our decisions on payment trigger disputes are binding while using our platform</li>
+                    <li>Users retain the right to pursue legal remedies independently for matters beyond trigger verification</li>
                   </ul>
 
                   <h2 className="text-2xl font-heading font-semibold text-foreground">

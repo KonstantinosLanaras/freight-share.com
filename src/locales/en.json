@@ -388,11 +388,11 @@
     "released": "Payment Released",
     "completed": "Payment Completed",
     "payNow": "Pay Now",
-    "releasePayment": "Release Payment",
-    "confirmDelivery": "Confirm Delivery & Release Payment",
-    "escrowInfo": "Funds are held securely until delivery is confirmed",
-    "paymentSecured": "Payment Secured",
-    "heldInEscrow": "held in escrow"
+    "releasePayment": "Confirm & Execute Payment",
+    "confirmDelivery": "Confirm Delivery & Execute Payment",
+    "paymentInfo": "Payment executes automatically on delivery confirmation",
+    "paymentAuthorised": "Payment Authorised",
+    "executesOnDelivery": "executes on delivery confirmation"
   },
   "common": {
     "loading": "Loading...",

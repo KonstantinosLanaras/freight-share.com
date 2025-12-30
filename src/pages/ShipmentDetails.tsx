@@ -450,9 +450,9 @@ export default function ShipmentDetails() {
                     <CheckCircle className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium text-primary">Payment Secured</div>
+                    <div className="font-medium text-primary">Payment Authorised</div>
                     <div className="text-sm text-muted-foreground">
-                      €{shipment.price} held in escrow
+                      €{shipment.price} — executes on delivery confirmation
                     </div>
                   </div>
                 </div>
