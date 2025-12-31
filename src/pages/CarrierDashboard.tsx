@@ -276,6 +276,13 @@ export default function CarrierDashboard() {
               <Truck className="h-5 w-5" />
               Shipments
             </Link>
+            <Link 
+              to="/dashboard/carrier/messages"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <MessageSquare className="h-5 w-5" />
+              Messages
+            </Link>
             
             {/* Optional Routes Section */}
             <div className="pt-4 mt-4 border-t border-sidebar-border">

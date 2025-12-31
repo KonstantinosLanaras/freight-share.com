@@ -146,9 +146,11 @@ export default function ShipmentDetails() {
                   Get Help
                 </Link>
               </Button>
-              <Button variant="outline">
-                <MessageSquare className="h-4 w-4" />
-                Chat
+              <Button variant="outline" asChild>
+                <Link to={`/dashboard/${role === 'carrier' ? 'carrier' : 'shipper'}/messages/${id}`}>
+                  <MessageSquare className="h-4 w-4" />
+                  Chat
+                </Link>
               </Button>
             </div>
           </div>

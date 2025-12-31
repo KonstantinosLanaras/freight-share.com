@@ -33,6 +33,7 @@ import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
 import Research from "./pages/Research";
 import NotFound from "./pages/NotFound";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,16 @@ const App = () => (
                 <ShipperShipments />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/shipper/messages" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <Messages />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/messages/:shipmentId" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <Messages />
+              </ProtectedRoute>
+            } />
             {/* Carrier Routes */}
             <Route path="/dashboard/carrier" element={
               <ProtectedRoute allowedRoles={['carrier']}>
@@ -108,6 +119,16 @@ const App = () => (
             <Route path="/dashboard/carrier/shipments" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <CarrierShipments />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/messages" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <Messages />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/messages/:shipmentId" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <Messages />
               </ProtectedRoute>
             } />
             {/* Shared Routes */}
