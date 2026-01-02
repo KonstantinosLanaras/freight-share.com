@@ -629,13 +629,20 @@ export type Database = {
       shipments: {
         Row: {
           carrier_id: string
+          carrier_payout_amount: number | null
           created_at: string
+          delivery_marked_at: string | null
+          dispute_raised_at: string | null
+          dispute_reason: string | null
+          dispute_resolved_at: string | null
+          dispute_status: string | null
           final_price: number
           id: string
           load_id: string
           offer_id: string
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          platform_fee_amount: number | null
           shipper_id: string
           status: Database["public"]["Enums"]["shipment_status"]
           terms_version: string | null
@@ -643,13 +650,20 @@ export type Database = {
         }
         Insert: {
           carrier_id: string
+          carrier_payout_amount?: number | null
           created_at?: string
+          delivery_marked_at?: string | null
+          dispute_raised_at?: string | null
+          dispute_reason?: string | null
+          dispute_resolved_at?: string | null
+          dispute_status?: string | null
           final_price: number
           id?: string
           load_id: string
           offer_id: string
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          platform_fee_amount?: number | null
           shipper_id: string
           status?: Database["public"]["Enums"]["shipment_status"]
           terms_version?: string | null
@@ -657,13 +671,20 @@ export type Database = {
         }
         Update: {
           carrier_id?: string
+          carrier_payout_amount?: number | null
           created_at?: string
+          delivery_marked_at?: string | null
+          dispute_raised_at?: string | null
+          dispute_reason?: string | null
+          dispute_resolved_at?: string | null
+          dispute_status?: string | null
           final_price?: number
           id?: string
           load_id?: string
           offer_id?: string
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          platform_fee_amount?: number | null
           shipper_id?: string
           status?: Database["public"]["Enums"]["shipment_status"]
           terms_version?: string | null

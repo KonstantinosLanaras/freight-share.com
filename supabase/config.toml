@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.release-payment]
 verify_jwt = false
+
+[functions.raise-dispute]
+verify_jwt = false

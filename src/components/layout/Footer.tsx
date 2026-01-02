@@ -41,6 +41,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><Link to="/about" className="hover:text-secondary-foreground transition-colors">{t('footer.about')}</Link></li>
               <li><Link to="/impact" className="hover:text-secondary-foreground transition-colors">{t('footer.impact')}</Link></li>
+              <li><Link to="/payments" className="hover:text-secondary-foreground transition-colors">How Payments Work</Link></li>
               <li><Link to="/terms" className="hover:text-secondary-foreground transition-colors">{t('footer.terms')}</Link></li>
               <li><Link to="/privacy" className="hover:text-secondary-foreground transition-colors">{t('footer.privacy')}</Link></li>
               <li><Link to="/contact" className="hover:text-secondary-foreground transition-colors">{t('footer.contact')}</Link></li>

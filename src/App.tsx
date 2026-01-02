@@ -34,6 +34,7 @@ import Contact from "./pages/Contact";
 import Research from "./pages/Research";
 import NotFound from "./pages/NotFound";
 import Messages from "./pages/Messages";
+import HowPaymentsWork from "./pages/HowPaymentsWork";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/payments" element={<HowPaymentsWork />} />
             <Route path="/research" element={<Research />} />
             {/* Shipper Routes */}
             <Route path="/dashboard/shipper" element={
