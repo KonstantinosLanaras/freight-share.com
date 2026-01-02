@@ -21,13 +21,40 @@ import {
   Printer,
   CreditCard,
   Play,
-  FileCheck
+  FileCheck,
+  Star
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { exportShipmentsToCSV } from '@/lib/exportUtils';
+import { ShipmentExportActions } from '@/components/shipments';
+
+interface Shipment {
+  id: string;
+  status: string;
+  payment_status: string;
+  final_price: number;
+  created_at: string;
+  updated_at?: string;
+  load: {
+    origin_city: string;
+    origin_country: string;
+    destination_city: string;
+    destination_country: string;
+    pallets: number;
+    cargo_type?: string;
+    weight_kg?: number;
+    space_ldm?: number;
+    pickup_date_from: string;
+    pickup_date_to: string;
+  };
+  carrier: {
+    company_name: string | null;
+    full_name?: string | null;
+  };
+  hasRated?: boolean;
+}
 
 interface Shipment {
   id: string;
@@ -107,13 +134,15 @@ export default function ShipperShipments() {
         const loadIds = data.map(s => s.load_id);
         const carrierIds = data.map(s => s.carrier_id);
 
-        const [loadsResult, profilesResult] = await Promise.all([
-          supabase.from('loads').select('id, origin_city, origin_country, destination_city, destination_country, pallets, pickup_date_from, pickup_date_to').in('id', loadIds),
-          supabase.from('profiles').select('id, company_name').in('id', carrierIds)
+        const [loadsResult, profilesResult, ratingsResult] = await Promise.all([
+          supabase.from('loads').select('id, origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, space_ldm, pickup_date_from, pickup_date_to').in('id', loadIds),
+          supabase.from('profiles').select('id, company_name, full_name').in('id', carrierIds),
+          user ? supabase.from('detailed_ratings').select('shipment_id').eq('rater_id', user.id).in('shipment_id', data.map(s => s.id)) : { data: [] }
         ]);
 
         const loadsMap = new Map(loadsResult.data?.map(l => [l.id, l]) || []);
         const profilesMap = new Map(profilesResult.data?.map(p => [p.id, p]) || []);
+        const ratedShipments = new Set(ratingsResult.data?.map(r => r.shipment_id) || []);
 
         const enrichedShipments: Shipment[] = data.map(shipment => ({
           id: shipment.id,
@@ -121,8 +150,10 @@ export default function ShipperShipments() {
           payment_status: shipment.payment_status,
           final_price: shipment.final_price,
           created_at: shipment.created_at,
+          updated_at: shipment.updated_at,
           load: loadsMap.get(shipment.load_id) as Shipment['load'],
           carrier: profilesMap.get(shipment.carrier_id) as Shipment['carrier'],
+          hasRated: ratedShipments.has(shipment.id),
         })).filter(s => s.load && s.carrier);
 
         setShipments(enrichedShipments);
@@ -146,24 +177,12 @@ export default function ShipperShipments() {
     ['cancelled', 'disputed'].includes(s.status)
   );
 
-  const handleExportExecuted = () => {
-    const exportData = executedShipments.map(s => ({
-      id: s.id,
-      status: s.status,
-      payment_status: s.payment_status,
-      final_price: s.final_price,
-      created_at: s.created_at,
-      origin_city: s.load?.origin_city || '',
-      origin_country: s.load?.origin_country || '',
-      destination_city: s.load?.destination_city || '',
-      destination_country: s.load?.destination_country || '',
-      pallets: s.load?.pallets || 0,
-      cargo_type: 'general',
-      carrier_name: s.carrier?.company_name || '',
-    }));
-    exportShipmentsToCSV(exportData);
-    toast.success('Executed shipments exported to CSV');
-  };
+  // Format shipments for export component
+  const shipmentsForExport = executedShipments.map(s => ({
+    ...s,
+    shipper: undefined,
+    carrier: s.carrier,
+  }));
 
   const formatDateRange = (from: string, to: string) => {
     const fromDate = new Date(from);
@@ -221,17 +240,28 @@ export default function ShipperShipments() {
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-3">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-foreground">€{shipment.final_price}</div>
+              <div className="flex flex-col items-end gap-3">
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-foreground">€{shipment.final_price}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Show rating prompt for executed shipments that haven't been rated */}
+                  {shipment.status === 'completed' && !shipment.hasRated && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/shipment/${shipment.id}`}>
+                        <Star className="h-4 w-4 mr-2 text-warning" />
+                        Rate
+                      </Link>
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/shipment/${shipment.id}`}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </Link>
+                  </Button>
+                </div>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link to={`/shipment/${shipment.id}`}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
-                </Link>
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -329,10 +359,10 @@ export default function ShipperShipments() {
               ) : (
                 <>
                   <div className="flex justify-end gap-2 mb-4">
-                    <Button variant="outline" size="sm" onClick={handleExportExecuted}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Export for Financial Statements
-                    </Button>
+                    <ShipmentExportActions 
+                      shipments={shipmentsForExport} 
+                      userRole="shipper" 
+                    />
                   </div>
                   <div className="space-y-4">
                     {executedShipments.map(renderShipmentCard)}

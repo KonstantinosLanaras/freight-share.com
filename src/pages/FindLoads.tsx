@@ -18,12 +18,15 @@ import {
   Eye,
   Truck,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  XCircle,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
+import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Load {
@@ -33,6 +36,8 @@ interface Load {
   destination_city: string;
   destination_country: string;
   pallets: number;
+  weight_kg: number;
+  space_ldm: number | null;
   status: string;
   price: number | null;
   pricing_type: string;
@@ -43,10 +48,12 @@ interface Load {
   shipper_id: string;
 }
 
-interface CarrierProfile {
+interface CarrierRoute {
   id: string;
-  company_name: string | null;
-  verification_status: string | null;
+  vehicle_type: VehicleType | null;
+  available_pallets: number;
+  max_payload_kg: number;
+  space_ldm: number | null;
 }
 
 export default function FindLoads() {
@@ -55,28 +62,36 @@ export default function FindLoads() {
   const [searchOrigin, setSearchOrigin] = useState('');
   const [searchDestination, setSearchDestination] = useState('');
   const [cargoFilter, setCargoFilter] = useState<string>('all');
-  const [carrierVehicleType, setCarrierVehicleType] = useState<VehicleType | null>(null);
+  const [carrierRoute, setCarrierRoute] = useState<CarrierRoute | null>(null);
+  const [showCompatibleOnly, setShowCompatibleOnly] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     fetchLoads();
-    fetchCarrierVehicle();
+    fetchCarrierRoute();
   }, [user]);
 
-  const fetchCarrierVehicle = async () => {
+  const fetchCarrierRoute = async () => {
     if (!user) return;
-    // Get carrier's most recent route vehicle type
+    // Get carrier's most recent route with all capacity info
     const { data } = await supabase
       .from('routes')
-      .select('vehicle_type')
+      .select('id, vehicle_type, available_pallets, max_payload_kg, space_ldm')
       .eq('carrier_id', user.id)
+      .in('status', ['planned', 'active'])
       .not('vehicle_type', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
     
-    if (data?.vehicle_type) {
-      setCarrierVehicleType(data.vehicle_type as VehicleType);
+    if (data) {
+      setCarrierRoute({
+        id: data.id,
+        vehicle_type: data.vehicle_type as VehicleType,
+        available_pallets: data.available_pallets || 0,
+        max_payload_kg: data.max_payload_kg || 0,
+        space_ldm: data.space_ldm,
+      });
     }
   };
 
@@ -84,7 +99,7 @@ export default function FindLoads() {
     try {
       const { data, error } = await supabase
         .from('loads')
-        .select('*')
+        .select('id, origin_city, origin_country, destination_city, destination_country, pallets, weight_kg, space_ldm, status, price, pricing_type, pickup_date_from, pickup_date_to, cargo_type, created_at, shipper_id')
         .eq('status', 'posted')
         .order('created_at', { ascending: false });
 
@@ -97,6 +112,28 @@ export default function FindLoads() {
     }
   };
 
+  // Check full compatibility for a load
+  const getLoadCompatibility = (load: Load) => {
+    if (!carrierRoute || !carrierRoute.vehicle_type) {
+      return null;
+    }
+    
+    return checkLoadRouteMatch(
+      {
+        cargoType: load.cargo_type as CargoType,
+        pallets: load.pallets,
+        weightKg: load.weight_kg || 0,
+        spaceLdm: load.space_ldm || undefined,
+      },
+      {
+        vehicleType: carrierRoute.vehicle_type,
+        availablePallets: carrierRoute.available_pallets,
+        maxPayloadKg: carrierRoute.max_payload_kg,
+        spaceLdm: carrierRoute.space_ldm || undefined,
+      }
+    );
+  };
+
   const filteredLoads = loads.filter(load => {
     const matchesOrigin = !searchOrigin || 
       load.origin_city.toLowerCase().includes(searchOrigin.toLowerCase()) ||
@@ -107,6 +144,14 @@ export default function FindLoads() {
       load.destination_country.toLowerCase().includes(searchDestination.toLowerCase());
     
     const matchesCargo = cargoFilter === 'all' || load.cargo_type === cargoFilter;
+    
+    // Filter by compatibility if enabled
+    if (showCompatibleOnly && carrierRoute) {
+      const compatibility = getLoadCompatibility(load);
+      if (compatibility && !compatibility.isMatch) {
+        return false;
+      }
+    }
     
     return matchesOrigin && matchesDestination && matchesCargo;
   });
@@ -214,13 +259,11 @@ export default function FindLoads() {
               {filteredLoads.length} load{filteredLoads.length !== 1 ? 's' : ''} available
             </div>
             {filteredLoads.map((load) => {
-              const cargoType = load.cargo_type as CargoType;
-              const compatibility = carrierVehicleType 
-                ? checkCompatibility(cargoType, carrierVehicleType) 
-                : null;
+              const compatibility = getLoadCompatibility(load);
+              const isIncompatible = compatibility && !compatibility.isMatch;
               
               return (
-                <Card key={load.id} className={`hover:shadow-md transition-shadow ${compatibility && !compatibility.compatible ? 'border-warning/50' : ''}`}>
+                <Card key={load.id} className={`hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''}`}>
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                       <div className="flex-1">
@@ -232,22 +275,36 @@ export default function FindLoads() {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  {compatibility.compatible ? (
-                                    <Badge variant="outline" className="text-success border-success/50">
+                                  {compatibility.isMatch ? (
+                                    <Badge variant="outline" className="text-success border-success/50 bg-success/10">
                                       <CheckCircle className="h-3 w-3 mr-1" />
-                                      Compatible
+                                      Eligible
+                                    </Badge>
+                                  ) : !compatibility.isCompatible ? (
+                                    <Badge variant="outline" className="text-destructive border-destructive/50 bg-destructive/10">
+                                      <XCircle className="h-3 w-3 mr-1" />
+                                      Incompatible
                                     </Badge>
                                   ) : (
-                                    <Badge variant="outline" className="text-warning border-warning/50">
+                                    <Badge variant="outline" className="text-warning border-warning/50 bg-warning/10">
                                       <AlertTriangle className="h-3 w-3 mr-1" />
-                                      Incompatible
+                                      Insufficient
                                     </Badge>
                                   )}
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  {compatibility.compatible 
-                                    ? `Your ${vehicleTypeLabels[carrierVehicleType!]} can carry this cargo`
-                                    : compatibility.note || 'Not compatible with your vehicle type'}
+                                <TooltipContent className="max-w-xs">
+                                  {compatibility.isMatch ? (
+                                    <span className="text-success">✓ Your route can carry this load</span>
+                                  ) : (
+                                    <div>
+                                      <div className="font-medium text-destructive mb-1">Cannot match:</div>
+                                      <ul className="text-xs space-y-0.5">
+                                        {compatibility.reasons.map((r, i) => (
+                                          <li key={i}>• {r}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -257,44 +314,66 @@ export default function FindLoads() {
                           </span>
                         </div>
 
-                      <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        <span>{load.origin_city}, {load.origin_country}</span>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                        <span>{load.destination_city}, {load.destination_country}</span>
+                        <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
+                          <MapPin className="h-5 w-5 text-primary" />
+                          <span>{load.origin_city}, {load.origin_country}</span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          <span>{load.destination_city}, {load.destination_country}</span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Package className="h-4 w-4" />
+                            {load.pallets} pallets
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                          </div>
+                          {load.weight_kg > 0 && (
+                            <div className="flex items-center gap-1">
+                              <Truck className="h-4 w-4" />
+                              {load.weight_kg} kg
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Package className="h-4 w-4" />
-                          {load.pallets} pallets
+                      <div className="flex flex-col items-end gap-3">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-foreground">
+                            {load.price ? `€${load.price}` : 'Open to offers'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {load.pricing_type === 'fixed' ? 'Fixed price' : 'Accepting offers'}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
-                        </div>
+                        {isIncompatible ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" disabled className="cursor-not-allowed">
+                                  <Lock className="h-4 w-4 mr-2" />
+                                  Cannot Propose
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Your vehicle/capacity is not compatible with this load
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <Button variant="carrier" asChild>
+                            <Link to={`/load/${load.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View & Propose
+                            </Link>
+                          </Button>
+                        )}
                       </div>
                     </div>
-
-                    <div className="flex flex-col items-end gap-3">
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-foreground">
-                          {load.price ? `€${load.price}` : 'Open to offers'}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {load.pricing_type === 'fixed' ? 'Fixed price' : 'Accepting offers'}
-                        </div>
-                      </div>
-                      <Button variant="carrier" asChild>
-                        <Link to={`/load/${load.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View & Propose
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
