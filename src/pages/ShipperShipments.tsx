@@ -36,7 +36,6 @@ interface Shipment {
   payment_status: string;
   final_price: number;
   created_at: string;
-  updated_at?: string;
   load: {
     origin_city: string;
     origin_country: string;
@@ -54,26 +53,6 @@ interface Shipment {
     full_name?: string | null;
   };
   hasRated?: boolean;
-}
-
-interface Shipment {
-  id: string;
-  status: string;
-  payment_status: string;
-  final_price: number;
-  created_at: string;
-  load: {
-    origin_city: string;
-    origin_country: string;
-    destination_city: string;
-    destination_country: string;
-    pallets: number;
-    pickup_date_from: string;
-    pickup_date_to: string;
-  };
-  carrier: {
-    company_name: string | null;
-  };
 }
 
 // Active = shipment in progress / awaiting steps
@@ -150,7 +129,6 @@ export default function ShipperShipments() {
           payment_status: shipment.payment_status,
           final_price: shipment.final_price,
           created_at: shipment.created_at,
-          updated_at: shipment.updated_at,
           load: loadsMap.get(shipment.load_id) as Shipment['load'],
           carrier: profilesMap.get(shipment.carrier_id) as Shipment['carrier'],
           hasRated: ratedShipments.has(shipment.id),
