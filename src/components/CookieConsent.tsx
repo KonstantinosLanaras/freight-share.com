@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -6,7 +6,7 @@ const COOKIE_CONSENT_KEY = 'freightshare_cookie_consent';
 
 type ConsentStatus = 'pending' | 'accepted' | 'rejected';
 
-export const CookieConsent = () => {
+export const CookieConsent = forwardRef<HTMLDivElement>((_, ref) => {
   const [status, setStatus] = useState<ConsentStatus>('pending');
   const [visible, setVisible] = useState(false);
 
@@ -34,7 +34,7 @@ export const CookieConsent = () => {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background border-t border-border shadow-lg">
+    <div ref={ref} className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background border-t border-border shadow-lg">
       <div className="container mx-auto max-w-4xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground">
           <p>
@@ -55,7 +55,9 @@ export const CookieConsent = () => {
       </div>
     </div>
   );
-};
+});
+
+CookieConsent.displayName = 'CookieConsent';
 
 export const getAnalyticsConsent = (): boolean => {
   return localStorage.getItem(COOKIE_CONSENT_KEY) === 'accepted';
