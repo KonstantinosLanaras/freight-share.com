@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Platform fee percentage (2%)
+const PLATFORM_FEE_PERCENTAGE = 0.02;
+
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[RELEASE-PAYMENT] ${step}${detailsStr}`);
@@ -40,12 +43,12 @@ serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    const { shipmentId } = await req.json();
+    const { shipmentId, confirmationType } = await req.json();
     
     if (!shipmentId) {
       throw new Error("Missing required field: shipmentId");
     }
-    logStep("Request data received", { shipmentId });
+    logStep("Request data received", { shipmentId, confirmationType });
 
     // Fetch the shipment to verify ownership and get payment reference
     const { data: shipment, error: shipmentError } = await supabaseClient
@@ -71,15 +74,32 @@ serve(async (req) => {
       throw new Error("Shipment must be marked as delivered first");
     }
 
+    // Check if there's an active dispute
+    if (shipment.dispute_status === 'raised') {
+      throw new Error("Cannot release payment while a dispute is active. Please resolve the dispute first.");
+    }
+
     logStep("Shipment verified", { 
       paymentReference: shipment.payment_reference,
-      status: shipment.status 
+      status: shipment.status,
+      finalPrice: shipment.final_price
     });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
+    // Calculate platform fee and carrier payout
+    const totalAmount = shipment.final_price;
+    const platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENTAGE * 100) / 100;
+    const carrierPayout = Math.round((totalAmount - platformFee) * 100) / 100;
+
+    logStep("Fee calculation", { 
+      totalAmount, 
+      platformFee, 
+      carrierPayout,
+      feePercentage: PLATFORM_FEE_PERCENTAGE * 100 + '%'
+    });
+
     // Capture the payment (execute the conditional transfer)
-    // This captures the previously authorised payment
     if (shipment.payment_reference) {
       try {
         await stripe.paymentIntents.capture(shipment.payment_reference);
@@ -90,12 +110,14 @@ serve(async (req) => {
       }
     }
 
-    // Update shipment to completed with payment executed
+    // Update shipment to completed with payment executed and fee details
     const { error: updateError } = await supabaseClient
       .from('shipments')
       .update({
         payment_status: 'completed',
         status: 'completed',
+        platform_fee_amount: platformFee,
+        carrier_payout_amount: carrierPayout,
         updated_at: new Date().toISOString(),
       })
       .eq('id', shipmentId);
@@ -104,12 +126,28 @@ serve(async (req) => {
       throw new Error(`Failed to update shipment: ${updateError.message}`);
     }
 
-    logStep("Payment executed successfully");
+    // Add timestamp record for completion
+    await supabaseClient
+      .from('shipment_timestamps')
+      .insert({
+        shipment_id: shipmentId,
+        status: 'completed',
+        notes: `Payment executed. Confirmation type: ${confirmationType || 'manual'}. Platform fee: €${platformFee}. Carrier payout: €${carrierPayout}.`,
+        changed_by: user.id,
+      });
+
+    logStep("Payment executed successfully", {
+      platformFee,
+      carrierPayout
+    });
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: "Payment executed — transfer to carrier initiated",
-      paymentStatus: 'completed'
+      paymentStatus: 'completed',
+      platformFee,
+      carrierPayout,
+      totalAmount
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

@@ -467,18 +467,56 @@ export default function ShipmentDetails() {
                 <CardTitle className="text-base">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {role === 'carrier' && (
+                {role === 'carrier' && shipment.status !== 'delivered' && shipment.status !== 'completed' && (
                   <Button variant="default" className="w-full">
                     <CheckCircle className="h-4 w-4" />
                     Mark as Delivered
                   </Button>
                 )}
-                <Button variant="outline" className="w-full">
-                  <MessageSquare className="h-4 w-4" />
-                  Message {role === 'carrier' ? 'Shipper' : 'Carrier'}
+                
+                {/* Shipper: Confirm Delivery button - Only show when delivered and no active dispute */}
+                {role === 'shipper' && shipment.status === 'delivered' && (
+                  <Button variant="default" className="w-full bg-success hover:bg-success/90">
+                    <CheckCircle className="h-4 w-4" />
+                    Confirm Delivery & Release Payment
+                  </Button>
+                )}
+                
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={`/dashboard/${role === 'carrier' ? 'carrier' : 'shipper'}/messages/${id}`}>
+                    <MessageSquare className="h-4 w-4" />
+                    Message {role === 'carrier' ? 'Shipper' : 'Carrier'}
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Dispute Section - Only for shippers when shipment is delivered */}
+            {role === 'shipper' && shipment.status === 'delivered' && (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    Dispute Options
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    If there's an issue with this delivery, you can raise a dispute within 48 hours. 
+                    This will pause payment execution while the issue is reviewed.
+                  </p>
+                  <Button variant="outline" className="w-full border-warning/50 text-warning hover:bg-warning/10">
+                    <AlertTriangle className="h-4 w-4" />
+                    Raise Dispute
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    <Link to="/payments" className="underline hover:no-underline">
+                      Learn how disputes work
+                    </Link>
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Help Link */}
             <Card className="bg-muted/50">
@@ -496,8 +534,8 @@ export default function ShipmentDetails() {
                 </div>
                 <Button variant="outline" className="w-full mt-3" asChild>
                   <Link to={`/help?shipment=${shipment.id}`}>
-                    <AlertTriangle className="h-4 w-4" />
-                    Report Issue
+                    <HelpCircle className="h-4 w-4" />
+                    Get Support
                   </Link>
                 </Button>
               </CardContent>
