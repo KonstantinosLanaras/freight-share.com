@@ -704,13 +704,78 @@ export default function PostRoute() {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="goodsAccepted">Goods Accepted</Label>
+                <Input
+                  id="goodsAccepted"
+                  placeholder="e.g., General cargo, palletized, dry goods"
+                  className="mt-1"
+                  value={goodsAccepted}
+                  onChange={(e) => setGoodsAccepted(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxDestRadius">Max distance from destination city (km)</Label>
+                <Input
+                  id="maxDestRadius"
+                  type="number" min="0" placeholder="e.g., 50"
+                  className="mt-1 max-w-[200px]"
+                  value={maxDestRadiusKm}
+                  onChange={(e) => setMaxDestRadiusKm(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Example: if your destination is Munich, 50 km means you can deliver within a 50 km radius
+                </p>
+              </div>
+              <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Any additional information about this route (e.g., specific requirements, flexibility on dates, etc.)"
-                  className="mt-1 min-h-[100px]"
+                  placeholder="Any additional information about this route"
+                  className="mt-1 min-h-[80px]"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Trip Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-carrier" />
+                Trip Description
+              </CardTitle>
+              <CardDescription>Describe your trip so shippers understand your route and flexibility</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Main roads, planned stops, flexibility, timing preferences, delivery limitations..."
+                className="min-h-[120px]"
+                value={tripDescription}
+                onChange={(e) => setTripDescription(e.target.value)}
+                disabled={isSubmitting}
+              />
+              <div>
+                <Label>Route / Itinerary Image (optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">Take a screenshot from Google Maps or your preferred route planner and upload it here.</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setItineraryFile(e.target.files?.[0] || null)}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div>
+                <Label>Route Link (optional)</Label>
+                <Input
+                  placeholder="Paste a route-sharing link from Google Maps, etc."
+                  className="mt-1"
+                  value={routeLink}
+                  onChange={(e) => setRouteLink(e.target.value)}
                   disabled={isSubmitting}
                 />
               </div>
