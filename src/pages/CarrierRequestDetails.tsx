@@ -41,6 +41,7 @@ export default function CarrierRequestDetails() {
   const [sending, setSending] = useState(false);
   const [showAcceptForm, setShowAcceptForm] = useState(false);
   const [acceptLoading, setAcceptLoading] = useState(false);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Accept form state
