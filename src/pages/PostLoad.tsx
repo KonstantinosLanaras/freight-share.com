@@ -26,10 +26,6 @@ const cargoTypes = [
   { value: 'other', label: 'Other' },
 ];
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden'
-];
 
 export default function PostLoad() {
   const navigate = useNavigate();
