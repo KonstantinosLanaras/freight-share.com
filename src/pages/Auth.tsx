@@ -246,8 +246,7 @@ export default function Auth() {
   };
 
   const handleContinueWithCurrentRole = () => {
-    const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
-    navigate(dashboardPath, { replace: true });
+    navigate('/select-role', { replace: true });
   };
 
   const handleSwitchRole = async () => {
