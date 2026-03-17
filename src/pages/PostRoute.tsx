@@ -159,6 +159,17 @@ export default function PostRoute() {
       // Calculate LDM for internal storage
       const spaceLdm = calculateLdm(spaceType, parseFloat(spaceValue) || 0);
 
+      // Upload itinerary image if provided
+      let itineraryImageUrl: string | null = null;
+      if (itineraryFile && user) {
+        const ext = itineraryFile.name.split('.').pop();
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('itinerary-images').upload(path, itineraryFile);
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from('itinerary-images').getPublicUrl(path);
+        itineraryImageUrl = urlData.publicUrl;
+      }
+
       // Create the route with new fields
       const { data: routeData, error: routeError } = await supabase
         .from('routes')
@@ -180,12 +191,16 @@ export default function PostRoute() {
           status: 'planned',
           open_to_extra_stops: formData.openToExtraStops,
           flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
-          // New capacity fields
           space_type: spaceType,
           space_value: parseFloat(spaceValue) || 0,
           space_ldm: spaceLdm,
           max_payload_kg: parseFloat(maxPayloadKg) || 0,
           max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
+          max_destination_radius_km: maxDestRadiusKm ? parseFloat(maxDestRadiusKm) : null,
+          trip_description: tripDescription || null,
+          route_link: routeLink || null,
+          itinerary_image_url: itineraryImageUrl,
+          goods_accepted: goodsAccepted || null,
         })
         .select()
         .single();
