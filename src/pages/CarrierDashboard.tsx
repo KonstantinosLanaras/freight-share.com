@@ -97,6 +97,7 @@ export default function CarrierDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0, pendingRequests: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
