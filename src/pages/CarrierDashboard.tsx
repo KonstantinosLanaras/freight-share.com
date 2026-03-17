@@ -284,6 +284,18 @@ export default function CarrierDashboard() {
               Messages
             </Link>
             
+            {/* Route Requests */}
+            <Link 
+              to="/dashboard/carrier/requests"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Inbox className="h-5 w-5" />
+              Route Requests
+              {stats.pendingRequests > 0 && (
+                <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
+              )}
+            </Link>
+
             {/* Optional Routes Section */}
             <div className="pt-4 mt-4 border-t border-sidebar-border">
               <div className="px-4 mb-2">
