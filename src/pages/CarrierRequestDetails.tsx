@@ -110,7 +110,7 @@ export default function CarrierRequestDetails() {
       setRoute(r);
       setShipperProfile(profileRes.data);
       setMessages(msgsRes.data || []);
-
+      setCarrierInsurance(insuranceRes.data || null);
       // Pre-fill accept form
       if (r) {
         setRemainingPallets(Math.max(0, r.available_pallets - req.pallets));
