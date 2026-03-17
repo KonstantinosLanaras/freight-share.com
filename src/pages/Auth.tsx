@@ -482,23 +482,13 @@ export default function Auth() {
 
                     <div>
                       <Label htmlFor="country">Country <span className="text-destructive">*</span></Label>
-                      <Select
+                      <SchengenCountrySelect
                         value={formData.country}
                         onValueChange={(value) => setFormData({ ...formData, country: value })}
                         disabled={isSubmitting}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <Globe className="h-4 w-4 text-muted-foreground mr-2" />
-                          <SelectValue placeholder="Select your country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {EUROPEAN_COUNTRIES.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Select your country"
+                        className="mt-1"
+                      />
                     </div>
 
                     <div>
