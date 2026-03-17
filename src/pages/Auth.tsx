@@ -390,14 +390,16 @@ export default function Auth() {
             </span>
           </div>
 
-          {mode === 'signup' && step === 'role' ? (
-            /* Role Selection */
+          {step === 'role' ? (
+            /* Role Selection — shown for both login and signup */
             <div className="animate-fade-in">
               <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                Join FreightShare
+                {mode === 'login' ? 'Welcome back' : 'Join FreightShare'}
               </h2>
               <p className="text-muted-foreground mb-8">
-                Choose how you'll use the platform
+                {mode === 'login' 
+                  ? 'How are you logging in today?' 
+                  : 'Choose how you\'ll use the platform'}
               </p>
 
               <div className="space-y-4">
@@ -411,7 +413,9 @@ export default function Auth() {
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">I'm a Shipper</div>
-                      <div className="text-sm text-muted-foreground">Post loads and find carriers</div>
+                      <div className="text-sm text-muted-foreground">
+                        {mode === 'login' ? 'Access your shipper dashboard' : 'Post loads and find carriers'}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -426,20 +430,36 @@ export default function Auth() {
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">I'm a Carrier</div>
-                      <div className="text-sm text-muted-foreground">Find loads and grow your business</div>
+                      <div className="text-sm text-muted-foreground">
+                        {mode === 'login' ? 'Access your carrier dashboard' : 'Find loads and grow your business'}
+                      </div>
                     </div>
                   </div>
                 </button>
               </div>
 
               <p className="mt-8 text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <button 
-                  onClick={() => setMode('login')}
-                  className="text-primary hover:underline font-medium"
-                >
-                  Log in
-                </button>
+                {mode === 'login' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <button 
+                      onClick={() => { setMode('signup'); setStep('role'); setRole(null); }}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Sign up
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <button 
+                      onClick={() => { setMode('login'); setStep('role'); setRole(null); }}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Log in
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           ) : (
