@@ -463,6 +463,106 @@ export type Database = {
           },
         ]
       }
+      route_request_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_system: boolean
+          request_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          request_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          request_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_request_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "route_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_requests: {
+        Row: {
+          carrier_id: string
+          created_at: string
+          delivery_address: string
+          goods_type: string
+          id: string
+          message: string | null
+          pallets: number
+          pickup_address: string
+          route_id: string
+          shipment_date: string
+          shipper_id: string
+          special_requirements: string | null
+          status: Database["public"]["Enums"]["route_request_status"]
+          updated_at: string
+          volume_cbm: number | null
+          weight_kg: number
+        }
+        Insert: {
+          carrier_id: string
+          created_at?: string
+          delivery_address: string
+          goods_type: string
+          id?: string
+          message?: string | null
+          pallets?: number
+          pickup_address: string
+          route_id: string
+          shipment_date: string
+          shipper_id: string
+          special_requirements?: string | null
+          status?: Database["public"]["Enums"]["route_request_status"]
+          updated_at?: string
+          volume_cbm?: number | null
+          weight_kg?: number
+        }
+        Update: {
+          carrier_id?: string
+          created_at?: string
+          delivery_address?: string
+          goods_type?: string
+          id?: string
+          message?: string | null
+          pallets?: number
+          pickup_address?: string
+          route_id?: string
+          shipment_date?: string
+          shipper_id?: string
+          special_requirements?: string | null
+          status?: Database["public"]["Enums"]["route_request_status"]
+          updated_at?: string
+          volume_cbm?: number | null
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_requests_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_stops: {
         Row: {
           available_pallets: number
@@ -517,18 +617,23 @@ export type Database = {
           destination_city: string
           destination_country: string
           flexibility_note: string | null
+          goods_accepted: string | null
           id: string
           is_active: boolean
+          itinerary_image_url: string | null
+          max_destination_radius_km: number | null
           max_deviation_km: number | null
           max_payload_kg: number
           notes: string | null
           open_to_extra_stops: boolean
           origin_city: string
           origin_country: string
+          route_link: string | null
           space_ldm: number | null
           space_type: string
           space_value: number
           status: Database["public"]["Enums"]["route_status"]
+          trip_description: string | null
           updated_at: string
           vehicle_constraints: string | null
           vehicle_type: string | null
@@ -545,18 +650,23 @@ export type Database = {
           destination_city: string
           destination_country: string
           flexibility_note?: string | null
+          goods_accepted?: string | null
           id?: string
           is_active?: boolean
+          itinerary_image_url?: string | null
+          max_destination_radius_km?: number | null
           max_deviation_km?: number | null
           max_payload_kg?: number
           notes?: string | null
           open_to_extra_stops?: boolean
           origin_city: string
           origin_country: string
+          route_link?: string | null
           space_ldm?: number | null
           space_type?: string
           space_value?: number
           status?: Database["public"]["Enums"]["route_status"]
+          trip_description?: string | null
           updated_at?: string
           vehicle_constraints?: string | null
           vehicle_type?: string | null
@@ -573,18 +683,23 @@ export type Database = {
           destination_city?: string
           destination_country?: string
           flexibility_note?: string | null
+          goods_accepted?: string | null
           id?: string
           is_active?: boolean
+          itinerary_image_url?: string | null
+          max_destination_radius_km?: number | null
           max_deviation_km?: number | null
           max_payload_kg?: number
           notes?: string | null
           open_to_extra_stops?: boolean
           origin_city?: string
           origin_country?: string
+          route_link?: string | null
           space_ldm?: number | null
           space_type?: string
           space_value?: number
           status?: Database["public"]["Enums"]["route_status"]
+          trip_description?: string | null
           updated_at?: string
           vehicle_constraints?: string | null
           vehicle_type?: string | null
@@ -792,6 +907,14 @@ export type Database = {
         | "other"
       payment_status: "pending" | "paid" | "completed" | "refunded"
       pricing_type: "fixed" | "open_to_offers"
+      route_request_status:
+        | "sent"
+        | "viewed"
+        | "in_discussion"
+        | "accepted"
+        | "rejected"
+        | "expired"
+        | "cancelled"
       route_status: "planned" | "active" | "completed" | "cancelled"
       shipment_status:
         | "posted"
@@ -950,6 +1073,15 @@ export const Constants = {
       ],
       payment_status: ["pending", "paid", "completed", "refunded"],
       pricing_type: ["fixed", "open_to_offers"],
+      route_request_status: [
+        "sent",
+        "viewed",
+        "in_discussion",
+        "accepted",
+        "rejected",
+        "expired",
+        "cancelled",
+      ],
       route_status: ["planned", "active", "completed", "cancelled"],
       shipment_status: [
         "posted",
