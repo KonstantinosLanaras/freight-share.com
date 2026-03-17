@@ -120,14 +120,14 @@ export default function RouteDetails() {
       if (error) throw error;
       setRoute(data as Route);
 
-      // Fetch carrier profile
+      // Fetch carrier profile and insurance
       if (data?.carrier_id) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name, company_name')
-          .eq('id', data.carrier_id)
-          .single();
-        setCarrierProfile(profileData);
+        const [profileRes, insuranceRes] = await Promise.all([
+          supabase.from('profiles').select('full_name, company_name, verification_status').eq('id', data.carrier_id).single(),
+          supabase.from('carrier_insurance').select('*').eq('carrier_id', data.carrier_id).maybeSingle(),
+        ]);
+        setCarrierProfile(profileRes.data);
+        setCarrierInsurance(insuranceRes.data);
       }
     } catch (error) {
       console.error('Error fetching route:', error);
