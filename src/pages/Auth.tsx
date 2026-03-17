@@ -609,7 +609,7 @@ export default function Auth() {
                   <>
                     Already have an account?{' '}
                     <button 
-                      onClick={() => setMode('login')}
+                      onClick={() => { setMode('login'); setStep('role'); setRole(null); }}
                       className="text-primary hover:underline font-medium"
                     >
                       Log in
