@@ -99,6 +99,10 @@ export default function Auth() {
         }
       } else {
         setMode('login');
+        if (roleParam === 'shipper' || roleParam === 'carrier') {
+          setRole(roleParam);
+          setStep('details');
+        }
       }
     }
   }, [searchParams, showRoleSwitchWarning]);
