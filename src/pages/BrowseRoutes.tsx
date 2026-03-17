@@ -61,11 +61,6 @@ interface RouteStop {
   stop_order: number;
 }
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden',
-  'Portugal', 'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Croatia'
-];
 
 export default function BrowseRoutes() {
   const [routes, setRoutes] = useState<Route[]>([]);
