@@ -83,8 +83,7 @@ export default function Auth() {
         return;
       }
       
-      const dashboardPath = userRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
-      navigate(dashboardPath, { replace: true });
+      navigate('/select-role', { replace: true });
     }
   }, [user, userRole, navigate, searchParams]);
 

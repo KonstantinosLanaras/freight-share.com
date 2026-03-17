@@ -37,6 +37,7 @@ import Messages from "./pages/Messages";
 import HowPaymentsWork from "./pages/HowPaymentsWork";
 import LoadDetails from "./pages/LoadDetails";
 import ShipperVerification from "./pages/ShipperVerification";
+import SelectRole from "./pages/SelectRole";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/select-role" element={<SelectRole />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/impact" element={<Impact />} />
             <Route path="/for-shippers" element={<ForShippers />} />
