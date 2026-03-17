@@ -43,6 +43,7 @@ import RouteRequestStatus from "./pages/RouteRequestStatus";
 import ShipperRequests from "./pages/ShipperRequests";
 import CarrierRequests from "./pages/CarrierRequests";
 import CarrierRequestDetails from "./pages/CarrierRequestDetails";
+import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 
 const queryClient = new QueryClient();
 
