@@ -49,10 +49,10 @@ export const ImpactSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-            {t('impact.title')}
+            {t('impact.missionTitle', 'Our Mission')}
           </h2>
           <p className="text-muted-foreground text-sm">
-            {t('impact.subtitle')}
+            {t('impact.missionSubtitle', 'Making freight logistics fairer, greener, and more accessible for everyone.')}
           </p>
         </div>
 
