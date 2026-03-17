@@ -10,12 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, MapPin, Package, Truck, Send, Loader2,
   MessageSquare, CheckCircle, XCircle, Eye, AlertTriangle,
-  Scale, Upload, Link as LinkIcon, Image
+  Scale, Upload, Link as LinkIcon, Image, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
