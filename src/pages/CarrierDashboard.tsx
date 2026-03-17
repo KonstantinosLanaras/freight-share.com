@@ -121,6 +121,13 @@ export default function CarrierDashboard() {
       
       setProfile(profileData as Profile | null);
 
+      // Fetch insurance
+      const { data: insuranceData } = await supabase
+        .from('carrier_insurance')
+        .select('*')
+        .eq('carrier_id', user.id)
+        .maybeSingle();
+      setCarrierInsurance(insuranceData);
       // Fetch carrier's routes (active and planned only)
       const { data: routesData } = await supabase
         .from('routes')
