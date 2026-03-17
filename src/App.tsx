@@ -35,6 +35,8 @@ import Research from "./pages/Research";
 import NotFound from "./pages/NotFound";
 import Messages from "./pages/Messages";
 import HowPaymentsWork from "./pages/HowPaymentsWork";
+import LoadDetails from "./pages/LoadDetails";
+import ShipperVerification from "./pages/ShipperVerification";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +77,16 @@ const App = () => (
             <Route path="/dashboard/shipper/loads" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <ShipperLoads />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/verify" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <ShipperVerification />
+              </ProtectedRoute>
+            } />
+            <Route path="/load/:id" element={
+              <ProtectedRoute>
+                <LoadDetails />
               </ProtectedRoute>
             } />
             <Route path="/dashboard/shipper/shipments" element={
