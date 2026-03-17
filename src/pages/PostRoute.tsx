@@ -50,6 +50,11 @@ export default function PostRoute() {
   const [spaceValue, setSpaceValue] = useState('');
   const [maxPayloadKg, setMaxPayloadKg] = useState('');
   const [maxDeviationKm, setMaxDeviationKm] = useState('');
+  const [maxDestRadiusKm, setMaxDestRadiusKm] = useState('');
+  const [tripDescription, setTripDescription] = useState('');
+  const [routeLink, setRouteLink] = useState('');
+  const [goodsAccepted, setGoodsAccepted] = useState('');
+  const [itineraryFile, setItineraryFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
