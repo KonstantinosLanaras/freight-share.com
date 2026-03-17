@@ -44,13 +44,6 @@ const saveRateLimitData = (data: { attempts: number[]; lockoutUntil: number | nu
   }
 };
 
-const EUROPEAN_COUNTRIES = [
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
-  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
-  'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
-  'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-  'Norway', 'Switzerland', 'United Kingdom'
-];
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
