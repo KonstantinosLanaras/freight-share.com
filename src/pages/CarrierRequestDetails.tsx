@@ -10,12 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, MapPin, Package, Truck, Send, Loader2,
   MessageSquare, CheckCircle, XCircle, Eye, AlertTriangle,
-  Scale, Upload, Link as LinkIcon, Image
+  Scale, Upload, Link as LinkIcon, Image, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
@@ -40,6 +41,7 @@ export default function CarrierRequestDetails() {
   const [sending, setSending] = useState(false);
   const [showAcceptForm, setShowAcceptForm] = useState(false);
   const [acceptLoading, setAcceptLoading] = useState(false);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Accept form state
@@ -97,17 +99,18 @@ export default function CarrierRequestDetails() {
         setRequest({ ...req, status: 'viewed' });
       }
 
-      const [routeRes, profileRes, msgsRes] = await Promise.all([
+      const [routeRes, profileRes, msgsRes, insuranceRes] = await Promise.all([
         supabase.from('routes').select('*').eq('id', req.route_id).single(),
         supabase.from('profiles').select('full_name, company_name').eq('id', req.shipper_id).single(),
         supabase.from('route_request_messages').select('*').eq('request_id', requestId).order('created_at', { ascending: true }),
+        supabase.from('carrier_insurance').select('*').eq('carrier_id', user!.id).maybeSingle(),
       ]);
 
       const r = routeRes.data;
       setRoute(r);
       setShipperProfile(profileRes.data);
       setMessages(msgsRes.data || []);
-
+      setCarrierInsurance(insuranceRes.data || null);
       // Pre-fill accept form
       if (r) {
         setRemainingPallets(Math.max(0, r.available_pallets - req.pallets));
@@ -466,9 +469,26 @@ export default function CarrierRequestDetails() {
               <Card>
                 <CardHeader><CardTitle className="text-base">Decision</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
-                    <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
-                  </Button>
+                  {!carrierInsurance ? (
+                    <>
+                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
+                        <p className="text-sm text-warning font-medium flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" />
+                          Insurance required to accept
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          You must provide insurance details before accepting load requests.
+                        </p>
+                      </div>
+                      <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
+                        <ShieldCheck className="h-4 w-4 mr-2" /> Add Insurance Details
+                      </Button>
+                    </>
+                  ) : (
+                    <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
+                      <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
+                    </Button>
+                  )}
                   <Button variant="destructive" className="w-full" onClick={handleReject}>
                     <XCircle className="h-4 w-4 mr-2" /> Reject Request
                   </Button>

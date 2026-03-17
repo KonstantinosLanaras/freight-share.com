@@ -43,6 +43,7 @@ import RouteRequestStatus from "./pages/RouteRequestStatus";
 import ShipperRequests from "./pages/ShipperRequests";
 import CarrierRequests from "./pages/CarrierRequests";
 import CarrierRequestDetails from "./pages/CarrierRequestDetails";
+import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 
 const queryClient = new QueryClient();
 
@@ -177,6 +178,11 @@ const App = () => (
             <Route path="/dashboard/carrier/requests/:requestId" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <CarrierRequestDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/insurance" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierInsuranceSetup />
               </ProtectedRoute>
             } />
             {/* Shared Routes */}

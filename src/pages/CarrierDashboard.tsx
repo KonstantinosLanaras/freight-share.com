@@ -97,6 +97,7 @@ export default function CarrierDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0, pendingRequests: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -120,6 +121,13 @@ export default function CarrierDashboard() {
       
       setProfile(profileData as Profile | null);
 
+      // Fetch insurance
+      const { data: insuranceData } = await supabase
+        .from('carrier_insurance')
+        .select('*')
+        .eq('carrier_id', user.id)
+        .maybeSingle();
+      setCarrierInsurance(insuranceData);
       // Fetch carrier's routes (active and planned only)
       const { data: routesData } = await supabase
         .from('routes')
@@ -437,6 +445,31 @@ export default function CarrierDashboard() {
                     fetchData();
                   }} />
                 </div>
+              )}
+
+              {/* Insurance Banner */}
+              {!carrierInsurance && !showVerificationForm && (
+                <Card className="mb-8 border-l-4 border-l-accent bg-accent/5">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/20">
+                          <ShieldCheck className="h-5 w-5 text-accent" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">Add Insurance Details</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Provide your transport insurance to accept load requests and build shipper trust.
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" onClick={() => navigate('/dashboard/carrier/insurance')}>
+                        <ShieldCheck className="h-4 w-4 mr-2" />
+                        Add Insurance
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Stats */}

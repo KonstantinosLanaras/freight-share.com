@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      carrier_insurance: {
+        Row: {
+          carrier_id: string
+          coverage_limit_eur: number
+          coverage_type: string
+          created_at: string
+          document_url: string | null
+          expiration_date: string
+          id: string
+          policy_number: string | null
+          provider_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          coverage_limit_eur?: number
+          coverage_type?: string
+          created_at?: string
+          document_url?: string | null
+          expiration_date: string
+          id?: string
+          policy_number?: string | null
+          provider_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          coverage_limit_eur?: number
+          coverage_type?: string
+          created_at?: string
+          document_url?: string | null
+          expiration_date?: string
+          id?: string
+          policy_number?: string | null
+          provider_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       carrier_verifications: {
         Row: {
           carrier_id: string

@@ -39,6 +39,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { DeviationRequestForm } from '@/components/routes/DeviationRequestForm';
+import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
+import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -94,8 +96,8 @@ export default function RouteDetails() {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deviationRequestOpen, setDeviationRequestOpen] = useState(false);
-  const [carrierProfile, setCarrierProfile] = useState<{ full_name: string | null; company_name: string | null } | null>(null);
-
+  const [carrierProfile, setCarrierProfile] = useState<{ full_name: string | null; company_name: string | null; verification_status: string | null } | null>(null);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   useEffect(() => {
     if (id) {
       fetchRoute();
@@ -118,14 +120,14 @@ export default function RouteDetails() {
       if (error) throw error;
       setRoute(data as Route);
 
-      // Fetch carrier profile
+      // Fetch carrier profile and insurance
       if (data?.carrier_id) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name, company_name')
-          .eq('id', data.carrier_id)
-          .single();
-        setCarrierProfile(profileData);
+        const [profileRes, insuranceRes] = await Promise.all([
+          supabase.from('profiles').select('full_name, company_name, verification_status').eq('id', data.carrier_id).single(),
+          supabase.from('carrier_insurance').select('*').eq('carrier_id', data.carrier_id).maybeSingle(),
+        ]);
+        setCarrierProfile(profileRes.data);
+        setCarrierInsurance(insuranceRes.data);
       }
     } catch (error) {
       console.error('Error fetching route:', error);
@@ -526,8 +528,18 @@ export default function RouteDetails() {
                     )}
                   </div>
                 </div>
+                {carrierProfile?.verification_status && (
+                  <div className="mt-3">
+                    <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Carrier Insurance */}
+            {!isOwner && (
+              <InsuranceSummaryCard insurance={carrierInsurance} />
+            )}
 
             {/* Quick Actions - Owner only */}
             {isOwner && (
