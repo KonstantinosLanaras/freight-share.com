@@ -197,9 +197,11 @@ export default function ShipperLoads() {
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Load
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Offers
+                    <DropdownMenuItem asChild>
+                      <Link to={`/load/${load.id}`}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Offers
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => deleteLoad(load.id)}
