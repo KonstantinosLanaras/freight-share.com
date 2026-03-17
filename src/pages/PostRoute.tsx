@@ -412,20 +412,12 @@ export default function PostRoute() {
                 </div>
                 <div>
                   <Label htmlFor="destinationCountry">Country <span className="text-destructive">*</span></Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="destinationPlannedDateTime">Planned Arrival <span className="text-destructive">*</span></Label>
