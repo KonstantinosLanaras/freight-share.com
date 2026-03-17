@@ -35,6 +35,8 @@ import Research from "./pages/Research";
 import NotFound from "./pages/NotFound";
 import Messages from "./pages/Messages";
 import HowPaymentsWork from "./pages/HowPaymentsWork";
+import LoadDetails from "./pages/LoadDetails";
+import ShipperVerification from "./pages/ShipperVerification";
 
 const queryClient = new QueryClient();
 
