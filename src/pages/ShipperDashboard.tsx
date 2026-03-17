@@ -21,7 +21,8 @@ import {
   MapPin,
   HelpCircle,
   MessageSquare,
-  XCircle
+  XCircle,
+  Send
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -262,6 +263,13 @@ export default function ShipperDashboard() {
             >
               <MessageSquare className="h-5 w-5" />
               Messages
+            </Link>
+            <Link 
+              to="/dashboard/shipper/requests"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Send className="h-5 w-5" />
+              My Requests
             </Link>
             <Link 
               to="/routes"

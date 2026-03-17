@@ -38,6 +38,11 @@ import HowPaymentsWork from "./pages/HowPaymentsWork";
 import LoadDetails from "./pages/LoadDetails";
 import ShipperVerification from "./pages/ShipperVerification";
 import SelectRole from "./pages/SelectRole";
+import RouteRequestForm from "./pages/RouteRequestForm";
+import RouteRequestStatus from "./pages/RouteRequestStatus";
+import ShipperRequests from "./pages/ShipperRequests";
+import CarrierRequests from "./pages/CarrierRequests";
+import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +70,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/payments" element={<HowPaymentsWork />} />
             <Route path="/research" element={<Research />} />
+            {/* Public route details */}
+            <Route path="/routes/:id" element={<RouteDetails />} />
             {/* Shipper Routes */}
             <Route path="/dashboard/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
@@ -106,6 +113,21 @@ const App = () => (
                 <Messages />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/shipper/requests" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <ShipperRequests />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/shipper/requests/:requestId" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <RouteRequestStatus />
+              </ProtectedRoute>
+            } />
+            <Route path="/routes/:routeId/request" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <RouteRequestForm />
+              </ProtectedRoute>
+            } />
             {/* Carrier Routes */}
             <Route path="/dashboard/carrier" element={
               <ProtectedRoute allowedRoles={['carrier']}>
@@ -145,6 +167,16 @@ const App = () => (
             <Route path="/dashboard/carrier/messages/:shipmentId" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <Messages />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/requests" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierRequests />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/carrier/requests/:requestId" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierRequestDetails />
               </ProtectedRoute>
             } />
             {/* Shared Routes */}

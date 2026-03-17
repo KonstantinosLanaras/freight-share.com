@@ -23,7 +23,8 @@ import {
   HelpCircle,
   MessageSquare,
   Clock,
-  XCircle
+  XCircle,
+  Inbox
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -165,13 +166,20 @@ export default function CarrierDashboard() {
 
       setDeviationRequests(requestsWithShippers as DeviationRequest[]);
 
+      // Fetch route request count
+      const { count: routeRequestCount } = await supabase
+        .from('route_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('carrier_id', user.id)
+        .in('status', ['sent', 'viewed', 'in_discussion']);
+
       // Calculate stats
       setStats({
         activeRoutes: routesData?.length || 0,
         matchedLoads: loadsData?.length || 0,
         completed: 0,
         totalEarned: 0,
-        pendingRequests: requestsData?.length || 0
+        pendingRequests: (requestsData?.length || 0) + (routeRequestCount || 0)
       });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -284,6 +292,18 @@ export default function CarrierDashboard() {
               Messages
             </Link>
             
+            {/* Route Requests */}
+            <Link 
+              to="/dashboard/carrier/requests"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Inbox className="h-5 w-5" />
+              Route Requests
+              {stats.pendingRequests > 0 && (
+                <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
+              )}
+            </Link>
+
             {/* Optional Routes Section */}
             <div className="pt-4 mt-4 border-t border-sidebar-border">
               <div className="px-4 mb-2">

@@ -70,6 +70,12 @@ interface Route {
   flexibility_note: string | null;
   created_at: string;
   carrier_id: string;
+  max_deviation_km: number | null;
+  max_destination_radius_km: number | null;
+  trip_description: string | null;
+  itinerary_image_url: string | null;
+  route_link: string | null;
+  goods_accepted: string | null;
   route_stops?: RouteStop[];
 }
 
@@ -372,6 +378,71 @@ export default function RouteDetails() {
               </CardContent>
             </Card>
 
+            {/* Route Tolerance */}
+            {(route.max_deviation_km || route.max_destination_radius_km) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Route Tolerance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {route.max_deviation_km && (
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <div className="text-sm text-muted-foreground mb-1">Max deviation from route</div>
+                        <div className="font-medium text-foreground">{route.max_deviation_km} km</div>
+                      </div>
+                    )}
+                    {route.max_destination_radius_km && (
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <div className="text-sm text-muted-foreground mb-1">Delivery radius from {route.destination_city}</div>
+                        <div className="font-medium text-foreground">{route.max_destination_radius_km} km</div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Trip Description */}
+            {route.trip_description && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-primary" />
+                    Trip Description
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{route.trip_description}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Itinerary Image */}
+            {route.itinerary_image_url && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Planned Itinerary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    <img src={route.itinerary_image_url} alt="Route itinerary" className="w-full max-h-96 object-contain bg-muted" />
+                  </div>
+                  {route.route_link && (
+                    <a href={route.route_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-3 text-sm text-primary hover:underline">
+                      <ArrowRight className="h-3 w-3" /> View Route Link
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Flexibility */}
             {route.open_to_extra_stops && (
               <Card className="border-success/30 bg-success/5">
@@ -394,6 +465,23 @@ export default function RouteDetails() {
                       Request Pickup on This Route
                     </Button>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Request Load CTA for shippers */}
+            {!isOwner && user && route.available_pallets > 0 && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="p-6 text-center">
+                  <Package className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <h3 className="font-heading font-bold text-foreground mb-2">Need space on this route?</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Send a load request to the carrier with your shipment details.</p>
+                  <Button asChild className="w-full">
+                    <Link to={`/routes/${route.id}/request`}>
+                      <Package className="h-4 w-4 mr-2" />
+                      Request Load on This Route
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             )}

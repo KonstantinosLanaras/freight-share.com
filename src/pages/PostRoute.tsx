@@ -50,6 +50,11 @@ export default function PostRoute() {
   const [spaceValue, setSpaceValue] = useState('');
   const [maxPayloadKg, setMaxPayloadKg] = useState('');
   const [maxDeviationKm, setMaxDeviationKm] = useState('');
+  const [maxDestRadiusKm, setMaxDestRadiusKm] = useState('');
+  const [tripDescription, setTripDescription] = useState('');
+  const [routeLink, setRouteLink] = useState('');
+  const [goodsAccepted, setGoodsAccepted] = useState('');
+  const [itineraryFile, setItineraryFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
@@ -154,6 +159,17 @@ export default function PostRoute() {
       // Calculate LDM for internal storage
       const spaceLdm = calculateLdm(spaceType, parseFloat(spaceValue) || 0);
 
+      // Upload itinerary image if provided
+      let itineraryImageUrl: string | null = null;
+      if (itineraryFile && user) {
+        const ext = itineraryFile.name.split('.').pop();
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('itinerary-images').upload(path, itineraryFile);
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from('itinerary-images').getPublicUrl(path);
+        itineraryImageUrl = urlData.publicUrl;
+      }
+
       // Create the route with new fields
       const { data: routeData, error: routeError } = await supabase
         .from('routes')
@@ -175,12 +191,16 @@ export default function PostRoute() {
           status: 'planned',
           open_to_extra_stops: formData.openToExtraStops,
           flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
-          // New capacity fields
           space_type: spaceType,
           space_value: parseFloat(spaceValue) || 0,
           space_ldm: spaceLdm,
           max_payload_kg: parseFloat(maxPayloadKg) || 0,
           max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
+          max_destination_radius_km: maxDestRadiusKm ? parseFloat(maxDestRadiusKm) : null,
+          trip_description: tripDescription || null,
+          route_link: routeLink || null,
+          itinerary_image_url: itineraryImageUrl,
+          goods_accepted: goodsAccepted || null,
         })
         .select()
         .single();
@@ -684,13 +704,78 @@ export default function PostRoute() {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="goodsAccepted">Goods Accepted</Label>
+                <Input
+                  id="goodsAccepted"
+                  placeholder="e.g., General cargo, palletized, dry goods"
+                  className="mt-1"
+                  value={goodsAccepted}
+                  onChange={(e) => setGoodsAccepted(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxDestRadius">Max distance from destination city (km)</Label>
+                <Input
+                  id="maxDestRadius"
+                  type="number" min="0" placeholder="e.g., 50"
+                  className="mt-1 max-w-[200px]"
+                  value={maxDestRadiusKm}
+                  onChange={(e) => setMaxDestRadiusKm(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Example: if your destination is Munich, 50 km means you can deliver within a 50 km radius
+                </p>
+              </div>
+              <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Any additional information about this route (e.g., specific requirements, flexibility on dates, etc.)"
-                  className="mt-1 min-h-[100px]"
+                  placeholder="Any additional information about this route"
+                  className="mt-1 min-h-[80px]"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Trip Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-carrier" />
+                Trip Description
+              </CardTitle>
+              <CardDescription>Describe your trip so shippers understand your route and flexibility</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Main roads, planned stops, flexibility, timing preferences, delivery limitations..."
+                className="min-h-[120px]"
+                value={tripDescription}
+                onChange={(e) => setTripDescription(e.target.value)}
+                disabled={isSubmitting}
+              />
+              <div>
+                <Label>Route / Itinerary Image (optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">Take a screenshot from Google Maps or your preferred route planner and upload it here.</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setItineraryFile(e.target.files?.[0] || null)}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div>
+                <Label>Route Link (optional)</Label>
+                <Input
+                  placeholder="Paste a route-sharing link from Google Maps, etc."
+                  className="mt-1"
+                  value={routeLink}
+                  onChange={(e) => setRouteLink(e.target.value)}
                   disabled={isSubmitting}
                 />
               </div>
