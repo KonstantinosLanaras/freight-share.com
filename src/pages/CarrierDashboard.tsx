@@ -166,13 +166,20 @@ export default function CarrierDashboard() {
 
       setDeviationRequests(requestsWithShippers as DeviationRequest[]);
 
+      // Fetch route request count
+      const { count: routeRequestCount } = await supabase
+        .from('route_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('carrier_id', user.id)
+        .in('status', ['sent', 'viewed', 'in_discussion']);
+
       // Calculate stats
       setStats({
         activeRoutes: routesData?.length || 0,
         matchedLoads: loadsData?.length || 0,
         completed: 0,
         totalEarned: 0,
-        pendingRequests: requestsData?.length || 0
+        pendingRequests: (requestsData?.length || 0) + (routeRequestCount || 0)
       });
     } catch (error) {
       console.error('Error fetching data:', error);
