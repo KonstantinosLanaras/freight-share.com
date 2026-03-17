@@ -24,12 +24,6 @@ interface RouteStop {
   plannedDateTime: string;
 }
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden',
-  'Portugal', 'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Croatia',
-  'Slovenia', 'Slovakia', 'Luxembourg', 'Ireland', 'Finland', 'Norway'
-];
 
 const vehicleTypes = [
   { value: 'standard_truck', label: 'Standard Trailer (13.6m)' },
