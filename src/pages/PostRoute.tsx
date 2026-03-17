@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,12 +24,6 @@ interface RouteStop {
   plannedDateTime: string;
 }
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden',
-  'Portugal', 'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Croatia',
-  'Slovenia', 'Slovakia', 'Luxembourg', 'Ireland', 'Finland', 'Norway'
-];
 
 const vehicleTypes = [
   { value: 'standard_truck', label: 'Standard Trailer (13.6m)' },
@@ -290,20 +285,12 @@ export default function PostRoute() {
                 </div>
                 <div>
                   <Label htmlFor="originCountry">Country <span className="text-destructive">*</span></Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="originPlannedDateTime">Planned Departure <span className="text-destructive">*</span></Label>
@@ -357,20 +344,12 @@ export default function PostRoute() {
                       </div>
                       <div>
                         <Label>Country <span className="text-destructive">*</span></Label>
-                        <Select
+                        <SchengenCountrySelect
                           value={stop.country}
                           onValueChange={(value) => updateStop(stop.id, 'country', value)}
                           disabled={isSubmitting}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countries.map((country) => (
-                              <SelectItem key={country} value={country}>{country}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          className="mt-1"
+                        />
                       </div>
                       <div>
                         <Label>Available pallets <span className="text-destructive">*</span></Label>
@@ -433,20 +412,12 @@ export default function PostRoute() {
                 </div>
                 <div>
                   <Label htmlFor="destinationCountry">Country <span className="text-destructive">*</span></Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="destinationPlannedDateTime">Planned Arrival <span className="text-destructive">*</span></Label>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,10 +26,6 @@ const cargoTypes = [
   { value: 'other', label: 'Other' },
 ];
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden'
-];
 
 export default function PostLoad() {
   const navigate = useNavigate();
@@ -185,20 +182,12 @@ export default function PostLoad() {
                 </div>
                 <div>
                   <Label htmlFor="originCountry">Origin Country</Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
               </div>
 
@@ -218,20 +207,12 @@ export default function PostLoad() {
                 </div>
                 <div>
                   <Label htmlFor="destinationCountry">Destination Country</Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.destinationCountry}
                     onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
               </div>
             </CardContent>

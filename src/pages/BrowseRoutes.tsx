@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { 
   MapPin, 
   Calendar,
@@ -61,11 +62,6 @@ interface RouteStop {
   stop_order: number;
 }
 
-const countries = [
-  'Netherlands', 'Germany', 'France', 'Belgium', 'Italy', 'Spain', 
-  'Poland', 'Austria', 'Switzerland', 'Czech Republic', 'Denmark', 'Sweden',
-  'Portugal', 'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Croatia'
-];
 
 export default function BrowseRoutes() {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -210,35 +206,21 @@ export default function BrowseRoutes() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label>Origin Country</Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={filters.originCountry}
                     onValueChange={(value) => setFilters({ ...filters, originCountry: value })}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Any country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Any country"
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label>Destination Country</Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={filters.destinationCountry}
                     onValueChange={(value) => setFilters({ ...filters, destinationCountry: value })}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Any country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Any country"
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label>Min. Pallets Needed</Label>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { Truck, Package, ArrowLeft, Mail, User, Building, Loader2, Globe, ShieldCheck, Users, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,13 +45,6 @@ const saveRateLimitData = (data: { attempts: number[]; lockoutUntil: number | nu
   }
 };
 
-const EUROPEAN_COUNTRIES = [
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
-  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
-  'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
-  'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-  'Norway', 'Switzerland', 'United Kingdom'
-];
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -488,23 +482,13 @@ export default function Auth() {
 
                     <div>
                       <Label htmlFor="country">Country <span className="text-destructive">*</span></Label>
-                      <Select
+                      <SchengenCountrySelect
                         value={formData.country}
                         onValueChange={(value) => setFormData({ ...formData, country: value })}
                         disabled={isSubmitting}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <Globe className="h-4 w-4 text-muted-foreground mr-2" />
-                          <SelectValue placeholder="Select your country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {EUROPEAN_COUNTRIES.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Select your country"
+                        className="mt-1"
+                      />
                     </div>
 
                     <div>
