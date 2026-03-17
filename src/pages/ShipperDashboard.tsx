@@ -264,6 +264,13 @@ export default function ShipperDashboard() {
               Messages
             </Link>
             <Link 
+              to="/dashboard/shipper/requests"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Send className="h-5 w-5" />
+              My Requests
+            </Link>
+            <Link 
               to="/routes"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
