@@ -180,6 +180,11 @@ const App = () => (
                 <CarrierRequestDetails />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/carrier/insurance" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <CarrierInsuranceSetup />
+              </ProtectedRoute>
+            } />
             {/* Shared Routes */}
             <Route path="/shipment/:id" element={
               <ProtectedRoute>
