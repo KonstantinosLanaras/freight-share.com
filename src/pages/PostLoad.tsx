@@ -182,20 +182,12 @@ export default function PostLoad() {
                 </div>
                 <div>
                   <Label htmlFor="originCountry">Origin Country</Label>
-                  <Select
+                  <SchengenCountrySelect
                     value={formData.originCountry}
                     onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
               </div>
 
