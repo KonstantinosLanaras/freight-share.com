@@ -66,7 +66,7 @@ export default function Auth() {
     country: '',
   });
 
-  // Handle role switching
+  // Handle redirect after auth
   useEffect(() => {
     if (user && userRole) {
       const roleParam = searchParams.get('role');
@@ -77,9 +77,14 @@ export default function Auth() {
         return;
       }
       
-      navigate('/select-role', { replace: true });
+      // If a role was selected on the login form, go directly to that dashboard
+      if (role) {
+        navigate(role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper', { replace: true });
+      } else {
+        navigate('/select-role', { replace: true });
+      }
     }
-  }, [user, userRole, navigate, searchParams]);
+  }, [user, userRole, navigate, searchParams, role]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
