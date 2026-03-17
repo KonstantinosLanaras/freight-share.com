@@ -466,7 +466,9 @@ export default function Auth() {
             /* Auth Form */
             <div className="animate-fade-in">
               <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                {mode === 'login' ? 'Welcome back' : `Create your ${role || ''} account`}
+                {mode === 'login' 
+                  ? `Log in as ${role === 'carrier' ? 'Carrier' : 'Shipper'}` 
+                  : `Create your ${role || ''} account`}
               </h2>
               <p className="text-muted-foreground mb-8">
                 {mode === 'login' 
@@ -474,9 +476,9 @@ export default function Auth() {
                   : 'Fill in your details to get started'}
               </p>
 
-              {mode === 'signup' && role && (
+              {role && (
                 <button 
-                  onClick={() => setStep('role')}
+                  onClick={() => { setStep('role'); setRole(null); }}
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
                 >
                   <ArrowLeft className="h-3 w-3" />
