@@ -3,15 +3,26 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   ArrowLeft, Package, MapPin, Calendar, Euro, Loader2, User, Star,
-  Truck, MessageSquare, CheckCircle, CreditCard, ShieldCheck
+  Truck, MessageSquare, CheckCircle, CreditCard, ShieldCheck, Send,
+  AlertTriangle, Clock, XCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { GoodsConfirmationDialog } from '@/components/payment/GoodsConfirmationDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 interface LoadData {
   id: string;
@@ -63,7 +74,15 @@ export default function LoadDetails() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
+  // Carrier offer form state
+  const [showOfferForm, setShowOfferForm] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerMessage, setOfferMessage] = useState('');
+  const [submittingOffer, setSubmittingOffer] = useState(false);
+  const [carrierExistingOffer, setCarrierExistingOffer] = useState<Offer | null>(null);
+
   const isOwner = user && load && user.id === load.shipper_id;
+  const isCarrier = role === 'carrier';
 
   useEffect(() => {
     if (id) {
@@ -74,6 +93,14 @@ export default function LoadDetails() {
       fetchVerificationStatus();
     }
   }, [id, user]);
+
+  // Check if carrier already submitted an offer
+  useEffect(() => {
+    if (user && isCarrier && offers.length > 0) {
+      const existing = offers.find((o) => o.carrier_id === user.id);
+      setCarrierExistingOffer(existing || null);
+    }
+  }, [offers, user, isCarrier]);
 
   const fetchLoad = async () => {
     try {
@@ -101,7 +128,6 @@ export default function LoadDetails() {
         .order('created_at', { ascending: false });
       if (error) throw error;
 
-      // Fetch carrier profiles for each offer
       const enriched = await Promise.all(
         (data || []).map(async (offer) => {
           const { data: profile } = await supabase
@@ -128,15 +154,96 @@ export default function LoadDetails() {
     setVerificationStatus(data?.verification_status || 'unverified');
   };
 
-  const handleAcceptOffer = (offer: Offer) => {
-    setSelectedOffer(offer);
+  // ── Verification gate ────────────────────────────────────
+  const checkVerification = (returnPath: string): boolean => {
+    if (!user) {
+      toast.info('Please sign in to continue.');
+      navigate(`/auth?returnTo=${encodeURIComponent(returnPath)}`);
+      return false;
+    }
 
-    if (verificationStatus !== 'verified') {
-      toast.info('Please complete business verification before proceeding to payment.');
-      navigate(`/dashboard/shipper/verify?returnTo=/load/${id}`);
+    if (verificationStatus === 'verified') return true;
+
+    if (verificationStatus === 'pending') {
+      toast.info('Your business verification is under review. You cannot proceed yet.');
+      return false;
+    }
+
+    if (verificationStatus === 'rejected') {
+      toast.error('Please update your company details to continue.');
+    } else {
+      toast.info('You must complete your company information before proceeding.');
+    }
+
+    const verifyPath = isCarrier
+      ? `/dashboard/carrier/verify?returnTo=${encodeURIComponent(returnPath)}`
+      : `/dashboard/shipper/verify?returnTo=${encodeURIComponent(returnPath)}`;
+    navigate(verifyPath);
+    return false;
+  };
+
+  // ── Carrier: Make Offer ──────────────────────────────────
+  const handleOpenOfferForm = () => {
+    if (!checkVerification(`/load/${id}`)) return;
+    if (load?.pricing_type === 'fixed' && load.price) {
+      setOfferAmount(String(load.price));
+    }
+    setShowOfferForm(true);
+  };
+
+  const handleSubmitOffer = async () => {
+    if (!user || !load || !offerAmount) return;
+
+    const amount = parseFloat(offerAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid offer amount.');
       return;
     }
 
+    setSubmittingOffer(true);
+    try {
+      const { error } = await supabase.from('offers').insert({
+        load_id: load.id,
+        carrier_id: user.id,
+        price: amount,
+        message: offerMessage.trim() || null,
+      });
+      if (error) throw error;
+
+      toast.success('Offer submitted successfully!');
+      setShowOfferForm(false);
+      setOfferAmount('');
+      setOfferMessage('');
+      fetchOffers();
+    } catch (error: any) {
+      console.error('Offer error:', error);
+      toast.error(error.message || 'Failed to submit offer');
+    } finally {
+      setSubmittingOffer(false);
+    }
+  };
+
+  // ── Shipper: Accept offer & pay ──────────────────────────
+  const handleAcceptOffer = (offer: Offer) => {
+    setSelectedOffer(offer);
+    if (!checkVerification(`/load/${id}`)) return;
+    setShowConfirmation(true);
+  };
+
+  const handleDirectPay = () => {
+    if (!load || !load.price) return;
+    // For fixed price, create a virtual "offer" at listed price
+    // The shipper is paying the listed price directly
+    if (!checkVerification(`/load/${id}`)) return;
+    setSelectedOffer({
+      id: '__direct__',
+      carrier_id: '',
+      price: load.price,
+      message: null,
+      is_accepted: false,
+      created_at: new Date().toISOString(),
+      route_id: null,
+    });
     setShowConfirmation(true);
   };
 
@@ -145,6 +252,15 @@ export default function LoadDetails() {
 
     setPaymentLoading(true);
     try {
+      // For direct pay (no carrier yet), we can't create shipment yet
+      // This should only work when accepting an actual carrier offer
+      if (selectedOffer.id === '__direct__') {
+        toast.info('No carrier has been assigned yet. Please wait for carrier offers or select an existing one.');
+        setPaymentLoading(false);
+        setShowConfirmation(false);
+        return;
+      }
+
       // 1. Accept the offer
       const { error: offerError } = await supabase
         .from('offers')
@@ -231,9 +347,12 @@ export default function LoadDetails() {
   }
 
   const acceptedOffer = offers.find((o) => o.is_accepted);
+  const isPosted = load.status === 'posted';
+  const isFixed = load.pricing_type === 'fixed';
+  const isOpenToOffers = load.pricing_type === 'open_to_offers';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 lg:pb-8">
       {/* Header */}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -241,16 +360,16 @@ export default function LoadDetails() {
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
                 <Package className="h-5 w-5 text-primary" />
-                Load Details
+                {load.origin_city} → {load.destination_city}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                {load.origin_country} → {load.destination_country} · {load.pallets} pallets · {load.cargo_type}
               </p>
             </div>
-            <Badge className="ml-auto capitalize">{load.status}</Badge>
+            <Badge className="capitalize">{load.status}</Badge>
           </div>
         </div>
       </header>
@@ -259,6 +378,7 @@ export default function LoadDetails() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left: Load info */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Shipment Info Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -303,16 +423,58 @@ export default function LoadDetails() {
                     <div className="font-semibold">{load.price ? `€${load.price}` : 'Open'}</div>
                   </div>
                 </div>
+                {load.cargo_notes && (
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <div className="text-sm text-muted-foreground mb-1">Cargo Notes</div>
+                    <p className="text-sm">{load.cargo_notes}</p>
+                  </div>
+                )}
                 {load.notes && (
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="text-sm text-muted-foreground mb-1">Notes</div>
+                    <div className="text-sm text-muted-foreground mb-1">Additional Notes</div>
                     <p className="text-sm">{load.notes}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Offers Section - only for load owner */}
+            {/* ── Carrier: Existing Offer Status ── */}
+            {isCarrier && carrierExistingOffer && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      {carrierExistingOffer.is_accepted ? (
+                        <CheckCircle className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Clock className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">
+                        {carrierExistingOffer.is_accepted ? 'Your Offer Was Accepted!' : 'Offer Submitted'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {carrierExistingOffer.is_accepted
+                          ? 'The shipper has accepted your offer. Check your shipments for next steps.'
+                          : 'Your offer is being reviewed by the shipper.'}
+                      </p>
+                      <div className="mt-3 flex items-center gap-4">
+                        <span className="text-xl font-bold text-foreground">€{carrierExistingOffer.price}</span>
+                        <Badge variant={carrierExistingOffer.is_accepted ? 'default' : 'outline'}>
+                          {carrierExistingOffer.is_accepted ? 'Accepted' : 'Pending'}
+                        </Badge>
+                      </div>
+                      {carrierExistingOffer.message && (
+                        <p className="text-sm text-muted-foreground mt-2 italic">"{carrierExistingOffer.message}"</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── Shipper: Offers Section ── */}
             {isOwner && (
               <Card>
                 <CardHeader>
@@ -374,8 +536,7 @@ export default function LoadDetails() {
                               {offer.message}
                             </div>
                           )}
-                          {/* Accept + Pay button */}
-                          {!acceptedOffer && load.status === 'posted' && (
+                          {!acceptedOffer && isPosted && (
                             <div className="mt-3 flex justify-end">
                               <Button onClick={() => handleAcceptOffer(offer)}>
                                 <CreditCard className="h-4 w-4 mr-2" />
@@ -392,8 +553,9 @@ export default function LoadDetails() {
             )}
           </div>
 
-          {/* Right sidebar */}
+          {/* ── Right Sidebar ── */}
           <div className="space-y-6">
+            {/* Pricing Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -406,7 +568,7 @@ export default function LoadDetails() {
                   {load.price ? `€${load.price}` : 'Open to offers'}
                 </div>
                 <p className="text-sm text-muted-foreground capitalize">
-                  {load.pricing_type === 'fixed' ? 'Fixed price' : 'Accepting carrier offers'}
+                  {isFixed ? 'Fixed price' : 'Accepting carrier offers'}
                 </p>
                 {acceptedOffer && (
                   <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
@@ -415,6 +577,30 @@ export default function LoadDetails() {
                     <div className="text-xs text-muted-foreground mt-1">
                       by {acceptedOffer.carrier_profile?.company_name || 'Carrier'}
                     </div>
+                  </div>
+                )}
+
+                {/* ── Carrier CTAs in sidebar (desktop) ── */}
+                {isCarrier && isPosted && !carrierExistingOffer && (
+                  <div className="mt-6 space-y-3 hidden lg:block">
+                    <Button className="w-full" size="lg" onClick={handleOpenOfferForm}>
+                      <Send className="h-4 w-4 mr-2" />
+                      {isFixed ? `Offer at €${load.price}` : 'Make an Offer'}
+                    </Button>
+                    {isFixed && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        You can also propose a different amount
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Shipper: direct pay CTA for fixed price with offers */}
+                {isOwner && isPosted && isFixed && offers.length > 0 && !acceptedOffer && (
+                  <div className="mt-6 hidden lg:block">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Or accept a carrier offer above to proceed to payment.
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -436,12 +622,111 @@ export default function LoadDetails() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Legal notice */}
+            <div className="p-4 rounded-lg bg-muted/50 border border-border text-xs text-muted-foreground">
+              <p>
+                The carrier is responsible for transport and cargo insurance. Freight Share acts as a platform connecting shippers and carriers and does not provide transport services.
+              </p>
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Goods Confirmation Dialog */}
-      {selectedOffer && (
+      {/* ── Sticky Mobile CTA Bar ── */}
+      {isCarrier && isPosted && !carrierExistingOffer && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 lg:hidden z-50">
+          <div className="container mx-auto flex gap-3">
+            <Button className="flex-1" size="lg" onClick={handleOpenOfferForm}>
+              <Send className="h-4 w-4 mr-2" />
+              {isFixed ? `Offer at €${load.price}` : 'Make an Offer'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Make Offer Dialog ── */}
+      <Dialog open={showOfferForm} onOpenChange={setShowOfferForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              Make an Offer
+            </DialogTitle>
+            <DialogDescription>
+              Submit your price proposal for this load.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Load summary */}
+            <div className="p-4 rounded-lg bg-muted/50 border border-border text-sm">
+              <div className="font-medium text-foreground mb-1">
+                {load.origin_city} → {load.destination_city}
+              </div>
+              <div className="text-muted-foreground">
+                {load.pallets} pallets · {load.cargo_type} · {load.weight_kg} kg
+              </div>
+              {load.price && (
+                <div className="mt-2 text-foreground">
+                  Listed price: <span className="font-bold">€{load.price}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="offer-amount">Your Offer (€)</Label>
+              <div className="relative">
+                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="offer-amount"
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  placeholder="Enter your price"
+                  className="pl-10"
+                  value={offerAmount}
+                  onChange={(e) => setOfferAmount(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="offer-message">Message to Shipper (optional)</Label>
+              <Textarea
+                id="offer-message"
+                placeholder="Add a note about your offer, vehicle, availability..."
+                rows={3}
+                value={offerMessage}
+                onChange={(e) => setOfferMessage(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowOfferForm(false)} disabled={submittingOffer}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitOffer} disabled={!offerAmount || submittingOffer}>
+              {submittingOffer ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Submit Offer
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Goods Confirmation Dialog (Shipper accepting offer) ── */}
+      {selectedOffer && selectedOffer.id !== '__direct__' && (
         <GoodsConfirmationDialog
           open={showConfirmation}
           onOpenChange={setShowConfirmation}
