@@ -469,9 +469,26 @@ export default function CarrierRequestDetails() {
               <Card>
                 <CardHeader><CardTitle className="text-base">Decision</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
-                    <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
-                  </Button>
+                  {!carrierInsurance ? (
+                    <>
+                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
+                        <p className="text-sm text-warning font-medium flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" />
+                          Insurance required to accept
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          You must provide insurance details before accepting load requests.
+                        </p>
+                      </div>
+                      <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
+                        <ShieldCheck className="h-4 w-4 mr-2" /> Add Insurance Details
+                      </Button>
+                    </>
+                  ) : (
+                    <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
+                      <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
+                    </Button>
+                  )}
                   <Button variant="destructive" className="w-full" onClick={handleReject}>
                     <XCircle className="h-4 w-4 mr-2" /> Reject Request
                   </Button>
