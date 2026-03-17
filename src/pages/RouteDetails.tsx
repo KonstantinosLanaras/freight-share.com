@@ -528,8 +528,18 @@ export default function RouteDetails() {
                     )}
                   </div>
                 </div>
+                {carrierProfile?.verification_status && (
+                  <div className="mt-3">
+                    <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Carrier Insurance */}
+            {!isOwner && (
+              <InsuranceSummaryCard insurance={carrierInsurance} />
+            )}
 
             {/* Quick Actions - Owner only */}
             {isOwner && (
