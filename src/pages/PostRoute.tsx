@@ -344,20 +344,12 @@ export default function PostRoute() {
                       </div>
                       <div>
                         <Label>Country <span className="text-destructive">*</span></Label>
-                        <Select
+                        <SchengenCountrySelect
                           value={stop.country}
                           onValueChange={(value) => updateStop(stop.id, 'country', value)}
                           disabled={isSubmitting}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countries.map((country) => (
-                              <SelectItem key={country} value={country}>{country}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          className="mt-1"
+                        />
                       </div>
                       <div>
                         <Label>Available pallets <span className="text-destructive">*</span></Label>
