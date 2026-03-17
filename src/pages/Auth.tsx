@@ -66,7 +66,7 @@ export default function Auth() {
     country: '',
   });
 
-  // Handle role switching
+  // Handle redirect after auth
   useEffect(() => {
     if (user && userRole) {
       const roleParam = searchParams.get('role');
@@ -77,9 +77,14 @@ export default function Auth() {
         return;
       }
       
-      navigate('/select-role', { replace: true });
+      // If a role was selected on the login form, go directly to that dashboard
+      if (role) {
+        navigate(role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper', { replace: true });
+      } else {
+        navigate('/select-role', { replace: true });
+      }
     }
-  }, [user, userRole, navigate, searchParams]);
+  }, [user, userRole, navigate, searchParams, role]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
@@ -94,6 +99,10 @@ export default function Auth() {
         }
       } else {
         setMode('login');
+        if (roleParam === 'shipper' || roleParam === 'carrier') {
+          setRole(roleParam);
+          setStep('details');
+        }
       }
     }
   }, [searchParams, showRoleSwitchWarning]);
@@ -385,14 +394,16 @@ export default function Auth() {
             </span>
           </div>
 
-          {mode === 'signup' && step === 'role' ? (
-            /* Role Selection */
+          {step === 'role' ? (
+            /* Role Selection — shown for both login and signup */
             <div className="animate-fade-in">
               <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                Join FreightShare
+                {mode === 'login' ? 'Welcome back' : 'Join FreightShare'}
               </h2>
               <p className="text-muted-foreground mb-8">
-                Choose how you'll use the platform
+                {mode === 'login' 
+                  ? 'How are you logging in today?' 
+                  : 'Choose how you\'ll use the platform'}
               </p>
 
               <div className="space-y-4">
@@ -406,7 +417,9 @@ export default function Auth() {
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">I'm a Shipper</div>
-                      <div className="text-sm text-muted-foreground">Post loads and find carriers</div>
+                      <div className="text-sm text-muted-foreground">
+                        {mode === 'login' ? 'Access your shipper dashboard' : 'Post loads and find carriers'}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -421,27 +434,45 @@ export default function Auth() {
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">I'm a Carrier</div>
-                      <div className="text-sm text-muted-foreground">Find loads and grow your business</div>
+                      <div className="text-sm text-muted-foreground">
+                        {mode === 'login' ? 'Access your carrier dashboard' : 'Find loads and grow your business'}
+                      </div>
                     </div>
                   </div>
                 </button>
               </div>
 
               <p className="mt-8 text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <button 
-                  onClick={() => setMode('login')}
-                  className="text-primary hover:underline font-medium"
-                >
-                  Log in
-                </button>
+                {mode === 'login' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <button 
+                      onClick={() => { setMode('signup'); setStep('role'); setRole(null); }}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Sign up
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <button 
+                      onClick={() => { setMode('login'); setStep('role'); setRole(null); }}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Log in
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           ) : (
             /* Auth Form */
             <div className="animate-fade-in">
               <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                {mode === 'login' ? 'Welcome back' : `Create your ${role || ''} account`}
+                {mode === 'login' 
+                  ? `Log in as ${role === 'carrier' ? 'Carrier' : 'Shipper'}` 
+                  : `Create your ${role || ''} account`}
               </h2>
               <p className="text-muted-foreground mb-8">
                 {mode === 'login' 
@@ -449,9 +480,9 @@ export default function Auth() {
                   : 'Fill in your details to get started'}
               </p>
 
-              {mode === 'signup' && role && (
+              {role && (
                 <button 
-                  onClick={() => setStep('role')}
+                  onClick={() => { setStep('role'); setRole(null); }}
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
                 >
                   <ArrowLeft className="h-3 w-3" />
@@ -572,7 +603,7 @@ export default function Auth() {
                   <>
                     Don't have an account?{' '}
                     <button 
-                      onClick={() => { setMode('signup'); setStep('role'); }}
+                      onClick={() => { setMode('signup'); setStep('role'); setRole(null); }}
                       className="text-primary hover:underline font-medium"
                     >
                       Sign up
@@ -582,7 +613,7 @@ export default function Auth() {
                   <>
                     Already have an account?{' '}
                     <button 
-                      onClick={() => setMode('login')}
+                      onClick={() => { setMode('login'); setStep('role'); setRole(null); }}
                       className="text-primary hover:underline font-medium"
                     >
                       Log in
