@@ -70,6 +70,12 @@ interface Route {
   flexibility_note: string | null;
   created_at: string;
   carrier_id: string;
+  max_deviation_km: number | null;
+  max_destination_radius_km: number | null;
+  trip_description: string | null;
+  itinerary_image_url: string | null;
+  route_link: string | null;
+  goods_accepted: string | null;
   route_stops?: RouteStop[];
 }
 
