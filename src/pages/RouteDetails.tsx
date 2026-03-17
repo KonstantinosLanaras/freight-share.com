@@ -39,6 +39,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { DeviationRequestForm } from '@/components/routes/DeviationRequestForm';
+import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
+import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
