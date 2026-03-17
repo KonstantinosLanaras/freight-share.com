@@ -96,8 +96,8 @@ export default function RouteDetails() {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deviationRequestOpen, setDeviationRequestOpen] = useState(false);
-  const [carrierProfile, setCarrierProfile] = useState<{ full_name: string | null; company_name: string | null } | null>(null);
-
+  const [carrierProfile, setCarrierProfile] = useState<{ full_name: string | null; company_name: string | null; verification_status: string | null } | null>(null);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   useEffect(() => {
     if (id) {
       fetchRoute();
