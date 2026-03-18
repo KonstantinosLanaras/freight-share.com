@@ -173,10 +173,10 @@ export default function CarrierInsuranceSetup() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              Insurance Information
+              Liability Policy Details
             </CardTitle>
             <CardDescription>
-              Enter your transport insurance details below
+              Your transport liability insurance under CMR convention
             </CardDescription>
           </CardHeader>
           <CardContent>
