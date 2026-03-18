@@ -771,10 +771,11 @@ export default function LoadDetails() {
         <GoodsConfirmationDialog
           open={showConfirmation}
           onOpenChange={setShowConfirmation}
-          onConfirm={handleProceedToPayment}
+          onConfirm={(decision) => handleProceedToPayment(decision)}
           isLoading={paymentLoading}
           cargoType={load.cargo_type}
           price={selectedOffer.price}
+          weightKg={load.weight_kg}
           carrierInsurance={selectedOffer.carrier_insurance || undefined}
         />
       )}
