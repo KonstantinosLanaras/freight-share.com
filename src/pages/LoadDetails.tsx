@@ -282,7 +282,7 @@ export default function LoadDetails() {
       fetchOffers();
     } catch (error: any) {
       console.error('Offer error:', error);
-      toast.error(error.message || 'Failed to submit offer');
+      toast.error(getSafeErrorMessage(error, 'Failed to submit offer'));
     } finally {
       setSubmittingOffer(false);
     }
