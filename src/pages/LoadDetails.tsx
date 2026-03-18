@@ -47,6 +47,15 @@ interface LoadData {
   created_at: string;
 }
 
+interface CarrierInsuranceInfo {
+  provider_name: string;
+  coverage_type: string;
+  coverage_limit_eur: number;
+  expiration_date: string;
+  status: string;
+  policy_number?: string | null;
+}
+
 interface Offer {
   id: string;
   carrier_id: string;
@@ -60,6 +69,7 @@ interface Offer {
     company_name: string | null;
     verification_status: string | null;
   };
+  carrier_insurance?: CarrierInsuranceInfo | null;
 }
 
 export default function LoadDetails() {
@@ -130,12 +140,15 @@ export default function LoadDetails() {
 
       const enriched = await Promise.all(
         (data || []).map(async (offer) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, company_name, verification_status')
-            .eq('id', offer.carrier_id)
-            .single();
-          return { ...offer, carrier_profile: profile || undefined };
+          const [profileRes, insuranceRes] = await Promise.all([
+            supabase.from('profiles').select('full_name, company_name, verification_status').eq('id', offer.carrier_id).single(),
+            supabase.from('carrier_insurance').select('provider_name, coverage_type, coverage_limit_eur, expiration_date, status, policy_number').eq('carrier_id', offer.carrier_id).maybeSingle(),
+          ]);
+          return {
+            ...offer,
+            carrier_profile: profileRes.data || undefined,
+            carrier_insurance: insuranceRes.data || null,
+          };
         })
       );
       setOffers(enriched);
@@ -491,61 +504,89 @@ export default function LoadDetails() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {offers.map((offer) => (
-                        <div
-                          key={offer.id}
-                          className={`p-4 rounded-lg border ${
-                            offer.is_accepted
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/30'
-                          } transition-colors`}
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <User className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <div className="font-medium">
-                                  {offer.carrier_profile?.company_name || offer.carrier_profile?.full_name || 'Carrier'}
+                      {offers.map((offer) => {
+                        const insuranceExpired = offer.carrier_insurance
+                          ? new Date(offer.carrier_insurance.expiration_date) < new Date()
+                          : false;
+
+                        return (
+                          <div
+                            key={offer.id}
+                            className={`p-4 rounded-lg border ${
+                              offer.is_accepted
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/30'
+                            } transition-colors`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <User className="h-5 w-5 text-primary" />
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  {offer.carrier_profile?.verification_status === 'verified' && (
+                                <div>
+                                  <div className="font-medium">
+                                    {offer.carrier_profile?.company_name || offer.carrier_profile?.full_name || 'Carrier'}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                                    {offer.carrier_profile?.verification_status === 'verified' && (
+                                      <Badge variant="outline" className="text-xs text-primary border-primary/30">
+                                        <ShieldCheck className="h-3 w-3 mr-1" />
+                                        Verified
+                                      </Badge>
+                                    )}
+                                    <span>{format(new Date(offer.created_at), 'MMM d, yyyy')}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xl font-bold text-foreground">€{offer.price}</div>
+                                {offer.is_accepted && (
+                                  <Badge className="bg-primary text-primary-foreground mt-1">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Accepted
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Carrier Insurance Info — visible at offer comparison stage */}
+                            <div className="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
+                              <div className="flex items-center gap-2 text-sm">
+                                <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                                {offer.carrier_insurance && !insuranceExpired ? (
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-foreground font-medium">
+                                      Carrier liability coverage up to €{offer.carrier_insurance.coverage_limit_eur.toLocaleString()}
+                                    </span>
                                     <Badge variant="outline" className="text-xs text-primary border-primary/30">
-                                      <ShieldCheck className="h-3 w-3 mr-1" />
-                                      Verified
+                                      {offer.carrier_insurance.status === 'verified' ? 'Verified' : 'Provided'}
                                     </Badge>
-                                  )}
-                                  <span>{format(new Date(offer.created_at), 'MMM d, yyyy')}</span>
-                                </div>
+                                  </div>
+                                ) : insuranceExpired ? (
+                                  <span className="text-destructive text-sm">Carrier insurance expired</span>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">No carrier insurance information provided</span>
+                                )}
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-xl font-bold text-foreground">€{offer.price}</div>
-                              {offer.is_accepted && (
-                                <Badge className="bg-primary text-primary-foreground mt-1">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Accepted
-                                </Badge>
-                              )}
-                            </div>
+
+                            {offer.message && (
+                              <div className="mt-3 p-3 rounded bg-muted/50 text-sm text-muted-foreground">
+                                <MessageSquare className="h-3 w-3 inline mr-1" />
+                                {offer.message}
+                              </div>
+                            )}
+                            {!acceptedOffer && isPosted && (
+                              <div className="mt-3 flex justify-end">
+                                <Button onClick={() => handleAcceptOffer(offer)}>
+                                  <CreditCard className="h-4 w-4 mr-2" />
+                                  Accept & Proceed to Payment
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                          {offer.message && (
-                            <div className="mt-3 p-3 rounded bg-muted/50 text-sm text-muted-foreground">
-                              <MessageSquare className="h-3 w-3 inline mr-1" />
-                              {offer.message}
-                            </div>
-                          )}
-                          {!acceptedOffer && isPosted && (
-                            <div className="mt-3 flex justify-end">
-                              <Button onClick={() => handleAcceptOffer(offer)}>
-                                <CreditCard className="h-4 w-4 mr-2" />
-                                Accept & Proceed to Payment
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>
@@ -734,6 +775,7 @@ export default function LoadDetails() {
           isLoading={paymentLoading}
           cargoType={load.cargo_type}
           price={selectedOffer.price}
+          carrierInsurance={selectedOffer.carrier_insurance || undefined}
         />
       )}
     </div>
