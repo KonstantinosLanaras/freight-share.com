@@ -11,10 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const COVERAGE_TYPES = [
-  { value: 'cargo', label: 'Cargo Insurance' },
-  { value: 'liability', label: 'General Liability' },
-  { value: 'cargo_and_liability', label: 'Cargo + Liability' },
-  { value: 'comprehensive', label: 'Comprehensive Transport' },
+  { value: 'cmt_liability', label: 'CMR/CMT Liability' },
+  { value: 'general_liability', label: 'General Transport Liability' },
+  { value: 'comprehensive', label: 'Comprehensive Liability' },
 ];
 
 export default function CarrierInsuranceSetup() {
@@ -151,10 +150,10 @@ export default function CarrierInsuranceSetup() {
             </Button>
             <div>
               <h1 className="text-xl font-heading font-bold text-foreground">
-                {existingInsurance ? 'Update Insurance Details' : 'Add Your Insurance Details'}
+                {existingInsurance ? 'Update Liability Insurance' : 'Carrier Liability Insurance'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Provide your transport insurance to accept load requests
+                Add your transport liability policy to your carrier profile
               </p>
             </div>
           </div>
@@ -165,8 +164,8 @@ export default function CarrierInsuranceSetup() {
         <div className="bg-muted/50 rounded-lg p-4 mb-6 flex gap-3">
           <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Why insurance matters</p>
-            <p>Providing insurance information builds trust with shippers. You must have insurance details on file before accepting load requests.</p>
+            <p className="font-medium text-foreground mb-1">Liability vs. cargo insurance</p>
+            <p>This is your <strong>transport liability policy</strong> — it covers your legal responsibility as a carrier under CMR. Cargo protection for individual shipments is offered separately to shippers during checkout.</p>
           </div>
         </div>
 
@@ -174,10 +173,10 @@ export default function CarrierInsuranceSetup() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              Insurance Information
+              Liability Policy Details
             </CardTitle>
             <CardDescription>
-              Enter your transport insurance details below
+              Your transport liability insurance under CMR convention
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -299,7 +298,7 @@ export default function CarrierInsuranceSetup() {
 
         {/* Legal disclaimer */}
         <p className="text-xs text-muted-foreground text-center mt-6 italic">
-          The carrier is responsible for transport and cargo insurance. Freight Share acts as a platform connecting shippers and carriers and does not provide transport services.
+          This is your carrier liability policy. Per-shipment cargo protection is handled separately and offered to shippers during the transaction flow.
         </p>
       </main>
     </div>

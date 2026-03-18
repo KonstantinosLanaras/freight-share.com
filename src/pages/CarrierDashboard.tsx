@@ -447,7 +447,7 @@ export default function CarrierDashboard() {
                 </div>
               )}
 
-              {/* Insurance Banner */}
+              {/* Carrier Liability Insurance Banner */}
               {!carrierInsurance && !showVerificationForm && (
                 <Card className="mb-8 border-l-4 border-l-accent bg-accent/5">
                   <CardContent className="p-4 lg:p-6">
@@ -457,15 +457,15 @@ export default function CarrierDashboard() {
                           <ShieldCheck className="h-5 w-5 text-accent" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground mb-1">Add Insurance Details</h3>
+                          <h3 className="font-semibold text-foreground mb-1">Carrier Liability Insurance</h3>
                           <p className="text-sm text-muted-foreground">
-                            Provide your transport insurance to accept load requests and build shipper trust.
+                            Add your transport liability policy to your profile. This helps shippers assess coverage and builds trust.
                           </p>
                         </div>
                       </div>
                       <Button variant="outline" onClick={() => navigate('/dashboard/carrier/insurance')}>
                         <ShieldCheck className="h-4 w-4 mr-2" />
-                        Add Insurance
+                        Add Policy
                       </Button>
                     </div>
                   </CardContent>
