@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
+import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+
+// ── Types ──────────────────────────────────────────────────
 
 interface LoadData {
   id: string;
@@ -72,27 +75,53 @@ interface Offer {
   carrier_insurance?: CarrierInsuranceInfo | null;
 }
 
+// ── Flow states ────────────────────────────────────────────
+// The "Make an Offer" / "Accept Offer" flow is sequential:
+//   idle → verificationGate → offerForm → (submitted)
+//   idle → verificationGate → goodsConfirmation → payment
+type FlowState =
+  | 'idle'
+  | 'verification_gate'    // blocking: must verify first
+  | 'offer_form'           // carrier: composing offer
+  | 'goods_confirmation'   // shipper: reviewing + insurance + terms
+  | 'processing_payment';  // shipper: payment in flight
+
+// What action triggered the flow (so we can resume after verification)
+type PendingAction =
+  | { type: 'make_offer' }
+  | { type: 'accept_offer'; offer: Offer };
+
+// ── Component ──────────────────────────────────────────────
+
 export default function LoadDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+
+  // Data
   const [load, setLoad] = useState<LoadData | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
-  // Carrier offer form state
-  const [showOfferForm, setShowOfferForm] = useState(false);
+  // Flow state machine
+  const [flowState, setFlowState] = useState<FlowState>('idle');
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+
+  // Offer form
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [submittingOffer, setSubmittingOffer] = useState(false);
   const [carrierExistingOffer, setCarrierExistingOffer] = useState<Offer | null>(null);
 
+  // Payment
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
   const isOwner = user && load && user.id === load.shipper_id;
   const isCarrier = role === 'carrier';
+
+  // ── Data fetching ────────────────────────────────────────
 
   useEffect(() => {
     if (id) {
@@ -104,7 +133,6 @@ export default function LoadDetails() {
     }
   }, [id, user]);
 
-  // Check if carrier already submitted an offer
   useEffect(() => {
     if (user && isCarrier && offers.length > 0) {
       const existing = offers.find((o) => o.carrier_id === user.id);
@@ -167,42 +195,58 @@ export default function LoadDetails() {
     setVerificationStatus(data?.verification_status || 'unverified');
   };
 
-  // ── Verification gate ────────────────────────────────────
-  const checkVerification = (returnPath: string): boolean => {
+  // ── Flow control ─────────────────────────────────────────
+
+  const isVerified = verificationStatus === 'verified';
+
+  /**
+   * Starts a flow action. If not verified, shows the verification gate.
+   * If verified, proceeds directly to the action.
+   */
+  const startAction = (action: PendingAction) => {
     if (!user) {
-      toast.info('Please sign in to continue.');
-      navigate(`/auth?returnTo=${encodeURIComponent(returnPath)}`);
-      return false;
+      navigate(`/auth?mode=login&returnTo=${encodeURIComponent(`/load/${id}`)}`);
+      return;
     }
 
-    if (verificationStatus === 'verified') return true;
+    setPendingAction(action);
 
-    if (verificationStatus === 'pending') {
-      toast.info('Your business verification is under review. You cannot proceed yet.');
-      return false;
+    if (!isVerified) {
+      setFlowState('verification_gate');
+      return;
     }
 
-    if (verificationStatus === 'rejected') {
-      toast.error('Please update your company details to continue.');
-    } else {
-      toast.info('You must complete your company information before proceeding.');
-    }
-
-    const verifyPath = isCarrier
-      ? `/dashboard/carrier/verify?returnTo=${encodeURIComponent(returnPath)}`
-      : `/dashboard/shipper/verify?returnTo=${encodeURIComponent(returnPath)}`;
-    navigate(verifyPath);
-    return false;
+    executeAction(action);
   };
 
-  // ── Carrier: Make Offer ──────────────────────────────────
-  const handleOpenOfferForm = () => {
-    if (!checkVerification(`/load/${id}`)) return;
-    if (load?.pricing_type === 'fixed' && load.price) {
-      setOfferAmount(String(load.price));
+  /**
+   * Executes the pending action (called after verification passes or if already verified).
+   */
+  const executeAction = (action: PendingAction) => {
+    switch (action.type) {
+      case 'make_offer':
+        if (load?.pricing_type === 'fixed' && load.price) {
+          setOfferAmount(String(load.price));
+        }
+        setFlowState('offer_form');
+        break;
+
+      case 'accept_offer':
+        setSelectedOffer(action.offer);
+        setFlowState('goods_confirmation');
+        break;
     }
-    setShowOfferForm(true);
   };
+
+  const resetFlow = () => {
+    setFlowState('idle');
+    setPendingAction(null);
+    setSelectedOffer(null);
+    setOfferAmount('');
+    setOfferMessage('');
+  };
+
+  // ── Carrier: Submit offer ────────────────────────────────
 
   const handleSubmitOffer = async () => {
     if (!user || !load || !offerAmount) return;
@@ -224,9 +268,7 @@ export default function LoadDetails() {
       if (error) throw error;
 
       toast.success('Offer submitted successfully!');
-      setShowOfferForm(false);
-      setOfferAmount('');
-      setOfferMessage('');
+      resetFlow();
       fetchOffers();
     } catch (error: any) {
       console.error('Offer error:', error);
@@ -236,44 +278,15 @@ export default function LoadDetails() {
     }
   };
 
-  // ── Shipper: Accept offer & pay ──────────────────────────
-  const handleAcceptOffer = (offer: Offer) => {
-    setSelectedOffer(offer);
-    if (!checkVerification(`/load/${id}`)) return;
-    setShowConfirmation(true);
-  };
-
-  const handleDirectPay = () => {
-    if (!load || !load.price) return;
-    // For fixed price, create a virtual "offer" at listed price
-    // The shipper is paying the listed price directly
-    if (!checkVerification(`/load/${id}`)) return;
-    setSelectedOffer({
-      id: '__direct__',
-      carrier_id: '',
-      price: load.price,
-      message: null,
-      is_accepted: false,
-      created_at: new Date().toISOString(),
-      route_id: null,
-    });
-    setShowConfirmation(true);
-  };
+  // ── Shipper: Accept offer → Goods confirmation → Payment ─
 
   const handleProceedToPayment = async (insuranceDecision?: InsuranceDecision) => {
     if (!selectedOffer || !load || !user) return;
 
     setPaymentLoading(true);
-    try {
-      // For direct pay (no carrier yet), we can't create shipment yet
-      // This should only work when accepting an actual carrier offer
-      if (selectedOffer.id === '__direct__') {
-        toast.info('No carrier has been assigned yet. Please wait for carrier offers or select an existing one.');
-        setPaymentLoading(false);
-        setShowConfirmation(false);
-        return;
-      }
+    setFlowState('processing_payment');
 
+    try {
       // 1. Accept the offer
       const { error: offerError } = await supabase
         .from('offers')
@@ -328,12 +341,14 @@ export default function LoadDetails() {
       }
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'Failed to initiate payment');
+      toast.error(error.message || 'Failed to initiate payment. Please try again.');
+      setFlowState('goods_confirmation'); // Return to confirmation, don't dead-end
     } finally {
       setPaymentLoading(false);
-      setShowConfirmation(false);
     }
   };
+
+  // ── Helpers ──────────────────────────────────────────────
 
   const formatDateRange = (from: string, to: string) => {
     const fromDate = new Date(from);
@@ -341,6 +356,8 @@ export default function LoadDetails() {
     if (from === to) return format(fromDate, 'MMM d, yyyy');
     return `${format(fromDate, 'MMM d')} – ${format(toDate, 'd, yyyy')}`;
   };
+
+  // ── Loading / Not found ──────────────────────────────────
 
   if (loading) {
     return (
@@ -362,7 +379,8 @@ export default function LoadDetails() {
   const acceptedOffer = offers.find((o) => o.is_accepted);
   const isPosted = load.status === 'posted';
   const isFixed = load.pricing_type === 'fixed';
-  const isOpenToOffers = load.pricing_type === 'open_to_offers';
+
+  // ── Render ───────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-8">
@@ -549,7 +567,7 @@ export default function LoadDetails() {
                               </div>
                             </div>
 
-                            {/* Carrier Insurance Info — visible at offer comparison stage */}
+                            {/* Carrier Insurance Info */}
                             <div className="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
                               <div className="flex items-center gap-2 text-sm">
                                 <ShieldCheck className="h-4 w-4 text-muted-foreground" />
@@ -578,7 +596,7 @@ export default function LoadDetails() {
                             )}
                             {!acceptedOffer && isPosted && (
                               <div className="mt-3 flex justify-end">
-                                <Button onClick={() => handleAcceptOffer(offer)}>
+                                <Button onClick={() => startAction({ type: 'accept_offer', offer })}>
                                   <CreditCard className="h-4 w-4 mr-2" />
                                   Accept & Proceed to Payment
                                 </Button>
@@ -621,10 +639,14 @@ export default function LoadDetails() {
                   </div>
                 )}
 
-                {/* ── Carrier CTAs in sidebar (desktop) ── */}
+                {/* Carrier CTAs in sidebar (desktop) */}
                 {isCarrier && isPosted && !carrierExistingOffer && (
                   <div className="mt-6 space-y-3 hidden lg:block">
-                    <Button className="w-full" size="lg" onClick={handleOpenOfferForm}>
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={() => startAction({ type: 'make_offer' })}
+                    >
                       <Send className="h-4 w-4 mr-2" />
                       {isFixed ? `Offer at €${load.price}` : 'Make an Offer'}
                     </Button>
@@ -636,7 +658,7 @@ export default function LoadDetails() {
                   </div>
                 )}
 
-                {/* Shipper: direct pay CTA for fixed price with offers */}
+                {/* Shipper hint */}
                 {isOwner && isPosted && isFixed && offers.length > 0 && !acceptedOffer && (
                   <div className="mt-6 hidden lg:block">
                     <p className="text-xs text-muted-foreground mb-2">
@@ -667,7 +689,7 @@ export default function LoadDetails() {
             {/* Legal notice */}
             <div className="p-4 rounded-lg bg-muted/50 border border-border text-xs text-muted-foreground">
               <p>
-                The carrier is responsible for transport and cargo insurance. Freight Share acts as a platform connecting shippers and carriers and does not provide transport services.
+                The carrier is responsible for transport and cargo insurance. FreightShare acts as a platform connecting shippers and carriers and does not provide transport services.
               </p>
             </div>
           </div>
@@ -678,7 +700,11 @@ export default function LoadDetails() {
       {isCarrier && isPosted && !carrierExistingOffer && (
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 lg:hidden z-50">
           <div className="container mx-auto flex gap-3">
-            <Button className="flex-1" size="lg" onClick={handleOpenOfferForm}>
+            <Button
+              className="flex-1"
+              size="lg"
+              onClick={() => startAction({ type: 'make_offer' })}
+            >
               <Send className="h-4 w-4 mr-2" />
               {isFixed ? `Offer at €${load.price}` : 'Make an Offer'}
             </Button>
@@ -686,8 +712,26 @@ export default function LoadDetails() {
         </div>
       )}
 
-      {/* ── Make Offer Dialog ── */}
-      <Dialog open={showOfferForm} onOpenChange={setShowOfferForm}>
+      {/* ── FLOW DIALOGS ── */}
+
+      {/* 1. Verification Gate */}
+      <VerificationGateDialog
+        open={flowState === 'verification_gate'}
+        onOpenChange={(open) => {
+          if (!open) resetFlow();
+        }}
+        verificationStatus={verificationStatus}
+        role={role as 'shipper' | 'carrier' | null}
+        returnPath={`/load/${id}`}
+      />
+
+      {/* 2. Make Offer Dialog (Carrier) */}
+      <Dialog
+        open={flowState === 'offer_form'}
+        onOpenChange={(open) => {
+          if (!open) resetFlow();
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -746,7 +790,7 @@ export default function LoadDetails() {
           </div>
 
           <div className="flex gap-3 justify-end">
-            <Button variant="outline" onClick={() => setShowOfferForm(false)} disabled={submittingOffer}>
+            <Button variant="outline" onClick={resetFlow} disabled={submittingOffer}>
               Cancel
             </Button>
             <Button onClick={handleSubmitOffer} disabled={!offerAmount || submittingOffer}>
@@ -766,11 +810,13 @@ export default function LoadDetails() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Goods Confirmation Dialog (Shipper accepting offer) ── */}
-      {selectedOffer && selectedOffer.id !== '__direct__' && (
+      {/* 3. Goods Confirmation → Insurance → Payment (Shipper) */}
+      {selectedOffer && (
         <GoodsConfirmationDialog
-          open={showConfirmation}
-          onOpenChange={setShowConfirmation}
+          open={flowState === 'goods_confirmation' || flowState === 'processing_payment'}
+          onOpenChange={(open) => {
+            if (!open && flowState !== 'processing_payment') resetFlow();
+          }}
           onConfirm={(decision) => handleProceedToPayment(decision)}
           isLoading={paymentLoading}
           cargoType={load.cargo_type}
