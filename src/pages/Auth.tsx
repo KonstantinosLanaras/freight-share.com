@@ -231,7 +231,7 @@ export default function Auth() {
           } else if (error.message.includes('Invalid login credentials')) {
             toast.error(`Invalid email or password. ${rateCheck.remainingAttempts} attempt${rateCheck.remainingAttempts !== 1 ? 's' : ''} remaining.`);
           } else {
-            toast.error(error.message);
+            toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
           }
         } else {
           clearRateLimit();

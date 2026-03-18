@@ -361,7 +361,7 @@ export default function LoadDetails() {
       }
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'Failed to initiate payment. Please try again.');
+      toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));
       setFlowState('goods_confirmation'); // Return to confirmation, don't dead-end
     } finally {
       setPaymentLoading(false);

@@ -225,7 +225,7 @@ export default function PostRoute() {
       navigate('/dashboard/carrier/routes');
     } catch (error: any) {
       console.error('Error posting route:', error);
-      toast.error(error.message || 'Failed to post route');
+      toast.error(getSafeErrorMessage(error, 'Failed to post route'));
     } finally {
       setIsSubmitting(false);
     }
