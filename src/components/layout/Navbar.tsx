@@ -84,6 +84,7 @@ export const Navbar = () => {
 
           {/* Auth Buttons + Language Selector - Desktop */}
           <div className="hidden md:flex items-center gap-3">
+            <DemoModeToggle />
             <LanguageSelector />
             {!loading && user ? (
               <>
