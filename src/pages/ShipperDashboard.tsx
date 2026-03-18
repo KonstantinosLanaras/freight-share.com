@@ -119,7 +119,25 @@ export default function ShipperDashboard() {
         .limit(10);
 
       if (error) throw error;
-      setLoads(loadsData || []);
+
+      // Fetch offer counts for each load
+      const loadIds = (loadsData || []).map(l => l.id);
+      let offerCountMap: Record<string, number> = {};
+      if (loadIds.length > 0) {
+        const { data: offersData } = await supabase
+          .from('offers')
+          .select('load_id')
+          .in('load_id', loadIds);
+        (offersData || []).forEach(o => {
+          offerCountMap[o.load_id] = (offerCountMap[o.load_id] || 0) + 1;
+        });
+      }
+
+      const loadsWithOffers = (loadsData || []).map(l => ({
+        ...l,
+        offer_count: offerCountMap[l.id] || 0,
+      }));
+      setLoads(loadsWithOffers);
 
       // Fetch pickup requests made by this shipper
       const { data: requestsData } = await supabase
@@ -145,16 +163,16 @@ export default function ShipperDashboard() {
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
       // Calculate stats
-      const allLoads = loadsData || [];
+      const allLoads = loadsWithOffers;
       const active = allLoads.filter(l => ['posted', 'accepted', 'paid', 'picked_up'].includes(l.status)).length;
       const completed = allLoads.filter(l => l.status === 'completed').length;
       const totalSpent = allLoads
         .filter(l => l.status === 'completed' && l.price)
         .reduce((sum, l) => sum + (l.price || 0), 0);
       const pendingPickups = requestsData?.filter(r => r.status === 'pending' || r.status === 'counter_offer').length || 0;
+      const totalPendingOffers = allLoads.reduce((sum, l) => sum + (l.offer_count || 0), 0);
 
-      // Count pending offers (would need to join with offers table)
-      setStats({ active, pending: 0, completed, totalSpent, pickupRequests: pendingPickups });
+      setStats({ active, pending: totalPendingOffers, completed, totalSpent, pickupRequests: pendingPickups });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
