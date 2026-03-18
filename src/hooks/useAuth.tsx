@@ -7,8 +7,13 @@ type AppRole = 'shipper' | 'carrier' | 'admin';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  /** The currently active role (for routing/display) */
   role: AppRole | null;
+  /** All roles assigned to this user */
+  roles: AppRole[];
   loading: boolean;
+  /** Switch the active role (only works if user has that role) */
+  setActiveRole: (role: AppRole) => void;
   signUp: (email: string, password: string, fullName: string, role: AppRole, companyName?: string, country?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -19,46 +24,60 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [activeRole, setActiveRoleState] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRoles = async (userId: string) => {
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('user_id', userId);
     
-    if (!error && data) {
-      setRole(data.role as AppRole);
+    if (!error && data && data.length > 0) {
+      const fetchedRoles = data.map(d => d.role as AppRole);
+      setRoles(fetchedRoles);
+      
+      // If no active role set yet, or current active role isn't in the list, pick first
+      setActiveRoleState(prev => {
+        if (prev && fetchedRoles.includes(prev)) return prev;
+        return fetchedRoles[0];
+      });
+    } else {
+      setRoles([]);
+      setActiveRoleState(null);
+    }
+  };
+
+  const setActiveRole = (role: AppRole) => {
+    if (roles.includes(role)) {
+      setActiveRoleState(role);
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer role fetching with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            fetchUserRole(session.user.id);
+            fetchUserRoles(session.user.id);
           }, 0);
         } else {
-          setRole(null);
+          setRoles([]);
+          setActiveRoleState(null);
         }
         setLoading(false);
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserRoles(session.user.id);
       }
       setLoading(false);
     });
@@ -106,11 +125,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
-    setRole(null);
+    setRoles([]);
+    setActiveRoleState(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      role: activeRole, 
+      roles, 
+      loading, 
+      setActiveRole, 
+      signUp, 
+      signIn, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );
