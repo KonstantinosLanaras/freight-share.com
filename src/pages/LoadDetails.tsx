@@ -12,6 +12,7 @@ import {
   AlertTriangle, Clock, XCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -97,6 +98,7 @@ export default function LoadDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { isDemoMode, checkVerification, shouldSimulatePayment } = useDemoMode();
 
   // Data
   const [load, setLoad] = useState<LoadData | null>(null);
@@ -211,9 +213,16 @@ export default function LoadDetails() {
 
     setPendingAction(action);
 
-    if (!isVerified) {
+    if (!checkVerification(verificationStatus)) {
       setFlowState('verification_gate');
       return;
+    }
+
+    if (isDemoMode && verificationStatus !== 'verified') {
+      toast.info('Verification required in live environment', {
+        description: 'In demo mode, this step is bypassed.',
+        duration: 3000,
+      });
     }
 
     executeAction(action);
@@ -311,14 +320,24 @@ export default function LoadDetails() {
           carrier_id: selectedOffer.carrier_id,
           final_price: selectedOffer.price,
           status: 'accepted',
-          payment_status: 'pending',
+          payment_status: shouldSimulatePayment() ? 'paid' : 'pending',
           terms_version: '1.0',
         })
         .select('id')
         .single();
       if (shipmentError) throw shipmentError;
 
-      // 4. Call payment edge function
+      // 4. Demo mode: simulate payment success
+      if (shouldSimulatePayment()) {
+        toast.success('Demo: Payment simulated successfully!', {
+          description: 'In production, you would be redirected to Stripe checkout.',
+          duration: 5000,
+        });
+        navigate(`/shipment/${shipment.id}`);
+        return;
+      }
+
+      // 5. Production: real payment
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
         'create-shipment-payment',
         {

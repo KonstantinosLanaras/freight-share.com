@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { DemoModeToggle } from '@/components/DemoModeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,6 +84,7 @@ export const Navbar = () => {
 
           {/* Auth Buttons + Language Selector - Desktop */}
           <div className="hidden md:flex items-center gap-3">
+            <DemoModeToggle />
             <LanguageSelector />
             {!loading && user ? (
               <>
@@ -131,6 +133,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
+            <DemoModeToggle />
             <LanguageSelector />
             <button
               className="p-2"

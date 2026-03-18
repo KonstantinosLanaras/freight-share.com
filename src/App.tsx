@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ScrollToTop } from "@/hooks/useScrollToTop";
+import { DemoModeProvider } from "@/hooks/useDemoMode";
+import { DemoModeBadge } from "@/components/DemoModeBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import Index from "./pages/Index";
@@ -50,12 +52,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <ScrollToTop />
-          <Routes>
+      <DemoModeProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <ScrollToTop />
+            <DemoModeBadge />
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/select-role" element={<SelectRole />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
@@ -199,9 +203,10 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <CookieConsent />
-        </AuthProvider>
-      </BrowserRouter>
+            <CookieConsent />
+          </AuthProvider>
+        </BrowserRouter>
+      </DemoModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
