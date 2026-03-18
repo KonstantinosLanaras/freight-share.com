@@ -150,10 +150,10 @@ export default function CarrierInsuranceSetup() {
             </Button>
             <div>
               <h1 className="text-xl font-heading font-bold text-foreground">
-                {existingInsurance ? 'Update Insurance Details' : 'Add Your Insurance Details'}
+                {existingInsurance ? 'Update Liability Insurance' : 'Carrier Liability Insurance'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Provide your transport insurance to accept load requests
+                Add your transport liability policy to your carrier profile
               </p>
             </div>
           </div>
