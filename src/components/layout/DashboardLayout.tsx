@@ -15,6 +15,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 interface NavItem {
