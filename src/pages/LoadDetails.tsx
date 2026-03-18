@@ -775,6 +775,7 @@ export default function LoadDetails() {
           isLoading={paymentLoading}
           cargoType={load.cargo_type}
           price={selectedOffer.price}
+          carrierInsurance={selectedOffer.carrier_insurance || undefined}
         />
       )}
     </div>
