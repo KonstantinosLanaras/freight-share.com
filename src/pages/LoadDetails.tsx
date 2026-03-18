@@ -260,7 +260,7 @@ export default function LoadDetails() {
     setShowConfirmation(true);
   };
 
-  const handleProceedToPayment = async () => {
+  const handleProceedToPayment = async (insuranceDecision?: InsuranceDecision) => {
     if (!selectedOffer || !load || !user) return;
 
     setPaymentLoading(true);
