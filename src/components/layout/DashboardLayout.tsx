@@ -230,7 +230,7 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
       )}
 
       {/* Main Content */}
-      <main className="lg:pl-64 pt-16">
+      <main className={`lg:pl-64 ${demoPtContent}`}>
         <div className="p-6 lg:p-8">
           {children}
         </div>
