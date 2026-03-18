@@ -47,6 +47,15 @@ interface LoadData {
   created_at: string;
 }
 
+interface CarrierInsuranceInfo {
+  provider_name: string;
+  coverage_type: string;
+  coverage_limit_eur: number;
+  expiration_date: string;
+  status: string;
+  policy_number?: string | null;
+}
+
 interface Offer {
   id: string;
   carrier_id: string;
@@ -60,6 +69,7 @@ interface Offer {
     company_name: string | null;
     verification_status: string | null;
   };
+  carrier_insurance?: CarrierInsuranceInfo | null;
 }
 
 export default function LoadDetails() {
