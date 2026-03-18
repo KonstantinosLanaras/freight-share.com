@@ -20,6 +20,7 @@ export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, signOut, loading } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
