@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { DemoModeToggle } from '@/components/DemoModeToggle';
 import {
@@ -19,6 +20,7 @@ export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, signOut, loading } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -31,7 +33,7 @@ export const Navbar = () => {
   const dashboardPath = role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper';
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+    <nav className={`fixed ${isDemoMode ? 'top-7' : 'top-0'} left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-[top] duration-200`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
