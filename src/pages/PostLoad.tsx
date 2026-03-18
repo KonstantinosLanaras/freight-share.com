@@ -130,7 +130,7 @@ export default function PostLoad() {
       navigate('/dashboard/shipper');
     } catch (error: any) {
       console.error('Error posting load:', error);
-      toast.error(error.message || 'Failed to post load');
+      toast.error(getSafeErrorMessage(error, 'Failed to post load'));
     } finally {
       setIsSubmitting(false);
     }
