@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { DemoModeToggle } from '@/components/DemoModeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
