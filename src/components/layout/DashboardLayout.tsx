@@ -38,8 +38,12 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role, navItems, profile }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
   const location = useLocation();
+  const demoPad = isDemoMode ? 'top-7' : 'top-0';
+  const demoPtContent = isDemoMode ? 'pt-[calc(4rem+28px)]' : 'pt-16';
+  const demoPtSidebar = isDemoMode ? 'pt-[calc(4rem+28px)]' : 'pt-16';
 
   const handleSignOut = async () => {
     await signOut();
