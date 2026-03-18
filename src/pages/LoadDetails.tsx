@@ -98,6 +98,7 @@ export default function LoadDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { isDemoMode, checkVerification, shouldSimulatePayment } = useDemoMode();
 
   // Data
   const [load, setLoad] = useState<LoadData | null>(null);
