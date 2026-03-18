@@ -320,14 +320,24 @@ export default function LoadDetails() {
           carrier_id: selectedOffer.carrier_id,
           final_price: selectedOffer.price,
           status: 'accepted',
-          payment_status: 'pending',
+          payment_status: shouldSimulatePayment() ? 'paid' : 'pending',
           terms_version: '1.0',
         })
         .select('id')
         .single();
       if (shipmentError) throw shipmentError;
 
-      // 4. Call payment edge function
+      // 4. Demo mode: simulate payment success
+      if (shouldSimulatePayment()) {
+        toast.success('Demo: Payment simulated successfully!', {
+          description: 'In production, you would be redirected to Stripe checkout.',
+          duration: 5000,
+        });
+        navigate(`/shipment/${shipment.id}`);
+        return;
+      }
+
+      // 5. Production: real payment
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
         'create-shipment-payment',
         {
