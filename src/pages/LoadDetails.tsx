@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import {
   ArrowLeft, Package, MapPin, Calendar, Euro, Loader2, User, Star,
   Truck, MessageSquare, CheckCircle, CreditCard, ShieldCheck, Send,
-  AlertTriangle, Clock, XCircle
+  AlertTriangle, Clock, XCircle, X, Reply
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -78,20 +78,18 @@ interface Offer {
 }
 
 // ── Flow states ────────────────────────────────────────────
-// The "Make an Offer" / "Accept Offer" flow is sequential:
-//   idle → verificationGate → offerForm → (submitted)
-//   idle → verificationGate → goodsConfirmation → payment
 type FlowState =
   | 'idle'
-  | 'verification_gate'    // blocking: must verify first
-  | 'offer_form'           // carrier: composing offer
-  | 'goods_confirmation'   // shipper: reviewing + insurance + terms
-  | 'processing_payment';  // shipper: payment in flight
+  | 'verification_gate'
+  | 'offer_form'
+  | 'counter_offer_form'
+  | 'goods_confirmation'
+  | 'processing_payment';
 
-// What action triggered the flow (so we can resume after verification)
 type PendingAction =
   | { type: 'make_offer' }
-  | { type: 'accept_offer'; offer: Offer };
+  | { type: 'accept_offer'; offer: Offer }
+  | { type: 'counter_offer'; offer: Offer };
 
 // ── Component ──────────────────────────────────────────────
 
@@ -118,8 +116,16 @@ export default function LoadDetails() {
   const [submittingOffer, setSubmittingOffer] = useState(false);
   const [carrierExistingOffer, setCarrierExistingOffer] = useState<Offer | null>(null);
 
+  // Counter offer
+  const [counterAmount, setCounterAmount] = useState('');
+  const [counterMessage, setCounterMessage] = useState('');
+  const [submittingCounter, setSubmittingCounter] = useState(false);
+
   // Payment
   const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // Rejecting
+  const [rejectingOfferId, setRejectingOfferId] = useState<string | null>(null);
 
   const isOwner = user && load && user.id === load.shipper_id;
   const isCarrier = role === 'carrier';
@@ -200,12 +206,6 @@ export default function LoadDetails() {
 
   // ── Flow control ─────────────────────────────────────────
 
-  const isVerified = verificationStatus === 'verified';
-
-  /**
-   * Starts a flow action. If not verified, shows the verification gate.
-   * If verified, proceeds directly to the action.
-   */
   const startAction = (action: PendingAction) => {
     if (!user) {
       navigate(`/auth?mode=login&returnTo=${encodeURIComponent(`/load/${id}`)}`);
@@ -214,24 +214,27 @@ export default function LoadDetails() {
 
     setPendingAction(action);
 
+    // In demo mode, bypass verification entirely
+    if (isDemoMode) {
+      if (verificationStatus !== 'verified') {
+        toast.info('Verification required in live environment', {
+          description: 'In demo mode, this step is bypassed.',
+          duration: 3000,
+        });
+      }
+      executeAction(action);
+      return;
+    }
+
+    // Production: check verification
     if (!checkVerification(verificationStatus)) {
       setFlowState('verification_gate');
       return;
     }
 
-    if (isDemoMode && verificationStatus !== 'verified') {
-      toast.info('Verification required in live environment', {
-        description: 'In demo mode, this step is bypassed.',
-        duration: 3000,
-      });
-    }
-
     executeAction(action);
   };
 
-  /**
-   * Executes the pending action (called after verification passes or if already verified).
-   */
   const executeAction = (action: PendingAction) => {
     switch (action.type) {
       case 'make_offer':
@@ -245,6 +248,13 @@ export default function LoadDetails() {
         setSelectedOffer(action.offer);
         setFlowState('goods_confirmation');
         break;
+
+      case 'counter_offer':
+        setSelectedOffer(action.offer);
+        setCounterAmount(String(Math.round(action.offer.price * 0.9))); // suggest 10% lower
+        setCounterMessage('');
+        setFlowState('counter_offer_form');
+        break;
     }
   };
 
@@ -254,6 +264,8 @@ export default function LoadDetails() {
     setSelectedOffer(null);
     setOfferAmount('');
     setOfferMessage('');
+    setCounterAmount('');
+    setCounterMessage('');
   };
 
   // ── Carrier: Submit offer ────────────────────────────────
@@ -285,6 +297,63 @@ export default function LoadDetails() {
       toast.error(getSafeErrorMessage(error, 'Failed to submit offer'));
     } finally {
       setSubmittingOffer(false);
+    }
+  };
+
+  // ── Shipper: Reject offer ────────────────────────────────
+
+  const handleRejectOffer = async (offerId: string) => {
+    setRejectingOfferId(offerId);
+    try {
+      // We mark rejected by deleting the offer (or we could add a status field)
+      // For now, delete the offer so carrier can re-submit
+      const { error } = await supabase
+        .from('offers')
+        .delete()
+        .eq('id', offerId);
+      if (error) throw error;
+
+      toast.success('Offer rejected');
+      fetchOffers();
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Failed to reject offer'));
+    } finally {
+      setRejectingOfferId(null);
+    }
+  };
+
+  // ── Shipper: Counter offer ───────────────────────────────
+
+  const handleSubmitCounterOffer = async () => {
+    if (!user || !load || !selectedOffer || !counterAmount) return;
+
+    const amount = parseFloat(counterAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid counter amount.');
+      return;
+    }
+
+    setSubmittingCounter(true);
+    try {
+      // Update the existing offer price as a counter
+      const { error } = await supabase
+        .from('offers')
+        .update({
+          price: amount,
+          message: counterMessage.trim()
+            ? `Counter offer: ${counterMessage.trim()}`
+            : `Counter offer from shipper: €${amount}`,
+        })
+        .eq('id', selectedOffer.id);
+      if (error) throw error;
+
+      toast.success('Counter offer sent!');
+      resetFlow();
+      fetchOffers();
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Failed to send counter offer'));
+    } finally {
+      setSubmittingCounter(false);
     }
   };
 
@@ -320,7 +389,7 @@ export default function LoadDetails() {
           shipper_id: user.id,
           carrier_id: selectedOffer.carrier_id,
           final_price: selectedOffer.price,
-          status: 'accepted',
+          status: shouldSimulatePayment() ? 'paid' : 'accepted',
           payment_status: shouldSimulatePayment() ? 'paid' : 'pending',
           terms_version: '1.0',
         })
@@ -362,7 +431,7 @@ export default function LoadDetails() {
     } catch (error: any) {
       console.error('Payment error:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));
-      setFlowState('goods_confirmation'); // Return to confirmation, don't dead-end
+      setFlowState('goods_confirmation');
     } finally {
       setPaymentLoading(false);
     }
@@ -614,11 +683,37 @@ export default function LoadDetails() {
                                 {offer.message}
                               </div>
                             )}
+
+                            {/* Action buttons for shipper */}
                             {!acceptedOffer && isPosted && (
-                              <div className="mt-3 flex justify-end">
-                                <Button onClick={() => startAction({ type: 'accept_offer', offer })}>
-                                  <CreditCard className="h-4 w-4 mr-2" />
-                                  Accept & Proceed to Payment
+                              <div className="mt-4 flex flex-wrap gap-2 justify-end">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRejectOffer(offer.id)}
+                                  disabled={rejectingOfferId === offer.id}
+                                >
+                                  {rejectingOfferId === offer.id ? (
+                                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                  ) : (
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                  )}
+                                  Reject
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => startAction({ type: 'counter_offer', offer })}
+                                >
+                                  <Reply className="h-4 w-4 mr-1" />
+                                  Counter Offer
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => startAction({ type: 'accept_offer', offer })}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Accept & Proceed
                                 </Button>
                               </div>
                             )}
@@ -682,12 +777,46 @@ export default function LoadDetails() {
                 {isOwner && isPosted && isFixed && offers.length > 0 && !acceptedOffer && (
                   <div className="mt-6 hidden lg:block">
                     <p className="text-xs text-muted-foreground mb-2">
-                      Or accept a carrier offer above to proceed to payment.
+                      Accept, reject, or counter a carrier offer above to proceed.
                     </p>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Transaction Flow Status */}
+            {isOwner && offers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Clock className="h-4 w-4 text-primary" />
+                    Transaction Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Load Posted', done: true },
+                      { label: 'Offers Received', done: offers.length > 0 },
+                      { label: 'Offer Accepted', done: !!acceptedOffer },
+                      { label: 'Terms & Insurance', done: !!acceptedOffer },
+                      { label: 'Payment Complete', done: load.status !== 'posted' && !!acceptedOffer },
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                          step.done ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {step.done ? <CheckCircle className="h-3.5 w-3.5" /> : <span className="text-xs">{i + 1}</span>}
+                        </div>
+                        <span className={`text-sm ${step.done ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Payment info */}
             <Card>
@@ -807,6 +936,13 @@ export default function LoadDetails() {
                 maxLength={500}
               />
             </div>
+
+            {isDemoMode && (
+              <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning-foreground flex items-center gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
+                <span>Demo Mode — This offer will be created in the database and visible to the shipper.</span>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 justify-end">
@@ -830,7 +966,89 @@ export default function LoadDetails() {
         </DialogContent>
       </Dialog>
 
-      {/* 3. Goods Confirmation → Insurance → Payment (Shipper) */}
+      {/* 3. Counter Offer Dialog (Shipper) */}
+      <Dialog
+        open={flowState === 'counter_offer_form'}
+        onOpenChange={(open) => {
+          if (!open) resetFlow();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Reply className="h-5 w-5 text-primary" />
+              Counter Offer
+            </DialogTitle>
+            <DialogDescription>
+              Propose a different price to the carrier.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {selectedOffer && (
+              <div className="p-4 rounded-lg bg-muted/50 border border-border text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Carrier's offer:</span>
+                  <span className="font-bold text-foreground">€{selectedOffer.price}</span>
+                </div>
+                <div className="text-muted-foreground mt-1">
+                  by {selectedOffer.carrier_profile?.company_name || 'Carrier'}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="counter-amount">Your Counter Price (€)</Label>
+              <div className="relative">
+                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="counter-amount"
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  placeholder="Enter your counter price"
+                  className="pl-10"
+                  value={counterAmount}
+                  onChange={(e) => setCounterAmount(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="counter-message">Message (optional)</Label>
+              <Textarea
+                id="counter-message"
+                placeholder="Explain your counter offer..."
+                rows={3}
+                value={counterMessage}
+                onChange={(e) => setCounterMessage(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={resetFlow} disabled={submittingCounter}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitCounterOffer} disabled={!counterAmount || submittingCounter}>
+              {submittingCounter ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Counter Offer
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 4. Goods Confirmation → Insurance → Payment (Shipper) */}
       {selectedOffer && (
         <GoodsConfirmationDialog
           open={flowState === 'goods_confirmation' || flowState === 'processing_payment'}
@@ -843,6 +1061,7 @@ export default function LoadDetails() {
           price={selectedOffer.price}
           weightKg={load.weight_kg}
           carrierInsurance={selectedOffer.carrier_insurance || undefined}
+          isDemoMode={isDemoMode}
         />
       )}
     </div>
