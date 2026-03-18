@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ScrollToTop } from "@/hooks/useScrollToTop";
+import { DemoModeProvider } from "@/hooks/useDemoMode";
+import { DemoModeBadge } from "@/components/DemoModeBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import Index from "./pages/Index";
