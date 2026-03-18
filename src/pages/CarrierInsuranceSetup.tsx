@@ -298,7 +298,7 @@ export default function CarrierInsuranceSetup() {
 
         {/* Legal disclaimer */}
         <p className="text-xs text-muted-foreground text-center mt-6 italic">
-          The carrier is responsible for transport and cargo insurance. Freight Share acts as a platform connecting shippers and carriers and does not provide transport services.
+          This is your carrier liability policy. Per-shipment cargo protection is handled separately and offered to shippers during the transaction flow.
         </p>
       </main>
     </div>
