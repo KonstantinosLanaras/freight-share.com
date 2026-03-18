@@ -706,7 +706,7 @@ export default function CarrierDashboard() {
                                 </div>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" className="w-full mt-2">
+                            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => navigate(`/load/${load.id}`)}>
                               Make Offer
                             </Button>
                           </div>
