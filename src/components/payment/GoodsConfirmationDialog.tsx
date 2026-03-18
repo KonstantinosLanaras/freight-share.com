@@ -7,10 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   ShieldCheck, AlertTriangle, FileText, Loader2, Package,
-  ShieldAlert, Info, Euro, Shield, ChevronDown, ChevronUp
+  ShieldAlert, Info, Euro, Shield, ChevronDown, ChevronUp, FlaskConical
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
 
 interface CarrierInsuranceInfo {
   provider_name: string;
@@ -30,6 +29,7 @@ interface GoodsConfirmationDialogProps {
   price: number;
   weightKg: number;
   carrierInsurance?: CarrierInsuranceInfo;
+  isDemoMode?: boolean;
 }
 
 export interface InsuranceDecision {
@@ -55,6 +55,7 @@ export function GoodsConfirmationDialog({
   price,
   weightKg,
   carrierInsurance,
+  isDemoMode = false,
 }: GoodsConfirmationDialogProps) {
   const [goodsConfirmed, setGoodsConfirmed] = useState(false);
   const [responsibilityConfirmed, setResponsibilityConfirmed] = useState(false);
@@ -117,9 +118,18 @@ export function GoodsConfirmationDialog({
             Confirm & Proceed to Payment
           </DialogTitle>
           <DialogDescription>
-            Review details and choose your protection level before payment.
+            Review details, select protection, and accept terms before payment.
           </DialogDescription>
         </DialogHeader>
+
+        {isDemoMode && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs">
+            <FlaskConical className="h-3.5 w-3.5 text-warning shrink-0" />
+            <span className="text-warning-foreground">
+              <strong>Demo Mode</strong> — Payment will be simulated. Insurance selection is fully functional for demonstration.
+            </span>
+          </div>
+        )}
 
         <div className="space-y-5 py-4">
           {/* ── Transaction Summary ── */}
@@ -164,7 +174,7 @@ export function GoodsConfirmationDialog({
                     value={declaredCargoValue}
                     onChange={(e) => {
                       setDeclaredCargoValue(e.target.value);
-                      setAddInsurance(null); // Reset decision when value changes
+                      setAddInsurance(null);
                     }}
                   />
                 </div>
@@ -259,6 +269,11 @@ export function GoodsConfirmationDialog({
                             <p className="text-xs text-muted-foreground mt-1">
                               All-risk coverage up to €{parseFloat(declaredCargoValue).toLocaleString()} declared value. Covers loss, damage, and extraordinary events.
                             </p>
+                            {isDemoMode && (
+                              <p className="text-xs text-warning mt-1">
+                                Demo: No real underwriting — selection recorded for demonstration.
+                              </p>
+                            )}
                           </div>
                         </div>
                       </button>
@@ -406,6 +421,14 @@ export function GoodsConfirmationDialog({
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Processing...
+              </>
+            ) : isDemoMode ? (
+              <>
+                <FlaskConical className="h-4 w-4 mr-2" />
+                Simulate Payment
+                {addInsurance && insuranceCalc && (
+                  <span className="ml-1">· €{(price + insuranceCalc.estimatedPremium).toLocaleString()}</span>
+                )}
               </>
             ) : (
               <>

@@ -4,64 +4,52 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
-  ArrowLeft, 
-  Package, 
-  Truck, 
-  MapPin, 
-  Calendar, 
-  Euro, 
-  MessageSquare,
-  CheckCircle,
-  Clock,
-  FileText,
-  Star,
-  User,
-  HelpCircle,
-  Navigation,
-  AlertTriangle
+  ArrowLeft, Package, Truck, MapPin, Calendar, Euro, MessageSquare,
+  CheckCircle, Clock, FileText, Star, User, HelpCircle, Navigation,
+  AlertTriangle, Loader2, FlaskConical
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { DetailedRatingForm, DetailedRatingDisplay } from '@/components/ratings';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 
-// Mock shipment data - in real app, fetch from DB
-const shipment = {
-  id: 'SHP-2024-001',
-  status: 'picked_up',
-  paymentStatus: 'paid',
-  origin: 'Rotterdam, Netherlands',
-  destination: 'Munich, Germany',
-  pallets: 12,
-  cargoType: 'General Goods',
-  price: 850,
-  pickupDate: 'Dec 20, 2024',
-  deliveryDate: 'Dec 22, 2024',
-  shipper: {
-    name: 'John Doe',
-    company: 'Acme Logistics',
-    rating: 4.8,
-  },
-  carrier: {
-    name: 'Transport Co',
-    company: 'EuroFreight GmbH',
-    rating: 4.9,
-  },
-  tracking: {
-    lastUpdate: '2 hours ago',
-    currentLocation: 'Frankfurt, Germany',
-    estimatedArrival: 'Dec 22, 2024 14:00',
-    progress: 65,
-  },
-  timeline: [
-    { status: 'Posted', date: 'Dec 15, 2024 09:30', completed: true },
-    { status: 'Accepted', date: 'Dec 15, 2024 14:22', completed: true },
-    { status: 'Paid', date: 'Dec 16, 2024 10:15', completed: true },
-    { status: 'Picked Up', date: 'Dec 20, 2024 08:00', completed: true },
-    { status: 'In Transit', date: 'Dec 20, 2024 09:30', completed: true, current: true },
-    { status: 'Delivered', date: '', completed: false },
-    { status: 'Completed', date: '', completed: false },
-  ],
-};
+interface ShipmentData {
+  id: string;
+  load_id: string;
+  offer_id: string;
+  shipper_id: string;
+  carrier_id: string;
+  status: string;
+  payment_status: string;
+  final_price: number;
+  created_at: string;
+  updated_at: string;
+  payment_reference: string | null;
+  terms_version: string | null;
+  dispute_status: string | null;
+  dispute_reason: string | null;
+  delivery_marked_at: string | null;
+}
+
+interface LoadData {
+  origin_city: string;
+  origin_country: string;
+  destination_city: string;
+  destination_country: string;
+  pallets: number;
+  cargo_type: string;
+  weight_kg: number;
+  pickup_date_from: string;
+  delivery_date_from: string;
+}
+
+interface ProfileData {
+  full_name: string | null;
+  company_name: string | null;
+}
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   posted: { label: 'Posted', className: 'bg-muted text-muted-foreground' },
@@ -76,44 +64,131 @@ export default function ShipmentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { isDemoMode } = useDemoMode();
+
+  const [shipment, setShipment] = useState<ShipmentData | null>(null);
+  const [load, setLoad] = useState<LoadData | null>(null);
+  const [shipperProfile, setShipperProfile] = useState<ProfileData | null>(null);
+  const [carrierProfile, setCarrierProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [existingRating, setExistingRating] = useState<any>(null);
   const [otherPartyRating, setOtherPartyRating] = useState<any>(null);
-  
+
+  const [timestamps, setTimestamps] = useState<{ status: string; created_at: string }[]>([]);
+
   const backPath = role === 'carrier' ? '/dashboard/carrier/shipments' : '/dashboard/shipper/shipments';
 
-  // Check if user has already rated and fetch other party's rating
   useEffect(() => {
-    const fetchRatings = async () => {
-      if (!user || !id) return;
-      
-      // Check if user already rated
-      const { data: myRating } = await supabase
-        .from('detailed_ratings')
-        .select('*')
-        .eq('shipment_id', id)
-        .eq('rater_id', user.id)
-        .maybeSingle();
-      
-      setExistingRating(myRating);
-      
-      // Fetch the other party's rating of us
-      const { data: theirRating } = await supabase
-        .from('detailed_ratings')
-        .select('*')
-        .eq('shipment_id', id)
-        .eq('rated_id', user.id)
-        .maybeSingle();
-      
-      setOtherPartyRating(theirRating);
-    };
-    
-    fetchRatings();
-  }, [user, id]);
+    if (id) fetchShipmentData();
+  }, [id]);
 
+  const fetchShipmentData = async () => {
+    try {
+      // Fetch shipment
+      const { data: shipmentData, error: shipmentError } = await supabase
+        .from('shipments')
+        .select('*')
+        .eq('id', id!)
+        .single();
+      if (shipmentError) throw shipmentError;
+      setShipment(shipmentData);
+
+      // Fetch load, profiles, timestamps in parallel
+      const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes] = await Promise.all([
+        supabase.from('loads').select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from').eq('id', shipmentData.load_id).single(),
+        supabase.from('profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
+        supabase.from('profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
+        supabase.from('shipment_timestamps').select('status, created_at').eq('shipment_id', id!).order('created_at', { ascending: true }),
+        user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rater_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
+        user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rated_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
+      ]);
+
+      setLoad(loadRes.data);
+      setShipperProfile(shipperRes.data);
+      setCarrierProfile(carrierRes.data);
+      setTimestamps(tsRes.data || []);
+      setExistingRating(myRatingRes.data);
+      setOtherPartyRating(theirRatingRes.data);
+    } catch (error) {
+      console.error('Error fetching shipment:', error);
+      toast.error('Failed to load shipment details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!shipment || !user) return;
+    setUpdating(true);
+    try {
+      const { error: shipmentError } = await supabase
+        .from('shipments')
+        .update({ status: newStatus as any, ...(newStatus === 'delivered' ? { delivery_marked_at: new Date().toISOString() } : {}) })
+        .eq('id', shipment.id);
+      if (shipmentError) throw shipmentError;
+
+      // Record timestamp
+      await supabase.from('shipment_timestamps').insert({
+        shipment_id: shipment.id,
+        status: newStatus as any,
+        changed_by: user.id,
+      });
+
+      if (newStatus === 'completed') {
+        // Release payment
+        if (!isDemoMode) {
+          await supabase.functions.invoke('release-payment', {
+            body: { shipmentId: shipment.id },
+          });
+        }
+        toast.success(isDemoMode ? 'Demo: Delivery confirmed & payment released (simulated)' : 'Delivery confirmed & payment released!');
+      } else {
+        toast.success(`Shipment marked as ${newStatus.replace('_', ' ')}`);
+      }
+
+      fetchShipmentData();
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Failed to update status'));
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!shipment || !load) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Shipment not found</p>
+        <Button variant="outline" onClick={() => navigate(-1)}>Go Back</Button>
+      </div>
+    );
+  }
+
+  const statusInfo = statusConfig[shipment.status] || statusConfig.posted;
   const canRate = shipment.status === 'completed' && !existingRating;
-  const ratedPartyId = role === 'carrier' ? 'shipper-id' : 'carrier-id'; // In real app, get from shipment data
-  const ratedPartyName = role === 'carrier' ? shipment.shipper.name : shipment.carrier.name;
+  const ratedPartyId = role === 'carrier' ? shipment.shipper_id : shipment.carrier_id;
+  const ratedPartyName = role === 'carrier'
+    ? (shipperProfile?.company_name || shipperProfile?.full_name || 'Shipper')
+    : (carrierProfile?.company_name || carrierProfile?.full_name || 'Carrier');
+
+  // Build timeline from real data
+  const timelineSteps = [
+    { status: 'Accepted', done: true, date: shipment.created_at },
+    { status: 'Paid', done: ['paid', 'picked_up', 'delivered', 'completed'].includes(shipment.status), date: timestamps.find(t => t.status === 'paid')?.created_at },
+    { status: 'Picked Up', done: ['picked_up', 'delivered', 'completed'].includes(shipment.status), date: timestamps.find(t => t.status === 'picked_up')?.created_at },
+    { status: 'Delivered', done: ['delivered', 'completed'].includes(shipment.status), date: shipment.delivery_marked_at || timestamps.find(t => t.status === 'delivered')?.created_at },
+    { status: 'Completed', done: shipment.status === 'completed', date: timestamps.find(t => t.status === 'completed')?.created_at },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,28 +203,28 @@ export default function ShipmentDetails() {
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-xl font-heading font-bold text-foreground">
-                    {shipment.id}
+                    {load.origin_city} → {load.destination_city}
                   </h1>
-                  <Badge className={statusConfig[shipment.status].className}>
-                    {statusConfig[shipment.status].label}
+                  <Badge className={statusInfo.className}>
+                    {statusInfo.label}
                   </Badge>
+                  {isDemoMode && (
+                    <Badge variant="outline" className="border-warning/50 text-warning">
+                      <FlaskConical className="h-3 w-3 mr-1" />
+                      Demo
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {shipment.origin} → {shipment.destination}
+                  {load.origin_country} → {load.destination_country} · {load.pallets} pallets · {load.cargo_type}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
-                <Link to={`/help?shipment=${shipment.id}`}>
+                <Link to="/help">
                   <HelpCircle className="h-4 w-4" />
                   Get Help
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to={`/dashboard/${role === 'carrier' ? 'carrier' : 'shipper'}/messages/${id}`}>
-                  <MessageSquare className="h-4 w-4" />
-                  Chat
                 </Link>
               </Button>
             </div>
@@ -161,54 +236,6 @@ export default function ShipmentDetails() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Tracking Card - MVP Critical */}
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Navigation className="h-5 w-5 text-primary" />
-                  Live Tracking
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-muted-foreground">Current Location</div>
-                    <div className="font-semibold text-lg flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      {shipment.tracking.currentLocation}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-muted-foreground">Last Update</div>
-                    <div className="font-medium">{shipment.tracking.lastUpdate}</div>
-                  </div>
-                </div>
-                
-                {/* Progress Bar */}
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">Route Progress</span>
-                    <span className="font-medium">{shipment.tracking.progress}%</span>
-                  </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${shipment.tracking.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>{shipment.origin.split(',')[0]}</span>
-                    <span>{shipment.destination.split(',')[0]}</span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                  <div className="text-sm text-muted-foreground">Estimated Arrival</div>
-                  <div className="font-semibold text-primary">{shipment.tracking.estimatedArrival}</div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Route Card */}
             <Card>
               <CardHeader>
@@ -221,18 +248,18 @@ export default function ShipmentDetails() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="text-sm text-muted-foreground mb-1">Origin</div>
-                    <div className="font-medium">{shipment.origin}</div>
+                    <div className="font-medium">{load.origin_city}, {load.origin_country}</div>
                     <div className="text-sm text-muted-foreground mt-1">
                       <Calendar className="h-3 w-3 inline mr-1" />
-                      Pickup: {shipment.pickupDate}
+                      Pickup: {format(new Date(load.pickup_date_from), 'MMM d, yyyy')}
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="text-sm text-muted-foreground mb-1">Destination</div>
-                    <div className="font-medium">{shipment.destination}</div>
+                    <div className="font-medium">{load.destination_city}, {load.destination_country}</div>
                     <div className="text-sm text-muted-foreground mt-1">
                       <Calendar className="h-3 w-3 inline mr-1" />
-                      Delivery: {shipment.deliveryDate}
+                      Delivery: {format(new Date(load.delivery_date_from), 'MMM d, yyyy')}
                     </div>
                   </div>
                 </div>
@@ -241,18 +268,18 @@ export default function ShipmentDetails() {
                     <div className="text-sm text-muted-foreground mb-1">Pallets</div>
                     <div className="font-medium flex items-center gap-2">
                       <Package className="h-4 w-4 text-primary" />
-                      {shipment.pallets}
+                      {load.pallets}
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="text-sm text-muted-foreground mb-1">Cargo Type</div>
-                    <div className="font-medium">{shipment.cargoType}</div>
+                    <div className="font-medium capitalize">{load.cargo_type}</div>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="text-sm text-muted-foreground mb-1">Price</div>
+                    <div className="text-sm text-muted-foreground mb-1">Agreed Price</div>
                     <div className="font-medium flex items-center gap-2">
                       <Euro className="h-4 w-4 text-primary" />
-                      {shipment.price}
+                      {shipment.final_price}
                     </div>
                   </div>
                 </div>
@@ -269,39 +296,44 @@ export default function ShipmentDetails() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {shipment.timeline.map((item, index) => (
-                    <div key={item.status} className="flex gap-4">
-                      <div className="relative">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          item.completed 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted text-muted-foreground'
-                        } ${item.current ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-                          {item.completed ? (
-                            <CheckCircle className="h-4 w-4" />
-                          ) : (
-                            <Clock className="h-4 w-4" />
+                  {timelineSteps.map((item, index) => {
+                    const isCurrent = item.done && (index === timelineSteps.length - 1 || !timelineSteps[index + 1].done);
+                    return (
+                      <div key={item.status} className="flex gap-4">
+                        <div className="relative">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            item.done 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted text-muted-foreground'
+                          } ${isCurrent ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                            {item.done ? (
+                              <CheckCircle className="h-4 w-4" />
+                            ) : (
+                              <Clock className="h-4 w-4" />
+                            )}
+                          </div>
+                          {index < timelineSteps.length - 1 && (
+                            <div className={`absolute top-10 left-1/2 w-0.5 h-8 -translate-x-1/2 ${
+                              item.done ? 'bg-primary/50' : 'bg-border'
+                            }`} />
                           )}
                         </div>
-                        {index < shipment.timeline.length - 1 && (
-                          <div className={`absolute top-10 left-1/2 w-0.5 h-8 -translate-x-1/2 ${
-                            item.completed ? 'bg-primary/50' : 'bg-border'
-                          }`} />
-                        )}
-                      </div>
-                      <div className="flex-1 pb-4">
-                        <div className={`font-medium ${item.completed ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {item.status}
-                          {item.current && (
-                            <Badge variant="outline" className="ml-2 text-xs">Current</Badge>
+                        <div className="flex-1 pb-4">
+                          <div className={`font-medium ${item.done ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            {item.status}
+                            {isCurrent && (
+                              <Badge variant="outline" className="ml-2 text-xs">Current</Badge>
+                            )}
+                          </div>
+                          {item.date && (
+                            <div className="text-sm text-muted-foreground">
+                              {format(new Date(item.date), 'MMM d, yyyy HH:mm')}
+                            </div>
                           )}
                         </div>
-                        {item.date && (
-                          <div className="text-sm text-muted-foreground">{item.date}</div>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -315,19 +347,34 @@ export default function ShipmentDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-4">
-                    View the binding transport agreement with all shipment details.
-                  </p>
-                  <Button variant="outline">
-                    Download Contract PDF
-                  </Button>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Transport cost</span>
+                    <span className="font-medium">€{shipment.final_price}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Platform fee (2%)</span>
+                    <span className="font-medium">€{(shipment.final_price * 0.02).toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-border pt-2 flex justify-between font-bold">
+                    <span>Carrier payout</span>
+                    <span>€{(shipment.final_price * 0.98).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Payment status</span>
+                    <Badge variant="outline" className="capitalize">{shipment.payment_status}</Badge>
+                  </div>
+                  {shipment.terms_version && (
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Terms version</span>
+                      <span>v{shipment.terms_version}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Rating Section - Only show for completed shipments */}
+            {/* Rating Section */}
             {shipment.status === 'completed' && (
               <Card>
                 <CardHeader>
@@ -337,7 +384,6 @@ export default function ShipmentDetails() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Show rating form or existing rating */}
                   {showRatingForm && user ? (
                     <DetailedRatingForm
                       shipmentId={id || ''}
@@ -371,7 +417,6 @@ export default function ShipmentDetails() {
                     </div>
                   ) : null}
 
-                  {/* Show rating received from other party */}
                   {otherPartyRating && (
                     <div className="pt-4 border-t border-border">
                       <h4 className="text-sm font-medium text-muted-foreground mb-3">
@@ -408,12 +453,8 @@ export default function ShipmentDetails() {
                     <User className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium">{shipment.shipper.name}</div>
-                    <div className="text-sm text-muted-foreground">{shipment.shipper.company}</div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="h-3 w-3 text-accent fill-accent" />
-                      {shipment.shipper.rating}
-                    </div>
+                    <div className="font-medium">{shipperProfile?.full_name || 'Shipper'}</div>
+                    <div className="text-sm text-muted-foreground">{shipperProfile?.company_name || ''}</div>
                   </div>
                 </div>
               </CardContent>
@@ -433,12 +474,8 @@ export default function ShipmentDetails() {
                     <User className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium">{shipment.carrier.name}</div>
-                    <div className="text-sm text-muted-foreground">{shipment.carrier.company}</div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="h-3 w-3 text-accent fill-accent" />
-                      {shipment.carrier.rating}
-                    </div>
+                    <div className="font-medium">{carrierProfile?.full_name || 'Carrier'}</div>
+                    <div className="text-sm text-muted-foreground">{carrierProfile?.company_name || ''}</div>
                   </div>
                 </div>
               </CardContent>
@@ -452,9 +489,11 @@ export default function ShipmentDetails() {
                     <CheckCircle className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium text-primary">Payment Authorised</div>
+                    <div className="font-medium text-primary capitalize">
+                      Payment {shipment.payment_status}
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                      €{shipment.price} — executes on delivery confirmation
+                      €{shipment.final_price} — {shipment.payment_status === 'paid' ? 'executes on delivery confirmation' : shipment.payment_status}
                     </div>
                   </div>
                 </div>
@@ -467,31 +506,55 @@ export default function ShipmentDetails() {
                 <CardTitle className="text-base">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {role === 'carrier' && shipment.status !== 'delivered' && shipment.status !== 'completed' && (
-                  <Button variant="default" className="w-full">
-                    <CheckCircle className="h-4 w-4" />
+                {/* Carrier: Mark as Picked Up */}
+                {role === 'carrier' && shipment.status === 'paid' && (
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => handleStatusUpdate('picked_up')}
+                    disabled={updating}
+                  >
+                    {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Truck className="h-4 w-4 mr-2" />}
+                    Mark as Picked Up
+                  </Button>
+                )}
+
+                {/* Carrier: Mark as Delivered */}
+                {role === 'carrier' && shipment.status === 'picked_up' && (
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => handleStatusUpdate('delivered')}
+                    disabled={updating}
+                  >
+                    {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                     Mark as Delivered
                   </Button>
                 )}
                 
-                {/* Shipper: Confirm Delivery button - Only show when delivered and no active dispute */}
+                {/* Shipper: Confirm Delivery */}
                 {role === 'shipper' && shipment.status === 'delivered' && (
-                  <Button variant="default" className="w-full bg-success hover:bg-success/90">
-                    <CheckCircle className="h-4 w-4" />
+                  <Button
+                    variant="default"
+                    className="w-full bg-success hover:bg-success/90"
+                    onClick={() => handleStatusUpdate('completed')}
+                    disabled={updating}
+                  >
+                    {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                     Confirm Delivery & Release Payment
                   </Button>
                 )}
                 
                 <Button variant="outline" className="w-full" asChild>
                   <Link to={`/dashboard/${role === 'carrier' ? 'carrier' : 'shipper'}/messages/${id}`}>
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare className="h-4 w-4 mr-2" />
                     Message {role === 'carrier' ? 'Shipper' : 'Carrier'}
                   </Link>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Dispute Section - Only for shippers when shipment is delivered */}
+            {/* Dispute Section */}
             {role === 'shipper' && shipment.status === 'delivered' && (
               <Card className="border-warning/30 bg-warning/5">
                 <CardHeader>
@@ -506,14 +569,9 @@ export default function ShipmentDetails() {
                     This will pause payment execution while the issue is reviewed.
                   </p>
                   <Button variant="outline" className="w-full border-warning/50 text-warning hover:bg-warning/10">
-                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTriangle className="h-4 w-4 mr-2" />
                     Raise Dispute
                   </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    <Link to="/payments" className="underline hover:no-underline">
-                      Learn how disputes work
-                    </Link>
-                  </p>
                 </CardContent>
               </Card>
             )}
@@ -533,8 +591,8 @@ export default function ShipmentDetails() {
                   </div>
                 </div>
                 <Button variant="outline" className="w-full mt-3" asChild>
-                  <Link to={`/help?shipment=${shipment.id}`}>
-                    <HelpCircle className="h-4 w-4" />
+                  <Link to="/help">
+                    <HelpCircle className="h-4 w-4 mr-2" />
                     Get Support
                   </Link>
                 </Button>
