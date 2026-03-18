@@ -42,6 +42,7 @@ interface Load {
   pickup_date_from: string;
   pickup_date_to: string;
   created_at: string;
+  offer_count?: number;
 }
 
 interface Profile {
