@@ -556,9 +556,10 @@ export default function ShipperDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {loads.map((load) => (
-                        <div 
+                        <Link 
                           key={load.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                          to={`/load/${load.id}`}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -578,13 +579,15 @@ export default function ShipperDashboard() {
                               <div className="font-semibold text-foreground">
                                 {load.price ? `€${load.price}` : 'Open'}
                               </div>
-                              <div className="text-sm text-muted-foreground">0 offers</div>
+                              <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                                {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                              </div>
                             </div>
                             <Badge className={statusConfig[load.status]?.className || ''}>
                               {statusConfig[load.status]?.label || load.status}
                             </Badge>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}
