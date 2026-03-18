@@ -213,9 +213,16 @@ export default function LoadDetails() {
 
     setPendingAction(action);
 
-    if (!isVerified) {
+    if (!checkVerification(verificationStatus)) {
       setFlowState('verification_gate');
       return;
+    }
+
+    if (isDemoMode && verificationStatus !== 'verified') {
+      toast.info('Verification required in live environment', {
+        description: 'In demo mode, this step is bypassed.',
+        duration: 3000,
+      });
     }
 
     executeAction(action);
