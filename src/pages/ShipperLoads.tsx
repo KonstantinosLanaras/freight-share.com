@@ -49,6 +49,7 @@ interface Load {
   cargo_type: string;
   created_at: string;
   notes: string | null;
+  offer_count?: number;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
