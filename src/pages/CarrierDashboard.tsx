@@ -672,7 +672,7 @@ export default function CarrierDashboard() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Available Loads</CardTitle>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to="/dashboard/carrier/loads">
+                      <Link to="/dashboard/carrier/find-loads">
                         Browse All
                         <ArrowRight className="h-4 w-4 ml-1" />
                       </Link>
@@ -706,7 +706,7 @@ export default function CarrierDashboard() {
                                 </div>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" className="w-full mt-2">
+                            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => navigate(`/load/${load.id}`)}>
                               Make Offer
                             </Button>
                           </div>
