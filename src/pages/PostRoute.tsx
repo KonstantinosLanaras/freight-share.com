@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SpaceInput, type SpaceType } from '@/components/capacity';
@@ -224,7 +225,7 @@ export default function PostRoute() {
       navigate('/dashboard/carrier/routes');
     } catch (error: any) {
       console.error('Error posting route:', error);
-      toast.error(error.message || 'Failed to post route');
+      toast.error(getSafeErrorMessage(error, 'Failed to post route'));
     } finally {
       setIsSubmitting(false);
     }

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, Loader2, FileText, ShieldCheck, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -109,7 +110,7 @@ export function CarrierVerificationForm({ onSuccess }: CarrierVerificationFormPr
       onSuccess?.();
     } catch (error: any) {
       console.error('Verification error:', error);
-      toast.error(error.message || 'Failed to submit verification');
+      toast.error(getSafeErrorMessage(error, 'Failed to submit verification'));
     } finally {
       setIsSubmitting(false);
     }

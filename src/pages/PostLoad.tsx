@@ -10,6 +10,7 @@ import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale } from 'lucide-react';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SpaceInput, WeightInput, type SpaceType } from '@/components/capacity';
@@ -129,7 +130,7 @@ export default function PostLoad() {
       navigate('/dashboard/shipper');
     } catch (error: any) {
       console.error('Error posting load:', error);
-      toast.error(error.message || 'Failed to post load');
+      toast.error(getSafeErrorMessage(error, 'Failed to post load'));
     } finally {
       setIsSubmitting(false);
     }

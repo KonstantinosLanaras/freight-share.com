@@ -16,6 +16,7 @@ import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
@@ -281,7 +282,7 @@ export default function LoadDetails() {
       fetchOffers();
     } catch (error: any) {
       console.error('Offer error:', error);
-      toast.error(error.message || 'Failed to submit offer');
+      toast.error(getSafeErrorMessage(error, 'Failed to submit offer'));
     } finally {
       setSubmittingOffer(false);
     }
@@ -360,7 +361,7 @@ export default function LoadDetails() {
       }
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'Failed to initiate payment. Please try again.');
+      toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));
       setFlowState('goods_confirmation'); // Return to confirmation, don't dead-end
     } finally {
       setPaymentLoading(false);

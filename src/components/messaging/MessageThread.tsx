@@ -91,6 +91,9 @@ export function MessageThread({ shipmentId, shipment, onBack }: MessageThreadPro
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !user || isReadOnly) return;
+    if (newMessage.trim().length > 2000) {
+      return;
+    }
 
     setSending(true);
     try {

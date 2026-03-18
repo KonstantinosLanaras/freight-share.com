@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { Truck, Package, ArrowLeft, Mail, User, Building, Loader2, Globe, ShieldCheck, Users, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
@@ -213,7 +214,7 @@ export default function Auth() {
           if (error.message.includes('already registered')) {
             toast.error('This email is already registered. Please log in instead.');
           } else {
-            toast.error(error.message);
+            toast.error(getSafeErrorMessage(error, 'Failed to create account. Please try again.'));
           }
         } else {
           toast.success('Account created successfully!');
@@ -230,7 +231,7 @@ export default function Auth() {
           } else if (error.message.includes('Invalid login credentials')) {
             toast.error(`Invalid email or password. ${rateCheck.remainingAttempts} attempt${rateCheck.remainingAttempts !== 1 ? 's' : ''} remaining.`);
           } else {
-            toast.error(error.message);
+            toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
           }
         } else {
           clearRateLimit();
