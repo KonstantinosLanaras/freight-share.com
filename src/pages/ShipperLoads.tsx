@@ -86,7 +86,21 @@ export default function ShipperLoads() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLoads(data || []);
+
+      // Fetch offer counts
+      const loadIds = (data || []).map(l => l.id);
+      let offerCountMap: Record<string, number> = {};
+      if (loadIds.length > 0) {
+        const { data: offersData } = await supabase
+          .from('offers')
+          .select('load_id')
+          .in('load_id', loadIds);
+        (offersData || []).forEach(o => {
+          offerCountMap[o.load_id] = (offerCountMap[o.load_id] || 0) + 1;
+        });
+      }
+
+      setLoads((data || []).map(l => ({ ...l, offer_count: offerCountMap[l.id] || 0 })));
     } catch (error) {
       console.error('Error fetching loads:', error);
     } finally {
