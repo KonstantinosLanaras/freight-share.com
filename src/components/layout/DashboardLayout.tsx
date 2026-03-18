@@ -73,7 +73,7 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
   return (
     <div className="min-h-screen bg-background">
       {/* Top Header Bar - Always Visible */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border h-16 flex items-center justify-between px-4 lg:px-6">
+      <header className={`fixed ${demoPad} left-0 right-0 z-50 bg-card border-b border-border h-16 flex items-center justify-between px-4 lg:px-6`}>
         <div className="flex items-center gap-4">
           {/* Mobile menu trigger */}
           <button 
