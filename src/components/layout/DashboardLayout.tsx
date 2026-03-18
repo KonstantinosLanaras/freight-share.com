@@ -155,7 +155,7 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-sidebar transform transition-transform duration-300 
-        lg:translate-x-0 pt-16 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 ${demoPtSidebar} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
           {/* Mobile close */}
