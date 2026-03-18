@@ -7,8 +7,8 @@ export function DemoModeBadge() {
   if (!isDemoMode) return null;
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-50 bg-warning/90 text-warning-foreground text-center py-1.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 backdrop-blur-sm">
-      <FlaskConical className="h-3.5 w-3.5" />
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-warning text-warning-foreground text-center py-1 px-4 text-[11px] font-semibold flex items-center justify-center gap-1.5">
+      <FlaskConical className="h-3 w-3" />
       <span>Demo Mode — All actions are simulated. No real transactions.</span>
     </div>
   );
