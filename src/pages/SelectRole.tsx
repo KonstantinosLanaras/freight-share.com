@@ -49,7 +49,7 @@ export default function SelectRole() {
 
   const subtitle = isWorkspaceSwitcher
     ? 'You have access to both workspaces. Choose where to continue.'
-    : 'Choose how you'll use the platform. You can always change this later.';
+    : 'Choose how you\'ll use the platform. You can always change this later.';
 
   const shipperCta = isWorkspaceSwitcher ? 'Continue as Shipper' : 'Get started as Shipper';
   const carrierCta = isWorkspaceSwitcher ? 'Continue as Carrier' : 'Get started as Carrier';
