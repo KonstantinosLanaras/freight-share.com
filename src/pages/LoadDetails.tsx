@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { GoodsConfirmationDialog } from '@/components/payment/GoodsConfirmationDialog';
+import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import {
   Dialog,
   DialogContent,
@@ -260,7 +260,7 @@ export default function LoadDetails() {
     setShowConfirmation(true);
   };
 
-  const handleProceedToPayment = async () => {
+  const handleProceedToPayment = async (insuranceDecision?: InsuranceDecision) => {
     if (!selectedOffer || !load || !user) return;
 
     setPaymentLoading(true);
@@ -771,10 +771,11 @@ export default function LoadDetails() {
         <GoodsConfirmationDialog
           open={showConfirmation}
           onOpenChange={setShowConfirmation}
-          onConfirm={handleProceedToPayment}
+          onConfirm={(decision) => handleProceedToPayment(decision)}
           isLoading={paymentLoading}
           cargoType={load.cargo_type}
           price={selectedOffer.price}
+          weightKg={load.weight_kg}
           carrierInsurance={selectedOffer.carrier_insurance || undefined}
         />
       )}
