@@ -51,7 +51,7 @@ export function ShipperVerificationForm({ onSuccess }: ShipperVerificationFormPr
       onSuccess?.();
     } catch (error: any) {
       console.error('Verification error:', error);
-      toast.error(error.message || 'Failed to save business details');
+      toast.error(getSafeErrorMessage(error, 'Failed to save business details'));
     } finally {
       setIsSubmitting(false);
     }

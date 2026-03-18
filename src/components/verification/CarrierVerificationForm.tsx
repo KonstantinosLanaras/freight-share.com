@@ -110,7 +110,7 @@ export function CarrierVerificationForm({ onSuccess }: CarrierVerificationFormPr
       onSuccess?.();
     } catch (error: any) {
       console.error('Verification error:', error);
-      toast.error(error.message || 'Failed to submit verification');
+      toast.error(getSafeErrorMessage(error, 'Failed to submit verification'));
     } finally {
       setIsSubmitting(false);
     }
