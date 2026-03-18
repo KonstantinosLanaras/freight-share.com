@@ -42,6 +42,7 @@ interface Load {
   pickup_date_from: string;
   pickup_date_to: string;
   created_at: string;
+  offer_count?: number;
 }
 
 interface Profile {
@@ -118,7 +119,25 @@ export default function ShipperDashboard() {
         .limit(10);
 
       if (error) throw error;
-      setLoads(loadsData || []);
+
+      // Fetch offer counts for each load
+      const loadIds = (loadsData || []).map(l => l.id);
+      let offerCountMap: Record<string, number> = {};
+      if (loadIds.length > 0) {
+        const { data: offersData } = await supabase
+          .from('offers')
+          .select('load_id')
+          .in('load_id', loadIds);
+        (offersData || []).forEach(o => {
+          offerCountMap[o.load_id] = (offerCountMap[o.load_id] || 0) + 1;
+        });
+      }
+
+      const loadsWithOffers = (loadsData || []).map(l => ({
+        ...l,
+        offer_count: offerCountMap[l.id] || 0,
+      }));
+      setLoads(loadsWithOffers);
 
       // Fetch pickup requests made by this shipper
       const { data: requestsData } = await supabase
@@ -144,16 +163,16 @@ export default function ShipperDashboard() {
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
       // Calculate stats
-      const allLoads = loadsData || [];
+      const allLoads = loadsWithOffers;
       const active = allLoads.filter(l => ['posted', 'accepted', 'paid', 'picked_up'].includes(l.status)).length;
       const completed = allLoads.filter(l => l.status === 'completed').length;
       const totalSpent = allLoads
         .filter(l => l.status === 'completed' && l.price)
         .reduce((sum, l) => sum + (l.price || 0), 0);
       const pendingPickups = requestsData?.filter(r => r.status === 'pending' || r.status === 'counter_offer').length || 0;
+      const totalPendingOffers = allLoads.reduce((sum, l) => sum + (l.offer_count || 0), 0);
 
-      // Count pending offers (would need to join with offers table)
-      setStats({ active, pending: 0, completed, totalSpent, pickupRequests: pendingPickups });
+      setStats({ active, pending: totalPendingOffers, completed, totalSpent, pickupRequests: pendingPickups });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -537,9 +556,10 @@ export default function ShipperDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {loads.map((load) => (
-                        <div 
+                        <Link 
                           key={load.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                          to={`/load/${load.id}`}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -559,13 +579,15 @@ export default function ShipperDashboard() {
                               <div className="font-semibold text-foreground">
                                 {load.price ? `€${load.price}` : 'Open'}
                               </div>
-                              <div className="text-sm text-muted-foreground">0 offers</div>
+                              <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                                {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                              </div>
                             </div>
                             <Badge className={statusConfig[load.status]?.className || ''}>
                               {statusConfig[load.status]?.label || load.status}
                             </Badge>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}

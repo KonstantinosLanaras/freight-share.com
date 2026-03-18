@@ -49,6 +49,7 @@ interface Load {
   cargo_type: string;
   created_at: string;
   notes: string | null;
+  offer_count?: number;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -85,7 +86,21 @@ export default function ShipperLoads() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLoads(data || []);
+
+      // Fetch offer counts
+      const loadIds = (data || []).map(l => l.id);
+      let offerCountMap: Record<string, number> = {};
+      if (loadIds.length > 0) {
+        const { data: offersData } = await supabase
+          .from('offers')
+          .select('load_id')
+          .in('load_id', loadIds);
+        (offersData || []).forEach(o => {
+          offerCountMap[o.load_id] = (offerCountMap[o.load_id] || 0) + 1;
+        });
+      }
+
+      setLoads((data || []).map(l => ({ ...l, offer_count: offerCountMap[l.id] || 0 })));
     } catch (error) {
       console.error('Error fetching loads:', error);
     } finally {
@@ -145,78 +160,79 @@ export default function ShipperLoads() {
     const status = statusConfig[load.status] || statusConfig.posted;
 
     return (
-      <Card key={load.id} className="hover:shadow-md transition-shadow">
-        <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <Badge className={status.color}>{status.label}</Badge>
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(load.created_at), 'MMM d, yyyy')}
-                </span>
+      <Link key={load.id} to={`/load/${load.id}`} className="block">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <Badge className={status.color}>{status.label}</Badge>
+                  {(load.offer_count || 0) > 0 && load.status === 'posted' && (
+                    <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
+                      {load.offer_count} offer{load.offer_count !== 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(load.created_at), 'MMM d, yyyy')}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <span>{load.origin_city}, {load.origin_country}</span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  <span>{load.destination_city}, {load.destination_country}</span>
+                </div>
+
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Package className="h-4 w-4" />
+                    {load.pallets} pallets · {load.cargo_type}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <span>{load.origin_city}, {load.origin_country}</span>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                <span>{load.destination_city}, {load.destination_country}</span>
-              </div>
+              <div className="flex items-start gap-4">
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-foreground">
+                    {load.price ? `€${load.price}` : 'Open'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {load.pricing_type === 'fixed' ? 'Fixed price' : 'Open to offers'}
+                  </div>
+                </div>
 
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Package className="h-4 w-4" />
-                  {load.pallets} pallets · {load.cargo_type}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
-                </div>
+                {showActions && load.status === 'posted' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Load
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={(e) => { e.preventDefault(); deleteLoad(load.id); }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Load
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
-
-            <div className="flex items-start gap-4">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-foreground">
-                  {load.price ? `€${load.price}` : 'Open'}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {load.pricing_type === 'fixed' ? 'Fixed price' : 'Open to offers'}
-                </div>
-              </div>
-
-              {showActions && load.status === 'posted' && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Load
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={`/load/${load.id}`}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Offers
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => deleteLoad(load.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Load
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Link>
     );
   };
 
