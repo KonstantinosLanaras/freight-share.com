@@ -133,6 +133,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
+            <DemoModeToggle />
             <LanguageSelector />
             <button
               className="p-2"
