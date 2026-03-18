@@ -164,8 +164,8 @@ export default function CarrierInsuranceSetup() {
         <div className="bg-muted/50 rounded-lg p-4 mb-6 flex gap-3">
           <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Why insurance matters</p>
-            <p>Providing insurance information builds trust with shippers. You must have insurance details on file before accepting load requests.</p>
+            <p className="font-medium text-foreground mb-1">Liability vs. cargo insurance</p>
+            <p>This is your <strong>transport liability policy</strong> — it covers your legal responsibility as a carrier under CMR. Cargo protection for individual shipments is offered separately to shippers during checkout.</p>
           </div>
         </div>
 
