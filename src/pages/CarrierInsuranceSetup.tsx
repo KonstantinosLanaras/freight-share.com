@@ -11,10 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const COVERAGE_TYPES = [
-  { value: 'cargo', label: 'Cargo Insurance' },
-  { value: 'liability', label: 'General Liability' },
-  { value: 'cargo_and_liability', label: 'Cargo + Liability' },
-  { value: 'comprehensive', label: 'Comprehensive Transport' },
+  { value: 'cmt_liability', label: 'CMR/CMT Liability' },
+  { value: 'general_liability', label: 'General Transport Liability' },
+  { value: 'comprehensive', label: 'Comprehensive Liability' },
 ];
 
 export default function CarrierInsuranceSetup() {
