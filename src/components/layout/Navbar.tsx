@@ -96,6 +96,13 @@ export const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <a
+              href="/#early-access"
+              onClick={scrollToEarlyAccess}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Get Early Access
+            </a>
           </div>
 
           {/* Auth Buttons + Language Selector - Desktop */}
