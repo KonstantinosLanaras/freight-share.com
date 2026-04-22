@@ -643,54 +643,6 @@ export default function CarrierDashboard() {
                   </CardContent>
                 </Card>
 
-                {/* Available Loads */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Available Loads</CardTitle>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/dashboard/carrier/find-loads">
-                        Browse All
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </Link>
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    {availableLoads.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Package className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                        <p className="text-muted-foreground">No loads available right now</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {availableLoads.map((load) => (
-                          <div 
-                            key={load.id}
-                            className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <div className="font-medium text-foreground">
-                                  {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {load.pallets} pallets · {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold text-foreground">
-                                  {load.price ? `€${load.price}` : 'Open'}
-                                </div>
-                              </div>
-                            </div>
-                            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => navigate(`/load/${load.id}`)}>
-                              Make Offer
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
               </div>
             </>
           )}
