@@ -32,6 +32,7 @@ import { format } from 'date-fns';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { CarrierVerificationForm } from '@/components/verification/CarrierVerificationForm';
 import { DeviationRequestCard } from '@/components/routes/DeviationRequestCard';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -557,24 +558,26 @@ export default function CarrierDashboard() {
                     ) : (
                       <div className="space-y-4">
                         {availableLoads.slice(0, 3).map((load) => (
-                          <Link 
-                            key={load.id}
-                            to={`/load/${load.id}`}
-                            className="block p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="font-medium text-foreground">
-                                {load.origin_city} → {load.destination_city}
+                          <div key={load.id} className="relative">
+                            <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
+                            <Link 
+                              to={`/load/${load.id}`}
+                              className="block p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="font-medium text-foreground">
+                                  {load.origin_city} → {load.destination_city}
+                                </div>
+                                <span className="text-primary font-semibold">
+                                  {load.price ? `€${load.price}` : 'Open'}
+                                </span>
                               </div>
-                              <span className="text-primary font-semibold">
-                                {load.price ? `€${load.price}` : 'Open'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>{load.pallets} pallets</span>
-                              <span>{formatDateRange(load.pickup_date_from, load.pickup_date_to)}</span>
-                            </div>
-                          </Link>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>{load.pallets} pallets</span>
+                                <span>{formatDateRange(load.pickup_date_from, load.pickup_date_to)}</span>
+                              </div>
+                            </Link>
+                          </div>
                         ))}
                         {availableLoads.length > 3 && (
                           <Button variant="outline" className="w-full" asChild>
