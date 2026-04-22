@@ -559,38 +559,40 @@ export default function ShipperDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {loads.map((load) => (
-                        <Link 
-                          key={load.id}
-                          to={`/load/${load.id}`}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                              <Package className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-foreground">
-                                {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                        <div key={load.id} className="relative">
+                          <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
+                          <Link 
+                            to={`/load/${load.id}`}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <Package className="h-5 w-5 text-primary" />
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {load.pallets} pallets · Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 sm:gap-6">
-                            <div className="text-right">
-                              <div className="font-semibold text-foreground">
-                                {load.price ? `€${load.price}` : 'Open'}
-                              </div>
-                              <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                                {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                              <div>
+                                <div className="font-medium text-foreground">
+                                  {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {load.pallets} pallets · Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                                </div>
                               </div>
                             </div>
-                            <Badge className={statusConfig[load.status]?.className || ''}>
-                              {statusConfig[load.status]?.label || load.status}
-                            </Badge>
-                          </div>
-                        </Link>
+                            <div className="flex items-center gap-4 sm:gap-6">
+                              <div className="text-right">
+                                <div className="font-semibold text-foreground">
+                                  {load.price ? `€${load.price}` : 'Open'}
+                                </div>
+                                <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                                  {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              <Badge className={statusConfig[load.status]?.className || ''}>
+                                {statusConfig[load.status]?.label || load.status}
+                              </Badge>
+                            </div>
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   )}
