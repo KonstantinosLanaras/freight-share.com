@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 interface Load {
   id: string;
@@ -263,7 +264,8 @@ export default function FindLoads() {
               const isIncompatible = compatibility && !compatibility.isMatch;
               
               return (
-                <Card key={load.id} className={`hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''}`}>
+                <Card key={load.id} className={`relative hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''}`}>
+                  <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                       <div className="flex-1">
