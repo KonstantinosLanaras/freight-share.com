@@ -30,6 +30,20 @@ export const Navbar = () => {
     navigate('/');
   };
 
+  const scrollToEarlyAccess = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/#early-access');
+      // After navigation, scroll
+      setTimeout(() => {
+        document.getElementById('early-access')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById('early-access')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const dashboardPath = role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper';
 
   return (
