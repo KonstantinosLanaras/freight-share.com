@@ -29,6 +29,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { ShipperVerificationForm } from '@/components/verification/ShipperVerificationForm';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 interface Load {
   id: string;
@@ -89,6 +91,7 @@ export default function ShipperDashboard() {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0, pickupRequests: 0 });
   const { user, signOut } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
 
   useEffect(() => {
