@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Truck, Package, Mail, Phone, MapPin } from 'lucide-react';
+import { Truck, Package, Mail, MapPin } from 'lucide-react';
 
 export const Footer = () => {
   const { t } = useTranslation();
@@ -57,13 +57,9 @@ export const Footer = () => {
                 <Mail className="h-4 w-4" />
                 <span>support@freightshare.com</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
-              </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>123 Logistics Ave<br />Rotterdam, Netherlands</span>
+                <span>Milan, Italy</span>
               </li>
             </ul>
           </div>
@@ -74,8 +70,7 @@ export const Footer = () => {
             © {new Date().getFullYear()} FreightShare. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4 text-sm text-secondary-foreground/50">
-            <span>Secure payments powered by</span>
-            <span className="font-semibold text-secondary-foreground/70">FreightShare Trust</span>
+            <span>Secure platform — payments coming soon</span>
           </div>
         </div>
       </div>
