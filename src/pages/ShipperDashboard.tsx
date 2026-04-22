@@ -460,6 +460,50 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
+              {/* Demo: Loads Matching Your Routes */}
+              {isDemoMode && (
+                <Card className="mb-6 border-primary/20">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5 text-primary" />
+                          Loads Matching Your Routes
+                        </CardTitle>
+                        <Badge variant="secondary" className="mt-2 text-xs font-normal">
+                          Based on your shipping history
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {[
+                        { id: 'demo-1', origin: 'Milan, IT', destination: 'Munich, DE', pallets: 6, date: 'Apr 24-26', price: 720 },
+                        { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340 },
+                        { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480 },
+                      ].map((load) => (
+                        <div key={load.id} className="relative p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors">
+                          <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
+                          <div className="font-medium text-foreground mb-1">
+                            {load.origin} → {load.destination}
+                          </div>
+                          <div className="text-sm text-muted-foreground mb-3">
+                            {load.pallets} pallets · {load.date}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-primary font-semibold">€{load.price}</span>
+                            <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                              Match
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Pickup Requests Status */}
               {pickupRequests.length > 0 && (
                 <Card className="mb-6">
