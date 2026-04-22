@@ -206,6 +206,14 @@ export const Navbar = () => {
                   {t('nav.forCarriers')}
                 </Link>
               </div>
+
+              <a
+                href="/#early-access"
+                onClick={scrollToEarlyAccess}
+                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
+              >
+                Get Early Access
+              </a>
               
               <div className="flex gap-2 px-4 pt-2">
                 {!loading && user ? (
