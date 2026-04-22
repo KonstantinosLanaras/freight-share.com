@@ -30,6 +30,20 @@ export const Navbar = () => {
     navigate('/');
   };
 
+  const scrollToEarlyAccess = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/#early-access');
+      // After navigation, scroll
+      setTimeout(() => {
+        document.getElementById('early-access')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById('early-access')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const dashboardPath = role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper';
 
   return (
@@ -82,6 +96,13 @@ export const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <a
+              href="/#early-access"
+              onClick={scrollToEarlyAccess}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Get Early Access
+            </a>
           </div>
 
           {/* Auth Buttons + Language Selector - Desktop */}
@@ -185,6 +206,14 @@ export const Navbar = () => {
                   {t('nav.forCarriers')}
                 </Link>
               </div>
+
+              <a
+                href="/#early-access"
+                onClick={scrollToEarlyAccess}
+                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
+              >
+                Get Early Access
+              </a>
               
               <div className="flex gap-2 px-4 pt-2">
                 {!loading && user ? (

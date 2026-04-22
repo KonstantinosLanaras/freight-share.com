@@ -29,6 +29,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { ShipperVerificationForm } from '@/components/verification/ShipperVerificationForm';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 interface Load {
   id: string;
@@ -89,6 +91,7 @@ export default function ShipperDashboard() {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0, pickupRequests: 0 });
   const { user, signOut } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -457,6 +460,50 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
+              {/* Demo: Loads Matching Your Routes */}
+              {isDemoMode && (
+                <Card className="mb-6 border-primary/20">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5 text-primary" />
+                          Loads Matching Your Routes
+                        </CardTitle>
+                        <Badge variant="secondary" className="mt-2 text-xs font-normal">
+                          Based on your shipping history
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {[
+                        { id: 'demo-1', origin: 'Milan, IT', destination: 'Munich, DE', pallets: 6, date: 'Apr 24-26', price: 720 },
+                        { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340 },
+                        { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480 },
+                      ].map((load) => (
+                        <div key={load.id} className="relative p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors">
+                          <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
+                          <div className="font-medium text-foreground mb-1">
+                            {load.origin} → {load.destination}
+                          </div>
+                          <div className="text-sm text-muted-foreground mb-3">
+                            {load.pallets} pallets · {load.date}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-primary font-semibold">€{load.price}</span>
+                            <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                              Match
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Pickup Requests Status */}
               {pickupRequests.length > 0 && (
                 <Card className="mb-6">
@@ -556,38 +603,40 @@ export default function ShipperDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {loads.map((load) => (
-                        <Link 
-                          key={load.id}
-                          to={`/load/${load.id}`}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                              <Package className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-foreground">
-                                {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                        <div key={load.id} className="relative">
+                          <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
+                          <Link 
+                            to={`/load/${load.id}`}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <Package className="h-5 w-5 text-primary" />
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {load.pallets} pallets · Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 sm:gap-6">
-                            <div className="text-right">
-                              <div className="font-semibold text-foreground">
-                                {load.price ? `€${load.price}` : 'Open'}
-                              </div>
-                              <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                                {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                              <div>
+                                <div className="font-medium text-foreground">
+                                  {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {load.pallets} pallets · Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                                </div>
                               </div>
                             </div>
-                            <Badge className={statusConfig[load.status]?.className || ''}>
-                              {statusConfig[load.status]?.label || load.status}
-                            </Badge>
-                          </div>
-                        </Link>
+                            <div className="flex items-center gap-4 sm:gap-6">
+                              <div className="text-right">
+                                <div className="font-semibold text-foreground">
+                                  {load.price ? `€${load.price}` : 'Open'}
+                                </div>
+                                <div className={`text-sm ${(load.offer_count || 0) > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                                  {load.offer_count || 0} offer{(load.offer_count || 0) !== 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              <Badge className={statusConfig[load.status]?.className || ''}>
+                                {statusConfig[load.status]?.label || load.status}
+                              </Badge>
+                            </div>
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   )}
