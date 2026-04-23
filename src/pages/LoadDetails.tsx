@@ -397,9 +397,9 @@ export default function LoadDetails() {
         .single();
       if (shipmentError) throw shipmentError;
 
-      // 4. Demo mode: simulate payment success
+      // 4. Beta mode: simulate payment success
       if (shouldSimulatePayment()) {
-        toast.success('Demo: Payment simulated successfully!', {
+        toast.success('Beta: Payment simulated successfully!', {
           description: 'In production, you would be redirected to Stripe checkout.',
           duration: 5000,
         });
