@@ -50,9 +50,19 @@ export const Hero = () => {
             </div>
 
             <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.25s' }}>
-              {t('auth.alreadyHaveAccount')}{' '}
-              <Link to="/auth" className="text-primary hover:underline font-medium">
-                {t('nav.logIn')}
+              <a
+                href="#early-access"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('early-access')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-primary hover:underline font-medium"
+              >
+                Get Early Access
+              </a>
+              <span className="mx-2 text-muted-foreground/60">·</span>
+              <Link to="/select-role" className="text-primary hover:underline font-medium">
+                Explore the Demo
               </Link>
             </p>
 
