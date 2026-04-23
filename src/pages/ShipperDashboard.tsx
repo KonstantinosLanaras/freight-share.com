@@ -258,68 +258,73 @@ export default function ShipperDashboard() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1">
-            <Link 
-              to="/dashboard/shipper"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground"
-            >
-              <TrendingUp className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link 
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            {/* Group 1 */}
+            <Link
               to="/dashboard/shipper/loads"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Package className="h-5 w-5" />
               My Loads
             </Link>
-            <Link 
+            <Link
               to="/dashboard/shipper/shipments"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Truck className="h-5 w-5" />
               Shipments
             </Link>
-            <Link 
-              to="/dashboard/shipper/messages"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <MessageSquare className="h-5 w-5" />
-              Messages
-            </Link>
-            <Link 
-              to="/dashboard/shipper/requests"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Send className="h-5 w-5" />
-              My Requests
-            </Link>
-            <Link 
-              to="/routes"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <MapPin className="h-5 w-5" />
-              Browse Routes
-            </Link>
-            <Link 
-              to="/saved-loads"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Bookmark className="h-5 w-5" />
-              Saved Loads
-            </Link>
+
+            {/* Divider + Communication group */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
+              <div className="px-4 mb-2">
+                <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Communication</span>
+              </div>
+              <Link
+                to="/dashboard/shipper/messages"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <MessageSquare className="h-5 w-5" />
+                Messages
+              </Link>
+              <Link
+                to="/dashboard/shipper/requests"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Send className="h-5 w-5" />
+                My Requests
+              </Link>
+            </div>
+
+            {/* Divider + Group 3 */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
+              <Link
+                to="/routes"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <MapPin className="h-5 w-5" />
+                Browse Routes
+              </Link>
+              <Link
+                to="/saved-loads"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Bookmark className="h-5 w-5" />
+                Saved Loads
+              </Link>
+            </div>
           </nav>
 
-          {/* Help & Sign Out - Always Visible */}
+          {/* Help & Sign Out — Always visible at bottom */}
           <div className="p-4 border-t border-sidebar-border space-y-2">
-            <Link 
+            <Link
               to="/help"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <HelpCircle className="h-5 w-5" />
               Help & Resolution
             </Link>
-            <button 
+            <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-destructive/20 hover:text-destructive transition-colors"
             >

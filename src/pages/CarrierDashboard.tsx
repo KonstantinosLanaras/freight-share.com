@@ -272,81 +272,76 @@ export default function CarrierDashboard() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1">
-            <Link 
-              to="/dashboard/carrier"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground"
-            >
-              <TrendingUp className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link 
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            {/* Group 1 */}
+            <Link
               to="/dashboard/carrier/find-loads"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Package className="h-5 w-5" />
               Browse Loads
             </Link>
-            <Link 
+            <Link
               to="/dashboard/carrier/shipments"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Truck className="h-5 w-5" />
               Shipments
             </Link>
-            <Link 
-              to="/dashboard/carrier/messages"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <MessageSquare className="h-5 w-5" />
-              Messages
-            </Link>
-            
-            {/* Route Requests */}
-            <Link 
-              to="/dashboard/carrier/requests"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Inbox className="h-5 w-5" />
-              Route Requests
-              {stats.pendingRequests > 0 && (
-                <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
-              )}
-            </Link>
 
-            {/* Optional Routes Section */}
-            <div className="pt-4 mt-4 border-t border-sidebar-border">
+            {/* Divider + Communication group */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
               <div className="px-4 mb-2">
-                <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Optional</span>
+                <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Communication</span>
               </div>
-              <Link 
+              <Link
+                to="/dashboard/carrier/messages"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <MessageSquare className="h-5 w-5" />
+                Messages
+              </Link>
+              <Link
+                to="/dashboard/carrier/requests"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Inbox className="h-5 w-5" />
+                Route Requests
+                {stats.pendingRequests > 0 && (
+                  <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
+                )}
+              </Link>
+            </div>
+
+            {/* Divider + Group 3 */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
+              <Link
                 to="/dashboard/carrier/routes"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <MapPin className="h-5 w-5" />
                 My Routes
               </Link>
+              <Link
+                to="/saved-loads"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Bookmark className="h-5 w-5" />
+                Saved Loads
+              </Link>
             </div>
-
-            <Link 
-              to="/saved-loads"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors mt-2"
-            >
-              <Bookmark className="h-5 w-5" />
-              Saved Loads
-            </Link>
           </nav>
 
-          {/* Help & Sign Out - Always Visible */}
+          {/* Help & Sign Out — Always visible at bottom */}
           <div className="p-4 border-t border-sidebar-border space-y-2">
-            <Link 
+            <Link
               to="/help"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <HelpCircle className="h-5 w-5" />
               Help & Resolution
             </Link>
-            <button 
+            <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-destructive/20 hover:text-destructive transition-colors"
             >
