@@ -6,7 +6,6 @@ import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard, ChevronDown } f
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { LanguageSelector } from '@/components/LanguageSelector';
-import { DemoModeToggle } from '@/components/DemoModeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,12 +63,6 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              {t('nav.home')}
-            </Link>
-            <Link 
               to="/how-it-works" 
               className={`text-sm font-medium transition-colors ${isActive('/how-it-works') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
@@ -107,7 +100,6 @@ export const Navbar = () => {
 
           {/* Auth Buttons + Language Selector - Desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <DemoModeToggle />
             <LanguageSelector />
             {!loading && user ? (
               <>
@@ -143,20 +135,14 @@ export const Navbar = () => {
                 </DropdownMenu>
               </>
             ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link to="/auth">{t('nav.logIn')}</Link>
-                </Button>
-                <Button variant="accent" asChild>
-                  <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
-                </Button>
-              </>
+              <Button variant="accent" asChild>
+                <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
+              </Button>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            <DemoModeToggle />
             <LanguageSelector />
             <button
               className="p-2"
