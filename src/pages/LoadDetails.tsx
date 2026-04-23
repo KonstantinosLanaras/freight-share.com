@@ -218,7 +218,7 @@ export default function LoadDetails() {
     if (isDemoMode) {
       if (verificationStatus !== 'verified') {
         toast.info('Verification required in live environment', {
-          description: 'In demo mode, this step is bypassed.',
+          description: 'In beta, this step is bypassed.',
           duration: 3000,
         });
       }
@@ -397,9 +397,9 @@ export default function LoadDetails() {
         .single();
       if (shipmentError) throw shipmentError;
 
-      // 4. Demo mode: simulate payment success
+      // 4. Beta mode: simulate payment success
       if (shouldSimulatePayment()) {
-        toast.success('Demo: Payment simulated successfully!', {
+        toast.success('Beta: Payment simulated successfully!', {
           description: 'In production, you would be redirected to Stripe checkout.',
           duration: 5000,
         });
@@ -940,7 +940,7 @@ export default function LoadDetails() {
             {isDemoMode && (
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning-foreground flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
-                <span>Demo Mode — This offer will be created in the database and visible to the shipper.</span>
+                <span>Beta — This offer will be created in the database and visible to the shipper.</span>
               </div>
             )}
           </div>

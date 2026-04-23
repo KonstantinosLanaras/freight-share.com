@@ -144,7 +144,7 @@ export default function ShipmentDetails() {
             body: { shipmentId: shipment.id },
           });
         }
-        toast.success(isDemoMode ? 'Demo: Delivery confirmed & payment released (simulated)' : 'Delivery confirmed & payment released!');
+        toast.success(isDemoMode ? 'Beta: Delivery confirmed & payment released (simulated)' : 'Delivery confirmed & payment released!');
       } else {
         toast.success(`Shipment marked as ${newStatus.replace('_', ' ')}`);
       }

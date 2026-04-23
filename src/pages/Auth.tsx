@@ -482,12 +482,13 @@ export default function Auth() {
               </p>
 
               {role && (
-                <button 
-                  onClick={() => { setStep('role'); setRole(null); }}
+                <button
+                  type="button"
+                  onClick={() => navigate('/select-role')}
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
                 >
                   <ArrowLeft className="h-3 w-3" />
-                  Change role
+                  Back — change role
                 </button>
               )}
 
@@ -598,7 +599,7 @@ export default function Auth() {
                   )}
                 </Button>
 
-                {/* Skip — Browse as guest (demo bypass) */}
+                {/* Skip — Beta access only (bypass login) */}
                 {mode === 'login' && role && (
                   <div className="text-center pt-1">
                     <button
@@ -606,7 +607,7 @@ export default function Auth() {
                       onClick={() => navigate(role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper')}
                       className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
                     >
-                      Skip — Browse as guest
+                      Skip — Beta access only
                     </button>
                   </div>
                 )}

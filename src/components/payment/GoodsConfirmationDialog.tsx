@@ -126,7 +126,7 @@ export function GoodsConfirmationDialog({
           <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs">
             <FlaskConical className="h-3.5 w-3.5 text-warning shrink-0" />
             <span className="text-warning-foreground">
-              <strong>Demo Mode</strong> — Payment will be simulated. Insurance selection is fully functional for demonstration.
+              <strong>Beta</strong> — Payment will be simulated. Insurance selection is fully functional for demonstration.
             </span>
           </div>
         )}
@@ -271,7 +271,7 @@ export function GoodsConfirmationDialog({
                             </p>
                             {isDemoMode && (
                               <p className="text-xs text-warning mt-1">
-                                Demo: No real underwriting — selection recorded for demonstration.
+                                Beta: No real underwriting — selection recorded for demonstration.
                               </p>
                             )}
                           </div>
