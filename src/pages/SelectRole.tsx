@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
-import { Package, Truck, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Package, Truck, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useEffect } from 'react';
+import { Card } from '@/components/ui/card';
 
 export default function SelectRole() {
   const { user, role, roles, loading, setActiveRole } = useAuth();
@@ -12,19 +13,12 @@ export default function SelectRole() {
   useEffect(() => {
     if (loading) return;
 
-    // In demo mode, guests can pick a role and jump straight into the demo dashboard.
-    if (!user && !isDemoMode) {
-      navigate('/auth?mode=login', { replace: true });
-      return;
-    }
-
-    // Single role → skip this screen, go straight to dashboard
+    // For an already-logged-in user with a single role, jump to that dashboard.
     if (user && roles.length === 1) {
       const path = roles[0] === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
       navigate(path, { replace: true });
-      return;
     }
-  }, [user, roles, loading, navigate, isDemoMode]);
+  }, [user, roles, loading, navigate]);
 
   if (loading || (user && roles.length === 1)) {
     return (
@@ -34,113 +28,126 @@ export default function SelectRole() {
     );
   }
 
-  // Demo guests have no user — still show the picker
-  if (!user && !isDemoMode) return null;
-
-  const isNewUser = !user || roles.length === 0;
   const isSwitch = !!user && roles.length > 1;
 
   const handleSelect = (selectedRole: 'shipper' | 'carrier') => {
-    if (user) setActiveRole(selectedRole);
-    const path = selectedRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
-    navigate(path, { replace: true });
+    // Logged-in users with multiple roles: switch and go to dashboard.
+    if (user && roles.includes(selectedRole)) {
+      setActiveRole(selectedRole);
+      const path = selectedRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
+      navigate(path, { replace: true });
+      return;
+    }
+
+    // Otherwise (guest or new role): go to the login/signup page for that role.
+    // The login page is always an intermediate step — never bypass it from here.
+    navigate(`/auth?mode=login&role=${selectedRole}`);
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3">
-          {isSwitch ? 'Switch workspace' : 'How would you like to continue?'}
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-md mx-auto">
-          {isSwitch
-            ? 'Choose which workspace to open'
-            : 'Select your path to get started'}
-        </p>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Top bar with back link */}
+      <div className="container mx-auto px-4 pt-8">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-        {/* Shipper Card */}
-        {(isNewUser || roles.includes('shipper')) && (
-          <button
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="text-center mb-12 max-w-2xl">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3">
+            {isSwitch ? 'Switch workspace' : 'How would you like to continue?'}
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            {isSwitch
+              ? 'Choose which workspace to open.'
+              : 'Choose your role to continue to the login page.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+          {/* Shipper Card */}
+          <Card
+            role="button"
+            tabIndex={0}
             onClick={() => handleSelect('shipper')}
-            className={`group relative overflow-hidden rounded-2xl border-2 bg-card p-8 text-left transition-all duration-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              role === 'shipper' && isSwitch
-                ? 'border-primary shadow-md shadow-primary/10'
-                : 'border-border hover:border-primary hover:shadow-primary/10'
-            }`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelect('shipper');
+              }
+            }}
+            className="group cursor-pointer p-8 border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full transition-all duration-300 group-hover:w-40 group-hover:h-40 group-hover:bg-primary/10" />
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
-                  <Package className="h-7 w-7 text-primary" />
-                </div>
-                {role === 'shipper' && isSwitch && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Current
-                  </span>
-                )}
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Package className="h-7 w-7 text-primary" />
               </div>
-
-              <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                Shipper
-              </h2>
-
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Post your loads, compare carrier offers, and ship with confidence. Manage everything from one dashboard.
-              </p>
-
-              <div className="flex items-center gap-2 text-primary font-medium">
-                <span>{isSwitch ? 'Continue as Shipper' : 'Enter as Shipper'}</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </div>
+              {role === 'shipper' && isSwitch && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Current
+                </span>
+              )}
             </div>
-          </button>
-        )}
 
-        {/* Carrier Card */}
-        {(isNewUser || roles.includes('carrier')) && (
-          <button
+            <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
+              I am a Shipper
+            </h2>
+
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              I need to ship goods.
+            </p>
+
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <span>{isSwitch && roles.includes('shipper') ? 'Continue as Shipper' : 'Continue'}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </Card>
+
+          {/* Carrier Card */}
+          <Card
+            role="button"
+            tabIndex={0}
             onClick={() => handleSelect('carrier')}
-            className={`group relative overflow-hidden rounded-2xl border-2 bg-card p-8 text-left transition-all duration-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              role === 'carrier' && isSwitch
-                ? 'border-accent shadow-md shadow-accent/10'
-                : 'border-border hover:border-accent hover:shadow-accent/10'
-            }`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelect('carrier');
+              }
+            }}
+            className="group cursor-pointer p-8 border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full transition-all duration-300 group-hover:w-40 group-hover:h-40 group-hover:bg-accent/10" />
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center transition-colors group-hover:bg-accent/20">
-                  <Truck className="h-7 w-7 text-accent" />
-                </div>
-                {role === 'carrier' && isSwitch && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-accent/10 text-accent">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Current
-                  </span>
-                )}
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Truck className="h-7 w-7 text-primary" />
               </div>
-
-              <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-                Carrier
-              </h2>
-
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Browse available loads, post your routes, and fill your trucks. Grow your transport business efficiently.
-              </p>
-
-              <div className="flex items-center gap-2 text-accent font-medium">
-                <span>{isSwitch ? 'Continue as Carrier' : 'Enter as Carrier'}</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </div>
+              {role === 'carrier' && isSwitch && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Current
+                </span>
+              )}
             </div>
-          </button>
-        )}
+
+            <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
+              I am a Carrier
+            </h2>
+
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              I have spare truck capacity.
+            </p>
+
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <span>{isSwitch && roles.includes('carrier') ? 'Continue as Carrier' : 'Continue'}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
