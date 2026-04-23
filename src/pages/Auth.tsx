@@ -598,7 +598,7 @@ export default function Auth() {
                   )}
                 </Button>
 
-                {/* Skip — Browse as guest (demo bypass) */}
+                {/* Skip — Beta access only (bypass login) */}
                 {mode === 'login' && role && (
                   <div className="text-center pt-1">
                     <button
@@ -606,7 +606,7 @@ export default function Auth() {
                       onClick={() => navigate(role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper')}
                       className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
                     >
-                      Skip — Browse as guest
+                      Skip — Beta access only
                     </button>
                   </div>
                 )}
