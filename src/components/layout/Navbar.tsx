@@ -213,9 +213,14 @@ export const Navbar = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="accent" className="flex-1" asChild>
-                    <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t('nav.getStarted')}</Link>
-                  </Button>
+                  <>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>{t('nav.logIn')}</Link>
+                    </Button>
+                    <Button variant="accent" className="flex-1" asChild>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t('nav.getStarted')}</Link>
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
