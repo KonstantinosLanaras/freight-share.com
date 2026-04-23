@@ -604,7 +604,7 @@ export default function Auth() {
                   <>
                     Don't have an account?{' '}
                     <button 
-                      onClick={() => { setMode('signup'); setStep('role'); setRole(null); }}
+                      onClick={() => { setMode('signup'); }}
                       className="text-primary hover:underline font-medium"
                     >
                       Sign up
@@ -614,7 +614,7 @@ export default function Auth() {
                   <>
                     Already have an account?{' '}
                     <button 
-                      onClick={() => { setMode('login'); setStep('role'); setRole(null); }}
+                      onClick={() => { setMode('login'); }}
                       className="text-primary hover:underline font-medium"
                     >
                       Log in
