@@ -218,7 +218,7 @@ export default function LoadDetails() {
     if (isDemoMode) {
       if (verificationStatus !== 'verified') {
         toast.info('Verification required in live environment', {
-          description: 'In demo mode, this step is bypassed.',
+          description: 'In beta, this step is bypassed.',
           duration: 3000,
         });
       }
