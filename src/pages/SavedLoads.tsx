@@ -165,7 +165,7 @@ export default function SavedLoads() {
                       <div className="flex items-center gap-3 mb-3">
                         {load.isDemo && (
                           <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                            Demo
+                            Beta
                           </Badge>
                         )}
                       </div>
