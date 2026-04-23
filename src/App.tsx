@@ -46,6 +46,7 @@ import ShipperRequests from "./pages/ShipperRequests";
 import CarrierRequests from "./pages/CarrierRequests";
 import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
+import SavedLoads from "./pages/SavedLoads";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +191,11 @@ const App = () => (
               </ProtectedRoute>
             } />
             {/* Shared Routes */}
+            <Route path="/saved-loads" element={
+              <ProtectedRoute>
+                <SavedLoads />
+              </ProtectedRoute>
+            } />
             <Route path="/shipment/:id" element={
               <ProtectedRoute>
                 <ShipmentDetails />
