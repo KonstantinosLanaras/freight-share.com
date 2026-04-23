@@ -940,7 +940,7 @@ export default function LoadDetails() {
             {isDemoMode && (
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning-foreground flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
-                <span>Demo Mode — This offer will be created in the database and visible to the shipper.</span>
+                <span>Beta — This offer will be created in the database and visible to the shipper.</span>
               </div>
             )}
           </div>
