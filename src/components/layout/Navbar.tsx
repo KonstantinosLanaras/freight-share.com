@@ -103,15 +103,9 @@ export const Navbar = () => {
             <LanguageSelector />
             {!loading && user ? (
               <>
-                <Button variant="default" asChild>
-                  <Link to={dashboardPath}>
-                    <LayoutDashboard className="h-4 w-4 mr-2" />
-                    {t('nav.dashboard')}
-                  </Link>
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button variant="outline" size="icon" className="rounded-full" aria-label="Account menu">
                       <User className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -124,7 +118,7 @@ export const Navbar = () => {
                     <DropdownMenuItem asChild>
                       <Link to={dashboardPath}>
                         <LayoutDashboard className="h-4 w-4 mr-2" />
-                        {t('nav.goToDashboard')}
+                        My Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
@@ -133,11 +127,22 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <Button variant="accent" asChild>
+                  <Link to={dashboardPath}>{t('nav.getStarted')}</Link>
+                </Button>
               </>
             ) : (
-              <Button variant="accent" asChild>
-                <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
-              </Button>
+              <>
+                <Link
+                  to="/auth?mode=login"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('nav.logIn')}
+                </Link>
+                <Button variant="accent" asChild>
+                  <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
+                </Button>
+              </>
             )}
           </div>
 
