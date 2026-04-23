@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -10,6 +11,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, role, roles, loading } = useAuth();
+  const { isDemoMode } = useDemoMode();
 
   if (loading) {
     return (
@@ -17,6 +19,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // In demo mode the entire platform is browsable as a guest — bypass auth gates.
+  if (isDemoMode) {
+    return <>{children}</>;
   }
 
   if (!user) {

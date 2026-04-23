@@ -597,6 +597,19 @@ export default function Auth() {
                     mode === 'login' ? 'Log In' : 'Create Account'
                   )}
                 </Button>
+
+                {/* Skip — Browse as guest (demo bypass) */}
+                {mode === 'login' && role && (
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => navigate(role === 'carrier' ? '/dashboard/carrier' : '/dashboard/shipper')}
+                      className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
+                    >
+                      Skip — Browse as guest
+                    </button>
+                  </div>
+                )}
               </form>
 
               <p className="mt-6 text-center text-sm text-muted-foreground">

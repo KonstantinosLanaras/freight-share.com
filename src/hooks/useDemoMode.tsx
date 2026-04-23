@@ -12,10 +12,11 @@ interface DemoModeContextType {
 const DemoModeContext = createContext<DemoModeContextType | undefined>(undefined);
 
 export function DemoModeProvider({ children }: { children: React.ReactNode }) {
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  // Platform runs in demo mode by default at all times — no live mode for now.
+  const [isDemoMode] = useState(true);
 
   const toggleDemoMode = useCallback(() => {
-    setIsDemoMode((prev) => !prev);
+    // No-op: demo mode is locked on for the entire platform.
   }, []);
 
   const checkVerification = useCallback(

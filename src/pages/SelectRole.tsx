@@ -1,29 +1,32 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { Package, Truck, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function SelectRole() {
   const { user, role, roles, loading, setActiveRole } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return;
 
-    if (!user) {
+    // In demo mode, guests can pick a role and jump straight into the demo dashboard.
+    if (!user && !isDemoMode) {
       navigate('/auth?mode=login', { replace: true });
       return;
     }
 
     // Single role → skip this screen, go straight to dashboard
-    if (roles.length === 1) {
+    if (user && roles.length === 1) {
       const path = roles[0] === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
       navigate(path, { replace: true });
       return;
     }
-  }, [user, roles, loading, navigate]);
+  }, [user, roles, loading, navigate, isDemoMode]);
 
-  if (loading || roles.length === 1) {
+  if (loading || (user && roles.length === 1)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -31,13 +34,14 @@ export default function SelectRole() {
     );
   }
 
-  if (!user) return null;
+  // Demo guests have no user — still show the picker
+  if (!user && !isDemoMode) return null;
 
-  const isNewUser = roles.length === 0;
-  const isSwitch = roles.length > 1;
+  const isNewUser = !user || roles.length === 0;
+  const isSwitch = !!user && roles.length > 1;
 
   const handleSelect = (selectedRole: 'shipper' | 'carrier') => {
-    setActiveRole(selectedRole);
+    if (user) setActiveRole(selectedRole);
     const path = selectedRole === 'shipper' ? '/dashboard/shipper' : '/dashboard/carrier';
     navigate(path, { replace: true });
   };

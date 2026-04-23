@@ -6,7 +6,6 @@ import { Menu, X, Truck, Package, User, LogOut, LayoutDashboard, ChevronDown } f
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { LanguageSelector } from '@/components/LanguageSelector';
-import { DemoModeToggle } from '@/components/DemoModeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,12 +63,6 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              {t('nav.home')}
-            </Link>
-            <Link 
               to="/how-it-works" 
               className={`text-sm font-medium transition-colors ${isActive('/how-it-works') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
@@ -107,7 +100,6 @@ export const Navbar = () => {
 
           {/* Auth Buttons + Language Selector - Desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <DemoModeToggle />
             <LanguageSelector />
             {!loading && user ? (
               <>
@@ -143,20 +135,14 @@ export const Navbar = () => {
                 </DropdownMenu>
               </>
             ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link to="/auth">{t('nav.logIn')}</Link>
-                </Button>
-                <Button variant="accent" asChild>
-                  <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
-                </Button>
-              </>
+              <Button variant="accent" asChild>
+                <Link to="/auth?mode=signup">{t('nav.getStarted')}</Link>
+              </Button>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            <DemoModeToggle />
             <LanguageSelector />
             <button
               className="p-2"
@@ -171,13 +157,6 @@ export const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border animate-slide-up">
             <div className="flex flex-col gap-3">
-              <Link 
-                to="/" 
-                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
-                onClick={() => setIsOpen(false)}
-              >
-                {t('nav.home')}
-              </Link>
               <Link 
                 to="/how-it-works" 
                 className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg"
@@ -229,14 +208,9 @@ export const Navbar = () => {
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <Button variant="outline" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setIsOpen(false)}>{t('nav.logIn')}</Link>
-                    </Button>
-                    <Button variant="accent" className="flex-1" asChild>
-                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t('nav.getStarted')}</Link>
-                    </Button>
-                  </>
+                  <Button variant="accent" className="flex-1" asChild>
+                    <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t('nav.getStarted')}</Link>
+                  </Button>
                 )}
               </div>
             </div>
