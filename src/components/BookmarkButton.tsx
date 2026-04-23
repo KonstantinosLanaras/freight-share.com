@@ -33,6 +33,8 @@ export const BookmarkButton = ({ id, className }: BookmarkButtonProps) => {
         const arr: string[] = raw ? JSON.parse(raw) : [];
         const updated = next ? [...new Set([...arr, id])] : arr.filter((x) => x !== id);
         localStorage.setItem(storageKey, JSON.stringify(updated));
+        // Notify same-tab listeners (storage event only fires across tabs)
+        window.dispatchEvent(new StorageEvent('storage', { key: storageKey }));
       } catch {
         /* ignore */
       }
