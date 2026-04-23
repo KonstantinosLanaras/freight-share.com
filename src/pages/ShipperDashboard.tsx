@@ -98,6 +98,9 @@ export default function ShipperDashboard() {
   useEffect(() => {
     if (user) {
       fetchData();
+    } else {
+      // Demo guest mode — no user, skip data fetch but render the dashboard
+      setLoading(false);
     }
   }, [user]);
 
