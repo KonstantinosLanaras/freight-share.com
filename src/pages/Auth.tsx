@@ -482,12 +482,13 @@ export default function Auth() {
               </p>
 
               {role && (
-                <button 
-                  onClick={() => { setStep('role'); setRole(null); }}
+                <button
+                  type="button"
+                  onClick={() => navigate('/select-role')}
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
                 >
                   <ArrowLeft className="h-3 w-3" />
-                  Change role
+                  Back — change role
                 </button>
               )}
 
