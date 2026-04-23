@@ -62,7 +62,7 @@ export const Hero = () => {
               </a>
               <span className="mx-2 text-muted-foreground/60">·</span>
               <Link to="/select-role" className="text-primary hover:underline font-medium">
-                Explore the Demo
+                Explore the Beta
               </Link>
             </p>
 
