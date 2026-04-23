@@ -271,7 +271,7 @@ export function GoodsConfirmationDialog({
                             </p>
                             {isDemoMode && (
                               <p className="text-xs text-warning mt-1">
-                                Demo: No real underwriting — selection recorded for demonstration.
+                                Beta: No real underwriting — selection recorded for demonstration.
                               </p>
                             )}
                           </div>
