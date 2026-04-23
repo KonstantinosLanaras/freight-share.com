@@ -71,7 +71,7 @@ export const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-secondary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-secondary-foreground/50">
-            © {new Date().getFullYear()} FreightShare. {t('footer.rights')}
+            © {new Date().getFullYear()} FreightShare S.à r.l. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4 text-sm text-secondary-foreground/50">
             <span>Secure platform — payments coming soon</span>
