@@ -63,13 +63,12 @@ export default function RouteOfferPage() {
         .single();
       if (error) throw error;
       setRoute(data);
-      setDirect((d) => ({ ...d, price: data?.price ? String(data.price) : '' }));
       setAlt((a) => ({
         ...a,
-        price: data?.price ? String(data.price) : '',
         dropoffCity: data?.destination_city || '',
         dropoffCountry: data?.destination_country || '',
       }));
+
 
       if (data?.carrier_id) {
         const { data: profile } = await supabase
