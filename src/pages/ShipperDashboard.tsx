@@ -277,6 +277,13 @@ export default function ShipperDashboard() {
               <Truck className="h-5 w-5" />
               Shipments
             </Link>
+            <Link
+              to="/routes"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <MapPin className="h-5 w-5" />
+              Browse Routes
+            </Link>
 
             {/* Divider + Communication group */}
             <div className="pt-3 mt-3 border-t border-sidebar-border">
@@ -302,13 +309,6 @@ export default function ShipperDashboard() {
             {/* Divider + Group 3 */}
             <div className="pt-3 mt-3 border-t border-sidebar-border">
               <Link
-                to="/routes"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              >
-                <MapPin className="h-5 w-5" />
-                Browse Routes
-              </Link>
-              <Link
                 to="/saved-loads"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
@@ -316,6 +316,7 @@ export default function ShipperDashboard() {
                 Saved Loads
               </Link>
             </div>
+
           </nav>
 
           {/* Help & Sign Out — Always visible at bottom */}
