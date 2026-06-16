@@ -884,7 +884,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          company_name: string | null
+          country: string | null
+          full_name: string | null
+          id: string | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_name?: string | null
+          country?: string | null
+          full_name?: string | null
+          id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company_name?: string | null
+          country?: string | null
+          full_name?: string | null
+          id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_matching_loads_for_route: {
