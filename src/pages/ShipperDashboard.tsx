@@ -23,7 +23,8 @@ import {
   MessageSquare,
   XCircle,
   Send,
-  Bookmark
+  Bookmark,
+  Shuffle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
