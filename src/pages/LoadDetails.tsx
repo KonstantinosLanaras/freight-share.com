@@ -178,7 +178,7 @@ export default function LoadDetails() {
       const enriched = await Promise.all(
         (data || []).map(async (offer) => {
           const [profileRes, insuranceRes] = await Promise.all([
-            supabase.from('profiles').select('full_name, company_name, verification_status').eq('id', offer.carrier_id).single(),
+            supabase.from('public_profiles').select('full_name, company_name, verification_status').eq('id', offer.carrier_id).single(),
             supabase.from('carrier_insurance').select('provider_name, coverage_type, coverage_limit_eur, expiration_date, status, policy_number').eq('carrier_id', offer.carrier_id).maybeSingle(),
           ]);
           return {

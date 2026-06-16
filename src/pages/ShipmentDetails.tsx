@@ -99,8 +99,8 @@ export default function ShipmentDetails() {
       // Fetch load, profiles, timestamps in parallel
       const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes] = await Promise.all([
         supabase.from('loads').select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from').eq('id', shipmentData.load_id).single(),
-        supabase.from('profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
-        supabase.from('profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
+        supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
+        supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
         supabase.from('shipment_timestamps').select('status, created_at').eq('shipment_id', id!).order('created_at', { ascending: true }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rater_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rated_id', user.id).maybeSingle() : Promise.resolve({ data: null }),

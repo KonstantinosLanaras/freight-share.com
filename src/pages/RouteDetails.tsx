@@ -123,7 +123,7 @@ export default function RouteDetails() {
       // Fetch carrier profile and insurance
       if (data?.carrier_id) {
         const [profileRes, insuranceRes] = await Promise.all([
-          supabase.from('profiles').select('full_name, company_name, verification_status').eq('id', data.carrier_id).single(),
+          supabase.from('public_profiles').select('full_name, company_name, verification_status').eq('id', data.carrier_id).single(),
           supabase.from('carrier_insurance').select('*').eq('carrier_id', data.carrier_id).maybeSingle(),
         ]);
         setCarrierProfile(profileRes.data);

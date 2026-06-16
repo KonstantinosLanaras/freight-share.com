@@ -44,7 +44,7 @@ export default function CarrierRequests() {
 
       const [routesRes, profilesRes] = await Promise.all([
         supabase.from('routes').select('id, origin_city, destination_city').in('id', routeIds),
-        supabase.from('profiles').select('id, full_name, company_name').in('id', shipperIds),
+        supabase.from('public_profiles').select('id, full_name, company_name').in('id', shipperIds),
       ]);
 
       const routeMap = new Map(routesRes.data?.map(r => [r.id, r]) || []);

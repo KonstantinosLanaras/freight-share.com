@@ -69,7 +69,7 @@ export function MessageInbox() {
 
       // Fetch profiles
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, full_name, company_name')
         .in('id', Array.from(profileIds));
 

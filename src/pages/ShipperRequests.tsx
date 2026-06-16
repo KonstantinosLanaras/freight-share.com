@@ -52,7 +52,7 @@ export default function ShipperRequests() {
       // Fetch carrier profiles
       const carrierIds = [...new Set(data?.map(r => r.carrier_id) || [])];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, full_name, company_name')
         .in('id', carrierIds);
 
