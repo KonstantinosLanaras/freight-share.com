@@ -563,38 +563,42 @@ export default function CarrierDashboard() {
                         <p className="text-sm text-muted-foreground">Check back soon for new opportunities</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {availableLoads.slice(0, 3).map((load) => (
-                          <div key={load.id} className="relative">
-                            <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
-                            <Link 
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          {availableLoads.slice(0, 3).map((load) => (
+                            <Link
+                              key={load.id}
                               to={`/load/${load.id}`}
-                              className="block p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                              className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                             >
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="font-medium text-foreground">
-                                  {load.origin_city} → {load.destination_city}
-                                </div>
+                              <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
+                              <div className="font-medium text-foreground mb-1">
+                                {load.origin_city} → {load.destination_city}
+                              </div>
+                              <div className="text-sm text-muted-foreground mb-3">
+                                {load.pallets} pallets · {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
                                 <span className="text-primary font-semibold">
                                   {load.price ? `€${load.price}` : 'Open'}
                                 </span>
-                              </div>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span>{load.pallets} pallets</span>
-                                <span>{formatDateRange(load.pickup_date_from, load.pickup_date_to)}</span>
+                                <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                                  Match
+                                </Badge>
                               </div>
                             </Link>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                         {availableLoads.length > 3 && (
-                          <Button variant="outline" className="w-full" asChild>
+                          <Button variant="outline" className="w-full mt-4" asChild>
                             <Link to="/dashboard/carrier/find-loads">
                               View {availableLoads.length - 3} more loads
                             </Link>
                           </Button>
                         )}
-                      </div>
+                      </>
                     )}
+
                   </CardContent>
                 </Card>
 
