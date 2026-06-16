@@ -476,7 +476,7 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
-              {/* Demo: Loads Matching Your Routes */}
+              {/* Demo: Routes Matching Your Loads */}
               {isDemoMode && (
                 <Card className="mb-6 border-primary/20">
                   <CardHeader>
@@ -484,12 +484,18 @@ export default function ShipperDashboard() {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <MapPin className="h-5 w-5 text-primary" />
-                          Loads Matching Your Routes
+                          Routes Matching Your Loads
                         </CardTitle>
                         <Badge variant="secondary" className="mt-2 text-xs font-normal">
                           Based on your shipping history
                         </Badge>
                       </div>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link to="/routes">
+                          View all routes
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -499,7 +505,11 @@ export default function ShipperDashboard() {
                         { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340 },
                         { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480 },
                       ].map((load) => (
-                        <div key={load.id} className="relative p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors">
+                        <Link
+                          key={load.id}
+                          to={`/routes?origin=${encodeURIComponent(load.origin)}&destination=${encodeURIComponent(load.destination)}&pallets=${load.pallets}`}
+                          className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                        >
                           <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
                           <div className="font-medium text-foreground mb-1">
                             {load.origin} → {load.destination}
@@ -513,7 +523,7 @@ export default function ShipperDashboard() {
                               Match
                             </Badge>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </CardContent>
