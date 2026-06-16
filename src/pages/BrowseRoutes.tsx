@@ -400,12 +400,19 @@ export default function BrowseRoutes() {
                     {/* Actions */}
                     <div className="flex flex-col gap-2 lg:ml-4">
                       {user ? (
-                        <Button variant="carrier" asChild>
-                          <Link to={`/routes/${route.id}`}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Link>
-                        </Button>
+                        <>
+                          <Button variant="carrier" asChild>
+                            <Link to={`/routes/${route.id}/offer`}>
+                              Make an Offer
+                            </Link>
+                          </Button>
+                          <Button variant="outline" asChild>
+                            <Link to={`/routes/${route.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Link>
+                          </Button>
+                        </>
                       ) : (
                         <Button variant="outline" asChild>
                           <Link to="/auth">
@@ -415,6 +422,7 @@ export default function BrowseRoutes() {
                         </Button>
                       )}
                     </div>
+
                   </div>
                 </CardContent>
               </Card>
