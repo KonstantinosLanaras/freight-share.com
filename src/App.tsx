@@ -135,6 +135,12 @@ const App = () => (
                 <RouteRequestForm />
               </ProtectedRoute>
             } />
+            <Route path="/routes/:routeId/offer" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <RouteOfferPage />
+              </ProtectedRoute>
+            } />
+
             {/* Carrier Routes */}
             <Route path="/dashboard/carrier" element={
               <ProtectedRoute allowedRoles={['carrier']}>
