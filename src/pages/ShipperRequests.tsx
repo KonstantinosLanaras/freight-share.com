@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, MapPin, Package, Send, Loader2, MessageSquare,
-  Clock, CheckCircle, XCircle, Eye, ArrowRight
+  Clock, CheckCircle, XCircle, Eye, ArrowRight, Shuffle, Euro
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
