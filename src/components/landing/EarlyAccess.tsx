@@ -121,17 +121,33 @@ export const EarlyAccess = () => {
                 </RadioGroup>
               </div>
 
-              <div>
-                <Label htmlFor="ea-email">Email Address</Label>
-                <Input
-                  id="ea-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  maxLength={255}
-                  required
-                  className="mt-1"
-                />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ea-email">Email Address</Label>
+                  <Input
+                    id="ea-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    maxLength={255}
+                    required
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ea-phone">Phone Number</Label>
+                  <Input
+                    id="ea-phone"
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="+31 6 12345678"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    maxLength={30}
+                    required
+                    className="mt-1"
+                  />
+                </div>
               </div>
 
               <div>
