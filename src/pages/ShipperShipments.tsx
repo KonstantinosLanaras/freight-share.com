@@ -115,7 +115,7 @@ export default function ShipperShipments() {
 
         const [loadsResult, profilesResult, ratingsResult] = await Promise.all([
           supabase.from('loads').select('id, origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, space_ldm, pickup_date_from, pickup_date_to').in('id', loadIds),
-          supabase.from('profiles').select('id, company_name, full_name').in('id', carrierIds),
+          supabase.from('public_profiles').select('id, company_name, full_name').in('id', carrierIds),
           user ? supabase.from('detailed_ratings').select('shipment_id').eq('rater_id', user.id).in('shipment_id', data.map(s => s.id)) : { data: [] }
         ]);
 

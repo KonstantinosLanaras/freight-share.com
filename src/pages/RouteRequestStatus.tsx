@@ -72,7 +72,7 @@ export default function RouteRequestStatus() {
 
       const [routeRes, profileRes, msgsRes] = await Promise.all([
         supabase.from('routes').select('*').eq('id', req.route_id).single(),
-        supabase.from('profiles').select('full_name, company_name').eq('id', req.carrier_id).single(),
+        supabase.from('public_profiles').select('full_name, company_name').eq('id', req.carrier_id).single(),
         supabase.from('route_request_messages').select('*').eq('request_id', requestId).order('created_at', { ascending: true }),
       ]);
 
