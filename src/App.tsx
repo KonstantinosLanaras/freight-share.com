@@ -47,6 +47,7 @@ import CarrierRequests from "./pages/CarrierRequests";
 import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
+import RouteOfferPage from "./pages/RouteOfferPage";
 
 const queryClient = new QueryClient();
 
