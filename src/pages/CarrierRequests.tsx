@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  ArrowLeft, MapPin, Package, Loader2, Clock, ArrowRight, Inbox
+  ArrowLeft, MapPin, Package, Loader2, Clock, ArrowRight, Inbox, Shuffle, Euro
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
