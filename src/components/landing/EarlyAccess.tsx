@@ -13,6 +13,12 @@ const schema = z.object({
   companyName: z.string().trim().min(1, 'Please enter your company name').max(100),
   role: z.enum(['carrier', 'shipper'], { required_error: 'Please select a role' }),
   email: z.string().trim().email('Please enter a valid email').max(255),
+  phone: z
+    .string()
+    .trim()
+    .min(6, 'Please enter a valid phone number')
+    .max(30)
+    .regex(/^[+0-9\s()-]+$/, 'Phone number can only contain digits, spaces and + ( ) -'),
   challenge: z.string().trim().max(500).optional(),
 });
 
@@ -23,6 +29,7 @@ export const EarlyAccess = () => {
     companyName: '',
     role: '' as 'carrier' | 'shipper' | '',
     email: '',
+    phone: '',
     challenge: '',
   });
 
