@@ -109,7 +109,7 @@ export default function BrowseRoutes() {
       // Fetch carrier profiles separately
       const carrierIds = [...new Set(visibleRoutes.map(r => r.carrier_id))];
       const { data: profilesData } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, company_name, verification_status')
         .in('id', carrierIds);
 

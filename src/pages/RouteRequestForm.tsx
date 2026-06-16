@@ -58,7 +58,7 @@ export default function RouteRequestForm() {
 
       if (data?.carrier_id) {
         const { data: profile } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('full_name, company_name')
           .eq('id', data.carrier_id)
           .single();
