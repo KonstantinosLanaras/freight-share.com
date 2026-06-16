@@ -366,9 +366,10 @@ export default function BrowseRoutes() {
                         {route.open_to_extra_stops && (
                           <Badge variant="outline" className="text-xs border-success text-success">
                             <Plus className="h-3 w-3 mr-1" />
-                            Open to extra stops
+                            Flexible — open to alternative stops
                           </Badge>
                         )}
+
                       </div>
 
                       {/* Flexibility Note */}
