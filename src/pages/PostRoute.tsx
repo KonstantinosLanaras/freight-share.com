@@ -594,12 +594,13 @@ export default function PostRoute() {
                     htmlFor="openToExtraStops"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                   >
-                    Open to additional pickup stops
+                    Allow shippers to request alternative stops on this route
                   </label>
                   <p className="text-sm text-muted-foreground">
-                    Allow shippers to request pickup deviations from your planned route
+                    Shippers can propose alternative pickup/dropoff points along your route
                   </p>
                 </div>
+
               </div>
 
               {formData.openToExtraStops && (
