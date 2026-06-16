@@ -502,9 +502,9 @@ export default function ShipperDashboard() {
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {[
-                        { id: 'demo-1', origin: 'Milan, IT', destination: 'Munich, DE', pallets: 6, date: 'Apr 24-26', price: 720 },
-                        { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340 },
-                        { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480 },
+                        { id: 'demo-1', origin: 'Milan, IT', destination: 'Munich, DE', pallets: 6, date: 'Apr 24-26', price: 720, flexible: true },
+                        { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340, flexible: false },
+                        { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480, flexible: true },
                       ].map((load) => (
                         <Link
                           key={load.id}
@@ -518,15 +518,24 @@ export default function ShipperDashboard() {
                           <div className="text-sm text-muted-foreground mb-3">
                             {load.pallets} pallets · {load.date}
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <span className="text-primary font-semibold">€{load.price}</span>
-                            <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                              Match
-                            </Badge>
+                            <div className="flex items-center gap-1.5">
+                              {load.flexible && (
+                                <Badge variant="outline" className="text-xs border-success/40 text-success">
+                                  <Shuffle className="h-3 w-3 mr-1" />
+                                  Flexible
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                                Match
+                              </Badge>
+                            </div>
                           </div>
                         </Link>
                       ))}
                     </div>
+
                   </CardContent>
                 </Card>
               )}
