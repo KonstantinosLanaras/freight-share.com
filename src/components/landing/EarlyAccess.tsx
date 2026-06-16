@@ -13,6 +13,12 @@ const schema = z.object({
   companyName: z.string().trim().min(1, 'Please enter your company name').max(100),
   role: z.enum(['carrier', 'shipper'], { required_error: 'Please select a role' }),
   email: z.string().trim().email('Please enter a valid email').max(255),
+  phone: z
+    .string()
+    .trim()
+    .min(6, 'Please enter a valid phone number')
+    .max(30)
+    .regex(/^[+0-9\s()-]+$/, 'Phone number can only contain digits, spaces and + ( ) -'),
   challenge: z.string().trim().max(500).optional(),
 });
 
@@ -23,6 +29,7 @@ export const EarlyAccess = () => {
     companyName: '',
     role: '' as 'carrier' | 'shipper' | '',
     email: '',
+    phone: '',
     challenge: '',
   });
 
@@ -114,17 +121,33 @@ export const EarlyAccess = () => {
                 </RadioGroup>
               </div>
 
-              <div>
-                <Label htmlFor="ea-email">Email Address</Label>
-                <Input
-                  id="ea-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  maxLength={255}
-                  required
-                  className="mt-1"
-                />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ea-email">Email Address</Label>
+                  <Input
+                    id="ea-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    maxLength={255}
+                    required
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ea-phone">Phone Number</Label>
+                  <Input
+                    id="ea-phone"
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="+31 6 12345678"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    maxLength={30}
+                    required
+                    className="mt-1"
+                  />
+                </div>
               </div>
 
               <div>
