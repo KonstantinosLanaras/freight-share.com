@@ -47,6 +47,7 @@ import CarrierRequests from "./pages/CarrierRequests";
 import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
+import RouteOfferPage from "./pages/RouteOfferPage";
 
 const queryClient = new QueryClient();
 
@@ -134,6 +135,12 @@ const App = () => (
                 <RouteRequestForm />
               </ProtectedRoute>
             } />
+            <Route path="/routes/:routeId/offer" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <RouteOfferPage />
+              </ProtectedRoute>
+            } />
+
             {/* Carrier Routes */}
             <Route path="/dashboard/carrier" element={
               <ProtectedRoute allowedRoles={['carrier']}>

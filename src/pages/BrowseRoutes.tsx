@@ -366,9 +366,10 @@ export default function BrowseRoutes() {
                         {route.open_to_extra_stops && (
                           <Badge variant="outline" className="text-xs border-success text-success">
                             <Plus className="h-3 w-3 mr-1" />
-                            Open to extra stops
+                            Flexible — open to alternative stops
                           </Badge>
                         )}
+
                       </div>
 
                       {/* Flexibility Note */}
@@ -399,12 +400,19 @@ export default function BrowseRoutes() {
                     {/* Actions */}
                     <div className="flex flex-col gap-2 lg:ml-4">
                       {user ? (
-                        <Button variant="carrier" asChild>
-                          <Link to={`/routes/${route.id}`}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Link>
-                        </Button>
+                        <>
+                          <Button variant="carrier" asChild>
+                            <Link to={`/routes/${route.id}/offer`}>
+                              Make an Offer
+                            </Link>
+                          </Button>
+                          <Button variant="outline" asChild>
+                            <Link to={`/routes/${route.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Link>
+                          </Button>
+                        </>
                       ) : (
                         <Button variant="outline" asChild>
                           <Link to="/auth">
@@ -414,6 +422,7 @@ export default function BrowseRoutes() {
                         </Button>
                       )}
                     </div>
+
                   </div>
                 </CardContent>
               </Card>

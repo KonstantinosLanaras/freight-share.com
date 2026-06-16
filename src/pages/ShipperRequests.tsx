@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, MapPin, Package, Send, Loader2, MessageSquare,
-  Clock, CheckCircle, XCircle, Eye, ArrowRight
+  Clock, CheckCircle, XCircle, Eye, ArrowRight, Shuffle, Euro
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,11 +109,21 @@ export default function ShipperRequests() {
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <span className="font-medium text-foreground">
                             {req.carrier?.company_name || req.carrier?.full_name || 'Carrier'}
                           </span>
                           <Badge className={st.color}>{st.label}</Badge>
+                          {req.offer_type === 'alternative' ? (
+                            <Badge variant="outline" className="text-xs border-success/40 text-success">
+                              <Shuffle className="h-3 w-3 mr-1" />
+                              Alternative Stop
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                              Direct Bid
+                            </Badge>
+                          )}
                         </div>
                         {req.route && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -121,14 +131,28 @@ export default function ShipperRequests() {
                             {req.route.origin_city} → {req.route.destination_city}
                           </div>
                         )}
+                        {req.offer_type === 'alternative' && req.proposed_pickup_city && (
+                          <div className="text-sm bg-success/5 border border-success/20 rounded-md p-2 mb-2">
+                            <span className="text-xs text-muted-foreground">Your proposed stops: </span>
+                            <span className="font-medium">
+                              {req.proposed_pickup_city}, {req.proposed_pickup_country}
+                              {' → '}
+                              {req.proposed_dropoff_city}, {req.proposed_dropoff_country}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1"><Package className="h-3 w-3" /> {req.pallets} pallets · {req.goods_type}</span>
+                          {req.offer_price && (
+                            <span className="flex items-center gap-1 text-foreground font-medium"><Euro className="h-3 w-3" /> €{Number(req.offer_price).toLocaleString()}</span>
+                          )}
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {format(new Date(req.created_at), 'MMM d, HH:mm')}</span>
                         </div>
                       </div>
                       <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
                     </div>
                   </CardContent>
+
                 </Card>
               );
             })}
