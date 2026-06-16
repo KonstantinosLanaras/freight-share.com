@@ -548,11 +548,19 @@ export type Database = {
           goods_type: string
           id: string
           message: string | null
+          offer_price: number | null
+          offer_type: Database["public"]["Enums"]["route_offer_type"]
           pallets: number
+          pallets_requested: number | null
           pickup_address: string
+          proposed_dropoff_city: string | null
+          proposed_dropoff_country: string | null
+          proposed_pickup_city: string | null
+          proposed_pickup_country: string | null
           route_id: string
           shipment_date: string
           shipper_id: string
+          shipper_message: string | null
           special_requirements: string | null
           status: Database["public"]["Enums"]["route_request_status"]
           updated_at: string
@@ -566,11 +574,19 @@ export type Database = {
           goods_type: string
           id?: string
           message?: string | null
+          offer_price?: number | null
+          offer_type?: Database["public"]["Enums"]["route_offer_type"]
           pallets?: number
+          pallets_requested?: number | null
           pickup_address: string
+          proposed_dropoff_city?: string | null
+          proposed_dropoff_country?: string | null
+          proposed_pickup_city?: string | null
+          proposed_pickup_country?: string | null
           route_id: string
           shipment_date: string
           shipper_id: string
+          shipper_message?: string | null
           special_requirements?: string | null
           status?: Database["public"]["Enums"]["route_request_status"]
           updated_at?: string
@@ -584,11 +600,19 @@ export type Database = {
           goods_type?: string
           id?: string
           message?: string | null
+          offer_price?: number | null
+          offer_type?: Database["public"]["Enums"]["route_offer_type"]
           pallets?: number
+          pallets_requested?: number | null
           pickup_address?: string
+          proposed_dropoff_city?: string | null
+          proposed_dropoff_country?: string | null
+          proposed_pickup_city?: string | null
+          proposed_pickup_country?: string | null
           route_id?: string
           shipment_date?: string
           shipper_id?: string
+          shipper_message?: string | null
           special_requirements?: string | null
           status?: Database["public"]["Enums"]["route_request_status"]
           updated_at?: string
@@ -981,6 +1005,7 @@ export type Database = {
         | "other"
       payment_status: "pending" | "paid" | "completed" | "refunded"
       pricing_type: "fixed" | "open_to_offers"
+      route_offer_type: "direct" | "alternative"
       route_request_status:
         | "sent"
         | "viewed"
@@ -1147,6 +1172,7 @@ export const Constants = {
       ],
       payment_status: ["pending", "paid", "completed", "refunded"],
       pricing_type: ["fixed", "open_to_offers"],
+      route_offer_type: ["direct", "alternative"],
       route_request_status: [
         "sent",
         "viewed",
