@@ -604,7 +604,7 @@ export default function CarrierDashboard() {
                     <CardTitle className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="h-5 w-5" />
                       My Routes
-                      <Badge variant="secondary" className="text-xs font-normal">Optional</Badge>
+                      My Routes
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/dashboard/carrier/routes">
