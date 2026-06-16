@@ -263,9 +263,10 @@ export default function RouteOfferPage() {
               </span>
               {route.price && (
                 <span className="flex items-center gap-1 text-foreground font-medium">
-                  <Euro className="h-4 w-4 text-primary" /> Price anchor: €{Number(route.price).toLocaleString()}
+                  <Euro className="h-4 w-4 text-primary" /> Price anchor: €{Number((route as any).price).toLocaleString()}
                 </span>
               )}
+
             </div>
             {flexible && route.flexibility_note && (
               <p className="text-sm text-muted-foreground pt-2 border-t border-border">
