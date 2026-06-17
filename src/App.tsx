@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ScrollToTop } from "@/hooks/useScrollToTop";
 import { DemoModeProvider } from "@/hooks/useDemoMode";
@@ -116,11 +116,7 @@ const App = () => (
                 <LoadDetails />
               </ProtectedRoute>
             } />
-            <Route path="/dashboard/shipper/shipments" element={
-              <ProtectedRoute allowedRoles={['shipper']}>
-                <ShipperShipments />
-              </ProtectedRoute>
-            } />
+            <Route path="/dashboard/shipper/shipments" element={<Navigate to="/dashboard/shipper/loads" replace />} />
             <Route path="/dashboard/shipper/messages" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <Messages />
