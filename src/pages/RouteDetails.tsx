@@ -550,22 +550,6 @@ export default function RouteDetails() {
               </Card>
             )}
 
-            {/* Metadata */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Route ID</span>
-                  <code className="text-xs bg-muted px-2 py-1 rounded">{route.id.slice(0, 8)}</code>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created</span>
-                  <span>{format(new Date(route.created_at), 'MMM d, yyyy')}</span>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
