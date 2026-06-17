@@ -105,9 +105,13 @@ export default function CarrierRequests() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="font-medium text-foreground">
+                          <Link
+                            to={`/profile/shipper/${req.shipper_id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-medium text-foreground hover:underline"
+                          >
                             {req.shipper?.company_name || req.shipper?.full_name || 'Shipper'}
-                          </span>
+                          </Link>
                           <Badge className={st.color}>{st.label}</Badge>
                           {req.offer_type === 'alternative' ? (
                             <Badge variant="outline" className="text-xs border-success/40 text-success">
