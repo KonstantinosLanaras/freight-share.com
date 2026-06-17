@@ -14,7 +14,7 @@ export default function Terms() {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
                 <FileText className="h-7 w-7" />
               </div>
-              <p className="text-sm text-muted-foreground mb-2">FreightShare S.à r.l.</p>
+              <p className="text-sm text-muted-foreground mb-2">FreightShare</p>
               <h1 className="text-4xl font-heading font-bold text-foreground mb-4">
                 Terms of Service — Coming Soon
               </h1>
