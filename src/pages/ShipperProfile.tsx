@@ -49,7 +49,7 @@ export default function ShipperProfile() {
 
     const [{ data: loadsData, count: loadsCount }, { data: openLoads }, { data: ships }, { data: revs }, { data: offers }] = await Promise.all([
       supabase.from("loads").select("id", { count: "exact", head: true }).eq("shipper_id", userId),
-      supabase.from("loads").select("*").eq("shipper_id", userId).in("status", ["posted", "matched"]).order("created_at", { ascending: false }).limit(5),
+      supabase.from("loads").select("*").eq("shipper_id", userId).eq("status", "posted").order("created_at", { ascending: false }).limit(5),
       supabase.from("shipments").select("id,status,final_price,created_at,carrier_id,load_id,loads(origin_city,origin_country,destination_city,destination_country,pallets)").eq("shipper_id", userId).order("created_at", { ascending: false }),
       supabase.from("ratings").select("*").eq("rated_id", userId).order("created_at", { ascending: false }),
       supabase.from("offers").select("is_accepted,route_id,routes!inner(carrier_id)").eq("routes.carrier_id", ""), // placeholder unused
