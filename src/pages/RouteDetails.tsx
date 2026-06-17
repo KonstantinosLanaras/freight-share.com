@@ -445,48 +445,8 @@ export default function RouteDetails() {
               </Card>
             )}
 
-            {/* Flexibility */}
-            {route.open_to_extra_stops && (
-              <Card className="border-success/30 bg-success/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5 text-success" />
-                    Open to Extra Stops
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {route.flexibility_note && (
-                    <p className="text-muted-foreground">{route.flexibility_note}</p>
-                  )}
-                  {!isOwner && user && route.available_pallets > 0 && (
-                    <Button 
-                      className="mt-4 w-full" 
-                      onClick={() => setDeviationRequestOpen(true)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Request Pickup on This Route
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Request Load CTA for shippers */}
-            {!isOwner && user && route.available_pallets > 0 && (
-              <Card className="border-primary/30 bg-primary/5">
-                <CardContent className="p-6 text-center">
-                  <Package className="h-8 w-8 text-primary mx-auto mb-3" />
-                  <h3 className="font-heading font-bold text-foreground mb-2">Need space on this route?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Send a load request to the carrier with your shipment details.</p>
-                  <Button asChild className="w-full">
-                    <Link to={`/routes/${route.id}/request`}>
-                      <Package className="h-4 w-4 mr-2" />
-                      Request Load on This Route
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Notes */}
             {route.notes && (
@@ -507,39 +467,37 @@ export default function RouteDetails() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Carrier Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="h-4 w-4 text-primary" />
-                  Carrier
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-carrier/10 flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-carrier" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">
-                      {carrierProfile?.full_name || carrierProfile?.company_name || 'Carrier'}
+            <Link to={`/profile/carrier/${route.carrier_id}`} className="block">
+              <Card className="hover:border-primary/50 transition-colors">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <User className="h-4 w-4 text-primary" />
+                    Carrier
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-carrier/10 flex items-center justify-center">
+                      <Truck className="h-6 w-6 text-carrier" />
                     </div>
-                    {carrierProfile?.company_name && carrierProfile?.full_name && (
-                      <div className="text-sm text-muted-foreground">{carrierProfile.company_name}</div>
-                    )}
+                    <div>
+                      <div className="font-medium text-foreground">
+                        {carrierProfile?.full_name || carrierProfile?.company_name || 'Carrier'}
+                      </div>
+                      {carrierProfile?.company_name && carrierProfile?.full_name && (
+                        <div className="text-sm text-muted-foreground">{carrierProfile.company_name}</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {carrierProfile?.verification_status && (
-                  <div className="mt-3">
-                    <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  {carrierProfile?.verification_status && (
+                    <div className="mt-3">
+                      <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
 
-            {/* Carrier Insurance */}
-            {!isOwner && (
-              <InsuranceSummaryCard insurance={carrierInsurance} />
-            )}
 
             {/* Quick Actions - Owner only */}
             {isOwner && (
@@ -592,22 +550,6 @@ export default function RouteDetails() {
               </Card>
             )}
 
-            {/* Metadata */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Route ID</span>
-                  <code className="text-xs bg-muted px-2 py-1 rounded">{route.id.slice(0, 8)}</code>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created</span>
-                  <span>{format(new Date(route.created_at), 'MMM d, yyyy')}</span>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
