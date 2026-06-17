@@ -98,6 +98,7 @@ export default function ShipperDashboard() {
 
   const { user, signOut } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const offersUnread = useShipperOffersUnread();
   const navigate = useNavigate();
 
   useEffect(() => {
