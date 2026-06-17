@@ -48,6 +48,8 @@ import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
 import RouteOfferPage from "./pages/RouteOfferPage";
+import Resolution from "./pages/Resolution";
+import ResolutionCase from "./pages/ResolutionCase";
 
 const queryClient = new QueryClient();
 
