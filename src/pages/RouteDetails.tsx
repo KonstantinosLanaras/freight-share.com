@@ -467,39 +467,37 @@ export default function RouteDetails() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Carrier Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="h-4 w-4 text-primary" />
-                  Carrier
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-carrier/10 flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-carrier" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">
-                      {carrierProfile?.full_name || carrierProfile?.company_name || 'Carrier'}
+            <Link to={`/profile/carrier/${route.carrier_id}`} className="block">
+              <Card className="hover:border-primary/50 transition-colors">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <User className="h-4 w-4 text-primary" />
+                    Carrier
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-carrier/10 flex items-center justify-center">
+                      <Truck className="h-6 w-6 text-carrier" />
                     </div>
-                    {carrierProfile?.company_name && carrierProfile?.full_name && (
-                      <div className="text-sm text-muted-foreground">{carrierProfile.company_name}</div>
-                    )}
+                    <div>
+                      <div className="font-medium text-foreground">
+                        {carrierProfile?.full_name || carrierProfile?.company_name || 'Carrier'}
+                      </div>
+                      {carrierProfile?.company_name && carrierProfile?.full_name && (
+                        <div className="text-sm text-muted-foreground">{carrierProfile.company_name}</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {carrierProfile?.verification_status && (
-                  <div className="mt-3">
-                    <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  {carrierProfile?.verification_status && (
+                    <div className="mt-3">
+                      <VerificationBadge status={carrierProfile.verification_status as any} size="sm" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
 
-            {/* Carrier Insurance */}
-            {!isOwner && (
-              <InsuranceSummaryCard insurance={carrierInsurance} />
-            )}
 
             {/* Quick Actions - Owner only */}
             {isOwner && (
