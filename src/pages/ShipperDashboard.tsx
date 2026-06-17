@@ -173,6 +173,27 @@ export default function ShipperDashboard() {
 
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
+      // Fetch real routes matching shipper's load city pairs
+      const activeLoads = loadsWithOffers.filter(l => ['posted', 'accepted'].includes(l.status));
+      const originCities = [...new Set(activeLoads.map(l => l.origin_city).filter(Boolean))];
+      const destCities = [...new Set(activeLoads.map(l => l.destination_city).filter(Boolean))];
+      if (originCities.length > 0 && destCities.length > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const { data: routesData } = await supabase
+          .from('routes')
+          .select('id, origin_city, origin_country, destination_city, destination_country, departure_date_from, departure_date_to, available_pallets, price_per_pallet, open_to_extra_stops')
+          .in('status', ['planned', 'active'])
+          .in('origin_city', originCities)
+          .in('destination_city', destCities)
+          .gte('departure_date_to', today)
+          .order('departure_date_from', { ascending: true })
+          .limit(6);
+        setMatchingRoutes(routesData || []);
+      } else {
+        setMatchingRoutes([]);
+      }
+
+
       // Calculate stats
       const allLoads = loadsWithOffers;
       const active = allLoads.filter(l => ['posted', 'accepted', 'paid', 'picked_up'].includes(l.status)).length;
