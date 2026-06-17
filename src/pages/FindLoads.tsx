@@ -237,46 +237,106 @@ export default function FindLoads() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Origin city or country"
-                    className="pl-10"
-                    value={searchOrigin}
-                    onChange={(e) => setSearchOrigin(e.target.value)}
-                  />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Origin city or country"
+                      className="pl-10"
+                      value={searchOrigin}
+                      onChange={(e) => setSearchOrigin(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Destination city or country"
+                      className="pl-10"
+                      value={searchDestination}
+                      onChange={(e) => setSearchDestination(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="w-full md:w-48">
+                  <Select value={cargoFilter} onValueChange={setCargoFilter}>
+                    <SelectTrigger>
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Cargo type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All cargo types</SelectItem>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="fragile">Fragile</SelectItem>
+                      <SelectItem value="refrigerated">Refrigerated</SelectItem>
+                      <SelectItem value="hazardous">Hazardous</SelectItem>
+                      <SelectItem value="oversized">Oversized</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="flex-1">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Destination city or country"
-                    className="pl-10"
-                    value={searchDestination}
-                    onChange={(e) => setSearchDestination(e.target.value)}
-                  />
+
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Arrive by</label>
+                  <div className="relative">
+                    <CalendarClock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      className="pl-10"
+                      value={arriveBy}
+                      onChange={(e) => setArriveBy(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="w-full md:w-48">
-                <Select value={cargoFilter} onValueChange={setCargoFilter}>
-                  <SelectTrigger>
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Cargo type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All cargo types</SelectItem>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="fragile">Fragile</SelectItem>
-                    <SelectItem value="refrigerated">Refrigerated</SelectItem>
-                    <SelectItem value="hazardous">Hazardous</SelectItem>
-                    <SelectItem value="oversized">Oversized</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="w-full md:w-48">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Flexibility</label>
+                  <Select value={flexibility} onValueChange={setFlexibility}>
+                    <SelectTrigger>
+                      <Zap className="h-4 w-4 mr-2 text-primary" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Exact date</SelectItem>
+                      <SelectItem value="1">+1 day</SelectItem>
+                      <SelectItem value="2">+2 days</SelectItem>
+                      <SelectItem value="3">+3 days</SelectItem>
+                      <SelectItem value="7">+1 week</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-full md:w-56">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Sort by</label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <ArrowUpDown className="h-4 w-4 mr-2" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest first</SelectItem>
+                      <SelectItem value="price_asc">Price: low to high</SelectItem>
+                      <SelectItem value="pickup_asc">Departure date</SelectItem>
+                      <SelectItem value="delivery_asc">Arrival date</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {(arriveBy || sortBy !== 'newest' || flexibility !== '0') && (
+                  <div className="flex items-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setArriveBy(''); setFlexibility('0'); setSortBy('newest'); }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
+
           </CardContent>
         </Card>
 
