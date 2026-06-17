@@ -50,7 +50,7 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="relative">
               <Truck className="h-8 w-8 text-primary" />
               <Package className="h-4 w-4 text-accent absolute -bottom-1 -right-1" />
