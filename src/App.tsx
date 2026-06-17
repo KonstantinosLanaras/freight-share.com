@@ -228,6 +228,21 @@ const App = () => (
                 <ResolutionCase />
               </ProtectedRoute>
             } />
+            <Route path="/profile/shipper/:userId" element={
+              <ProtectedRoute>
+                <ShipperProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/carrier/:userId" element={
+              <ProtectedRoute>
+                <CarrierProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
