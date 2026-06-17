@@ -116,11 +116,7 @@ const App = () => (
                 <LoadDetails />
               </ProtectedRoute>
             } />
-            <Route path="/dashboard/shipper/shipments" element={
-              <ProtectedRoute allowedRoles={['shipper']}>
-                <ShipperShipments />
-              </ProtectedRoute>
-            } />
+            <Route path="/dashboard/shipper/shipments" element={<Navigate to="/dashboard/shipper/loads" replace />} />
             <Route path="/dashboard/shipper/messages" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <Messages />
