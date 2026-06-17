@@ -56,7 +56,7 @@ const statusLabel: Record<Status, string> = {
 };
 
 export default function Resolution() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [loading, setLoading] = useState(true);
