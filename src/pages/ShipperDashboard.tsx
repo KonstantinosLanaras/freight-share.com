@@ -172,25 +172,16 @@ export default function ShipperDashboard() {
 
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
-      // Fetch real routes matching shipper's load city pairs
-      const activeLoads = loadsWithOffers.filter(l => ['posted', 'accepted'].includes(l.status));
-      const originCities = [...new Set(activeLoads.map(l => l.origin_city).filter(Boolean))];
-      const destCities = [...new Set(activeLoads.map(l => l.destination_city).filter(Boolean))];
-      if (originCities.length > 0 && destCities.length > 0) {
-        const today = new Date().toISOString().split('T')[0];
-        const { data: routesData } = await supabase
-          .from('routes')
-          .select('id, origin_city, origin_country, destination_city, destination_country, departure_date_from, departure_date_to, available_pallets, price_per_pallet, open_to_extra_stops')
-          .in('status', ['planned', 'active'])
-          .in('origin_city', originCities)
-          .in('destination_city', destCities)
-          .gte('departure_date_to', today)
-          .order('departure_date_from', { ascending: true })
-          .limit(6);
-        setMatchingRoutes(routesData || []);
-      } else {
-        setMatchingRoutes([]);
-      }
+      // Fetch active routes for the matching routes section
+      const today = new Date().toISOString().split('T')[0];
+      const { data: activeRoutesData } = await supabase
+        .from('routes')
+        .select('id, origin_city, origin_country, destination_city, destination_country, departure_date_from, departure_date_to, available_pallets, price_per_pallet, open_to_extra_stops')
+        .in('status', ['planned', 'active'])
+        .gte('departure_date_to', today)
+        .order('departure_date_from', { ascending: true })
+        .limit(6);
+      setMatchingRoutes(activeRoutesData || []);
 
 
       // Calculate stats
@@ -499,29 +490,29 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
-              {/* Routes Matching Your Loads (real data) */}
-              {matchingRoutes.length > 0 && (
-                <Card className="mb-6 border-primary/20">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-primary" />
-                          Routes Matching Your Loads
-                        </CardTitle>
-                        <Badge variant="secondary" className="mt-2 text-xs font-normal">
-                          Based on your active shipments
-                        </Badge>
-                      </div>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to="/routes">
-                          View all routes
-                          <ArrowRight className="h-4 w-4 ml-1" />
-                        </Link>
-                      </Button>
+              {/* Routes Matching Your Loads */}
+              <Card className="mb-6 border-primary/20">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        Routes Matching Your Loads
+                      </CardTitle>
+                      <Badge variant="secondary" className="mt-2 text-xs font-normal">
+                        Based on your active shipments
+                      </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/routes">
+                        View all routes
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {matchingRoutes.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {matchingRoutes.map((route) => {
                         const dateLabel = route.departure_date_from === route.departure_date_to
@@ -560,9 +551,17 @@ export default function ShipperDashboard() {
                         );
                       })}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MapPin className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                      <p className="mb-2">No active routes match your current loads.</p>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/routes">Browse all routes</Link>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
 
               {/* Pickup Requests Status */}
