@@ -157,9 +157,9 @@ export default function FindLoads() {
     
     const matchesCargo = cargoFilter === 'all' || load.cargo_type === cargoFilter;
 
-    // Arrive-by filter with flexibility (+N days)
+    // Arrive-by filter with flexibility (+N days), or skip if no specification
     let matchesArriveBy = true;
-    if (arriveBy) {
+    if (arriveBy && flexibility !== 'none') {
       const target = parseISO(arriveBy);
       if (isValid(target)) {
         const flex = parseInt(flexibility, 10) || 0;
