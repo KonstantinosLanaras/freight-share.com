@@ -23,7 +23,6 @@ import {
   MessageSquare,
   XCircle,
   Send,
-  Bookmark,
   Shuffle,
   Home
 } from 'lucide-react';
