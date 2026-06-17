@@ -83,6 +83,7 @@ export function SpaceInput({
                 <Input
                   type="number"
                   min="1"
+                  required
                   placeholder="e.g., 12"
                   value={spaceValue}
                   onChange={(e) => onSpaceValueChange(e.target.value)}
