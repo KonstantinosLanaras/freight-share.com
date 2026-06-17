@@ -71,7 +71,7 @@ export default function FindLoads() {
   const [searchDestination, setSearchDestination] = useState('');
   const [cargoFilter, setCargoFilter] = useState<string>('all');
   const [arriveBy, setArriveBy] = useState<string>('');
-  const [flexibility, setFlexibility] = useState<string>('0');
+  const [flexibility, setFlexibility] = useState<string>('none');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [carrierRoute, setCarrierRoute] = useState<CarrierRoute | null>(null);
   const [showCompatibleOnly, setShowCompatibleOnly] = useState(false);
