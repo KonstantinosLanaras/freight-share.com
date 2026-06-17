@@ -28,6 +28,8 @@ interface RouteStop {
 
 const vehicleTypes = [
   { value: 'standard_truck', label: 'Standard Trailer (13.6m)' },
+  { value: 'mega_trailer', label: 'Mega Trailer (15.65m)' },
+  { value: 'jumbo_double_deck', label: 'Jumbo / Double Deck' },
   { value: 'box_truck', label: 'Box Truck' },
   { value: 'refrigerated_truck', label: 'Refrigerated (Reefer)' },
   { value: 'curtain_sider', label: 'Curtain Sider' },
