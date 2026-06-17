@@ -107,7 +107,7 @@ export default function FindLoads() {
     try {
       const { data, error } = await supabase
         .from('loads')
-        .select('id, origin_city, origin_country, destination_city, destination_country, pallets, weight_kg, space_ldm, status, price, pricing_type, pickup_date_from, pickup_date_to, cargo_type, created_at, shipper_id')
+        .select('id, origin_city, origin_country, destination_city, destination_country, pallets, weight_kg, space_ldm, status, price, pricing_type, pickup_date_from, pickup_date_to, delivery_date_from, delivery_date_to, cargo_type, created_at, shipper_id')
         .eq('status', 'posted')
         .order('created_at', { ascending: false });
 
