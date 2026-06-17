@@ -24,8 +24,10 @@ import {
   XCircle,
   Send,
   Shuffle,
-  Home
+  Home,
+  Handshake
 } from 'lucide-react';
+import { useShipperOffersUnread } from '@/hooks/useShipperOffersUnread';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -96,6 +98,7 @@ export default function ShipperDashboard() {
 
   const { user, signOut } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const offersUnread = useShipperOffersUnread();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -292,6 +295,16 @@ export default function ShipperDashboard() {
             >
               <Package className="h-5 w-5" />
               My Loads
+            </Link>
+            <Link
+              to="/offers/shipper"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Handshake className="h-5 w-5" />
+              <span className="flex-1">My Offers</span>
+              {offersUnread > 0 && (
+                <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{offersUnread}</Badge>
+              )}
             </Link>
             <Link
               to="/dashboard/shipper/shipments"
