@@ -324,12 +324,12 @@ export default function FindLoads() {
                     </SelectContent>
                   </Select>
                 </div>
-                {(arriveBy || sortBy !== 'newest' || flexibility !== '0') && (
+                {(arriveBy || sortBy !== 'newest' || flexibility !== 'none') && (
                   <div className="flex items-end">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => { setArriveBy(''); setFlexibility('0'); setSortBy('newest'); }}
+                      onClick={() => { setArriveBy(''); setFlexibility('none'); setSortBy('newest'); }}
                     >
                       Reset
                     </Button>
