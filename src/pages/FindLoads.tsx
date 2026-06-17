@@ -48,10 +48,13 @@ interface Load {
   pricing_type: string;
   pickup_date_from: string;
   pickup_date_to: string;
+  delivery_date_from: string | null;
+  delivery_date_to: string | null;
   cargo_type: string;
   created_at: string;
   shipper_id: string;
 }
+
 
 interface CarrierRoute {
   id: string;
