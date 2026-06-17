@@ -116,15 +116,7 @@ export default function PostRoute() {
       return;
     }
 
-    if (!formData.arrivalStart) {
-      toast.error('Please enter an expected arrival date');
-      return;
-    }
-
-    if (!formData.departureTime) {
-      toast.error('Please enter a departure time');
-      return;
-    }
+    // Schedule is derived from origin/destination planned datetimes below
 
     if (!formData.originPlannedDateTime) {
       toast.error('Please enter a planned departure date/time for origin');
