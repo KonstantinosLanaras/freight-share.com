@@ -115,7 +115,7 @@ export function EditProfileDialog({ open, onOpenChange, profile, mode, onSaved }
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Primary country</Label>
-              <SchengenCountrySelect value={form.country || ""} onChange={(v) => update({ country: v })} />
+              <SchengenCountrySelect value={form.country || ""} onValueChange={(v) => update({ country: v })} />
             </div>
             <div>
               <Label>Contact email</Label>
@@ -172,7 +172,7 @@ export function EditProfileDialog({ open, onOpenChange, profile, mode, onSaved }
                 <div className="mt-2">
                   <SchengenCountrySelect
                     value=""
-                    onChange={(v) => v && !(form.operating_countries || []).includes(v) && update({ operating_countries: [...(form.operating_countries || []), v] })}
+                    onValueChange={(v) => v && !(form.operating_countries || []).includes(v) && update({ operating_countries: [...(form.operating_countries || []), v] })}
                   />
                 </div>
               </div>
