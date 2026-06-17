@@ -1,73 +1,68 @@
-## Plan: Route Bidding & Flexible Offer Flow
 
-The codebase already has the building blocks: `routes.open_to_extra_stops` + `flexibility_note` (carrier-set per route), and a `route_requests` table used by the existing `/routes/:routeId/request` page. I'll extend rather than duplicate them so the new "offer" flow lives alongside what's already shipping.
+# Plan: Route Bidding, Flexible Offers & Resolution Center
 
-### 1. Database (single migration)
+This is a large, multi-area feature. Breaking it into 4 shippable phases, each verifiable on its own. I'll confirm phase order with you before building.
 
-Extend `route_requests` to support bid semantics:
-- `offer_type` enum (`direct` | `alternative`) — default `direct`
-- `offer_price` numeric (shipper's bid)
-- `proposed_pickup_city` / `proposed_pickup_country`
-- `proposed_dropoff_city` / `proposed_dropoff_country`
-- `pallets_requested` int
-- `shipper_message` text
+---
 
-Existing RLS policies on `route_requests` keep working (shipper owns row, carrier sees requests on their route).
+## Phase 1 — Carrier Route Flexibility (foundation)
 
-No change needed for carrier flexibility itself — `routes.open_to_extra_stops` already exists and is set on `PostRoute`.
+Without this flag the rest of the bidding flow has nothing to branch on, so it goes first.
 
-### 2. New Route Offer Page — `/routes/:routeId/offer`
+- **DB migration**: add `allow_flexible_stops boolean default false` on `routes`, and `allow_flexible_stops_default boolean default false` on `profiles` (carrier-level default).
+- **Carrier dashboard → Settings / Route Preferences**: toggle "Allow flexible stop requests" with subtext.
+- **Route posting form**: checkbox "Allow shippers to request alternative stops on this route" (pre-filled from carrier default).
+- **Route cards**: green "Flexible" pill on:
+  - Shipper dashboard "Routes Matching Your Loads"
+  - `/routes` listing page
+  - Find Loads / browse views that show route cards
 
-File: `src/pages/RouteOfferPage.tsx`, registered in `App.tsx`.
+## Phase 2 — Route Offer Page & Bid Inbox
 
-Layout:
-- **Header**: origin → destination, available pallets, departure window, price anchor (`route.price`), carrier name + verification, "Flexible" pill when `open_to_extra_stops`.
-- **Tabs** (shadcn `Tabs`):
-  - **Direct Bid** (always visible): price input pre-filled with `route.price`, pallet count (max = available), message textarea, "Place Bid" button → inserts `route_requests` row with `offer_type='direct'`.
-  - **Alternative Stop** (only when `route.open_to_extra_stops`): read-only carrier route line, editable pickup city/country and dropoff city/country (Schengen country select), helper text "Must be on or near the carrier's route", price + pallets + reason note, "Propose Alternative Stop" button → inserts with `offer_type='alternative'`.
-  - When flexibility is off, the second tab trigger is replaced by a disabled trigger with a Tooltip "This carrier hasn't enabled route flexibility."
+- **New route**: `/routes/:id/offer` (Shipper-only).
+  - Header: origin → destination, pallets, date range, listed price.
+  - Tabs: **Direct Bid** | **Alternative Route Offer** (second tab hidden + tooltip when flexibility off).
+  - Direct Bid: price (prefilled), pallet qty, message → "Place Bid".
+  - Alternative: read-only carrier route, editable pickup/dropoff with helper text + example prefill, price, pallets, justification note → "Propose Alternative Stop".
+- **Wire matched route cards** (shipper dashboard + `/routes`) to navigate here instead of current behavior.
+- **DB migration**: extend `offers` (or create `route_offers`) with: `offer_type` enum (`direct` | `alternative`), `proposed_pickup_city/country`, `proposed_dropoff_city/country`, `note`.
+- **Carrier Bid Inbox**: section already exists for offers — add badge "Alternative Stop Proposed" with proposed pickup/dropoff displayed, plus Accept / Counter / Decline actions.
+- **Confirmation screen** after submit: bid type, route summary, status "Pending carrier review".
+- **Shipper tracking view**: show Direct vs Alternative tag on each offer row.
 
-### 3. Confirmation screen
+## Phase 3 — Resolution Center
 
-After successful submit, swap the page body for a confirmation card showing bid type, route summary, and status "Pending carrier review", with links back to dashboard and to "View my offers" (`/dashboard/shipper/requests`).
+- **DB migrations**:
+  - `resolution_cases`: shipment_id, shipper_id, carrier_id, opened_by, issue_type enum (`late_delivery`,`cargo_damage`,`no_show`,`payment_dispute`,`route_deviation`,`other`), status enum (`open`,`under_review`,`decision_pending`,`resolved`), opened_at, resolved_at.
+  - `resolution_messages`: case_id, sender_id, sender_role (`shipper`/`carrier`/`support`/`system`), body, created_at, read_by jsonb.
+  - `resolution_evidence`: case_id, uploader_id, file_path, kind (photo/cmr/invoice/other).
+  - Storage bucket `resolution-evidence` (private) with RLS.
+  - `admin` role added to `app_role` enum for FreightShare Support.
+- **Routes**:
+  - `/resolution` — list of cases for current user (id, counterparty, route summary, status, opened date, filter open/closed).
+  - `/resolution/:caseId` — case detail with: header, issue tag, shipment timeline, evidence upload grid, status tracker, embedded chat panel.
+  - Auto system message on case open: "Your case has been received…".
+  - Quick actions: Mark as Resolved (both-party agreement), Escalate to FreightShare (→ Under Review), Download Case Summary (PDF).
+- **Chat**: realtime via Supabase channel on `resolution_messages`, send on Enter/button, attributed badges (Shipper/Carrier/**Support**), timestamps.
+- **PDF export**: client-side using existing PDF approach for case summary (header + timeline + messages + evidence list).
 
-### 4. Route cards — Flexible badge
+## Phase 4 — Navigation & Badges
 
-Add a green "Flexible" pill (Shuffle icon) on:
-- `ShipperDashboard.tsx` match cards in "Routes Matching Your Loads"
-- `BrowseRoutes.tsx` route cards
+- Add "Resolution Center" entry to shipper and carrier sidebars/hamburger menu.
+- Unread badge: count of cases with unread messages for current user (computed from `read_by` jsonb).
+- Verify existing dashboard sections (stats, recent loads, routes) remain intact.
 
-Conditioned on `route.open_to_extra_stops === true`.
+---
 
-Match cards link to `/routes/:id/offer` (replacing the current query-param link to `/routes`).
+## Tech notes
+- Reuses existing tables: `routes`, `offers`, `shipments`, `profiles`, `user_roles`, `shipment_timestamps`.
+- All new tables follow the standard CREATE → GRANT → ENABLE RLS → POLICY pattern with `service_role` full access; admin role policies use `has_role(auth.uid(),'admin')`.
+- Resolution chat scoped strictly to the case (matches existing "scoped messaging" memory).
+- No GPS / no automated status changes (manual-operations memory respected).
+- Bidding/payment unchanged — this layer only handles offer creation and post-match disputes.
 
-### 5. Carrier offers inbox
+---
 
-Update `src/pages/CarrierRequests.tsx` / `CarrierRequestDetails.tsx`:
-- Show a distinct "Alternative Stop Proposed" badge when `offer_type='alternative'`
-- Render the proposed pickup/dropoff prominently when present
-- Keep existing Accept / Counter / Decline actions; they already exist on the request
+## Question before I start
 
-### 6. Shipper offer tracking
-
-`ShipperRequests.tsx` / `RouteRequestStatus.tsx`:
-- Show "Direct Bid" vs "Alternative Stop" label + the proposed stops when applicable
-- Status pill already exists
-
-### 7. Carrier flexibility setting on route posting
-
-Already present in `PostRoute.tsx` ("Route Flexibility" section with `openToExtraStops`). I'll rename the visible label to "Allow shippers to request alternative stops on this route." and keep the descriptive note as the subtext to match the spec wording. No new global per-carrier setting — per-route is cleaner with the existing model.
-
-### Out of scope / not changing
-
-- Shipper dashboard stats, recent loads section, sidebar/hamburger menu — untouched.
-- Existing `/routes/:routeId/request` route stays for backwards compatibility but match cards now point to `/offer`.
-
-### Technical notes
-
-- `offer_type` added as a Postgres enum `route_offer_type`.
-- Validation via existing Zod patterns in `src/lib/validationSchemas.ts`.
-- City inputs are free text (no geocoding); helper text reminds shippers to stay on the corridor.
-- Counter/decline flows already implemented for `route_requests` — reused as-is.
-
-I'll run the migration first, then implement the page, badges, and inbox updates in one batch.
+Do you want me to **build all 4 phases in one go**, or **ship phase by phase** (Phase 1 → review → Phase 2, etc.)? Phase-by-phase is safer for a change this size; one-go is faster but riskier to review.

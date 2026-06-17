@@ -48,6 +48,8 @@ import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
 import RouteOfferPage from "./pages/RouteOfferPage";
+import Resolution from "./pages/Resolution";
+import ResolutionCase from "./pages/ResolutionCase";
 
 const queryClient = new QueryClient();
 
@@ -211,6 +213,16 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="/resolution" element={
+              <ProtectedRoute>
+                <Resolution />
+              </ProtectedRoute>
+            } />
+            <Route path="/resolution/:caseId" element={
+              <ProtectedRoute>
+                <ResolutionCase />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

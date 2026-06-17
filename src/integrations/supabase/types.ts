@@ -505,6 +505,144 @@ export type Database = {
           },
         ]
       }
+      resolution_cases: {
+        Row: {
+          carrier_id: string
+          carrier_resolved: boolean
+          created_at: string
+          description: string | null
+          id: string
+          issue_type: Database["public"]["Enums"]["resolution_issue_type"]
+          opened_at: string
+          opened_by: string
+          resolved_at: string | null
+          shipment_id: string | null
+          shipper_id: string
+          shipper_resolved: boolean
+          status: Database["public"]["Enums"]["resolution_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          carrier_resolved?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          issue_type: Database["public"]["Enums"]["resolution_issue_type"]
+          opened_at?: string
+          opened_by: string
+          resolved_at?: string | null
+          shipment_id?: string | null
+          shipper_id: string
+          shipper_resolved?: boolean
+          status?: Database["public"]["Enums"]["resolution_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          carrier_resolved?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          issue_type?: Database["public"]["Enums"]["resolution_issue_type"]
+          opened_at?: string
+          opened_by?: string
+          resolved_at?: string | null
+          shipment_id?: string | null
+          shipper_id?: string
+          shipper_resolved?: boolean
+          status?: Database["public"]["Enums"]["resolution_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resolution_cases_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resolution_evidence: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          kind: string
+          uploader_id: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          kind?: string
+          uploader_id: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          kind?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resolution_evidence_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "resolution_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resolution_messages: {
+        Row: {
+          body: string
+          case_id: string
+          created_at: string
+          id: string
+          read_by: Json
+          sender_id: string | null
+          sender_role: Database["public"]["Enums"]["resolution_sender_role"]
+        }
+        Insert: {
+          body: string
+          case_id: string
+          created_at?: string
+          id?: string
+          read_by?: Json
+          sender_id?: string | null
+          sender_role: Database["public"]["Enums"]["resolution_sender_role"]
+        }
+        Update: {
+          body?: string
+          case_id?: string
+          created_at?: string
+          id?: string
+          read_by?: Json
+          sender_id?: string | null
+          sender_role?: Database["public"]["Enums"]["resolution_sender_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resolution_messages_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "resolution_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_request_messages: {
         Row: {
           content: string
@@ -1005,6 +1143,19 @@ export type Database = {
         | "other"
       payment_status: "pending" | "paid" | "completed" | "refunded"
       pricing_type: "fixed" | "open_to_offers"
+      resolution_issue_type:
+        | "late_delivery"
+        | "cargo_damage"
+        | "no_show"
+        | "payment_dispute"
+        | "route_deviation"
+        | "other"
+      resolution_sender_role: "shipper" | "carrier" | "support" | "system"
+      resolution_status:
+        | "open"
+        | "under_review"
+        | "decision_pending"
+        | "resolved"
       route_offer_type: "direct" | "alternative"
       route_request_status:
         | "sent"
@@ -1172,6 +1323,21 @@ export const Constants = {
       ],
       payment_status: ["pending", "paid", "completed", "refunded"],
       pricing_type: ["fixed", "open_to_offers"],
+      resolution_issue_type: [
+        "late_delivery",
+        "cargo_damage",
+        "no_show",
+        "payment_dispute",
+        "route_deviation",
+        "other",
+      ],
+      resolution_sender_role: ["shipper", "carrier", "support", "system"],
+      resolution_status: [
+        "open",
+        "under_review",
+        "decision_pending",
+        "resolved",
+      ],
       route_offer_type: ["direct", "alternative"],
       route_request_status: [
         "sent",
