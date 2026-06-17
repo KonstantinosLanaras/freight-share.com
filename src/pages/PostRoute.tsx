@@ -63,7 +63,6 @@ export default function PostRoute() {
     arrivalStart: '',
     arrivalEnd: '',
     vehicleType: '',
-    notes: '',
     openToExtraStops: false,
     flexibilityNote: '',
   });
@@ -170,7 +169,6 @@ export default function PostRoute() {
           available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
           vehicle_type: formData.vehicleType,
           vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
-          notes: formData.notes || null,
           status: 'planned',
           open_to_extra_stops: formData.openToExtraStops,
           flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
@@ -503,17 +501,6 @@ export default function PostRoute() {
                 />
               </div>
 
-              <div className="pt-4 border-t">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Any additional information about this route"
-                  className="mt-1 min-h-[80px]"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  disabled={isSubmitting}
-                />
-              </div>
             </CardContent>
           </Card>
 
@@ -607,7 +594,7 @@ export default function PostRoute() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Main roads, planned stops, flexibility, timing preferences, delivery limitations..."
+                placeholder="Vehicle details, capacity notes, route specifics, preferred cargo types, flexibility (stops, timing, deviations), loading/unloading requirements, delivery limitations, contact preferences, or any other relevant information..."
                 className="min-h-[120px]"
                 value={tripDescription}
                 onChange={(e) => setTripDescription(e.target.value)}
