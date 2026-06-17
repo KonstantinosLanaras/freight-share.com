@@ -116,15 +116,7 @@ export default function PostRoute() {
       return;
     }
 
-    if (!formData.arrivalStart) {
-      toast.error('Please enter an expected arrival date');
-      return;
-    }
-
-    if (!formData.departureTime) {
-      toast.error('Please enter a departure time');
-      return;
-    }
+    // Schedule is derived from origin/destination planned datetimes below
 
     if (!formData.originPlannedDateTime) {
       toast.error('Please enter a planned departure date/time for origin');
@@ -175,11 +167,11 @@ export default function PostRoute() {
           origin_country: formData.originCountry,
           destination_city: formData.destinationCity,
           destination_country: formData.destinationCountry,
-          departure_date_from: formData.departureStart,
-          departure_date_to: formData.departureEnd,
-          departure_time: formData.departureTime || null,
-          arrival_date_from: formData.arrivalStart,
-          arrival_date_to: formData.arrivalEnd || null,
+          departure_date_from: formData.originPlannedDateTime.split('T')[0],
+          departure_date_to: formData.originPlannedDateTime.split('T')[0],
+          departure_time: formData.originPlannedDateTime.split('T')[1] || null,
+          arrival_date_from: formData.destinationPlannedDateTime.split('T')[0],
+          arrival_date_to: formData.destinationPlannedDateTime.split('T')[0],
           available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
           vehicle_type: formData.vehicleType,
           vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
@@ -488,89 +480,7 @@ export default function PostRoute() {
             </CardContent>
           </Card>
 
-          {/* Dates */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-carrier" />
-                Schedule
-              </CardTitle>
-              <CardDescription>When are you planning this journey?</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label className="text-base font-medium">Departure Window <span className="text-destructive">*</span></Label>
-                <div className="grid sm:grid-cols-3 gap-4 mt-2">
-                  <div>
-                    <Label htmlFor="departureStart" className="text-sm text-muted-foreground">Earliest Departure</Label>
-                    <Input
-                      id="departureStart"
-                      type="date"
-                      className="mt-1"
-                      value={formData.departureStart}
-                      onChange={(e) => setFormData({ ...formData, departureStart: e.target.value })}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="departureTime" className="text-sm text-muted-foreground">Departure Time</Label>
-                    <Input
-                      id="departureTime"
-                      type="time"
-                      className="mt-1"
-                      value={formData.departureTime}
-                      onChange={(e) => setFormData({ ...formData, departureTime: e.target.value })}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="departureEnd" className="text-sm text-muted-foreground">Latest Departure</Label>
-                    <Input
-                      id="departureEnd"
-                      type="date"
-                      className="mt-1"
-                      value={formData.departureEnd}
-                      onChange={(e) => setFormData({ ...formData, departureEnd: e.target.value })}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-base font-medium">Arrival Window <span className="text-destructive">*</span></Label>
-                <p className="text-sm text-muted-foreground mb-2">Earliest arrival is required for matching</p>
-                <div className="grid sm:grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <Label htmlFor="arrivalStart" className="text-sm text-muted-foreground">Earliest Arrival</Label>
-                    <Input
-                      id="arrivalStart"
-                      type="date"
-                      className="mt-1"
-                      value={formData.arrivalStart}
-                      onChange={(e) => setFormData({ ...formData, arrivalStart: e.target.value })}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="arrivalEnd" className="text-sm text-muted-foreground">Latest Arrival (optional)</Label>
-                    <Input
-                      id="arrivalEnd"
-                      type="date"
-                      className="mt-1"
-                      value={formData.arrivalEnd}
-                      onChange={(e) => setFormData({ ...formData, arrivalEnd: e.target.value })}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Schedule is derived from Planned Departure / Planned Arrival above */}
 
           {/* Route Flexibility */}
           <Card>
