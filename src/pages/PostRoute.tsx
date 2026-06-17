@@ -46,7 +46,6 @@ export default function PostRoute() {
   const [spaceValue, setSpaceValue] = useState('');
   const [maxPayloadKg, setMaxPayloadKg] = useState('');
   const [maxDeviationKm, setMaxDeviationKm] = useState('');
-  const [maxDestRadiusKm, setMaxDestRadiusKm] = useState('');
   const [tripDescription, setTripDescription] = useState('');
   const [routeLink, setRouteLink] = useState('');
   const [goodsAccepted, setGoodsAccepted] = useState('');
@@ -184,7 +183,6 @@ export default function PostRoute() {
           space_ldm: spaceLdm,
           max_payload_kg: parseFloat(maxPayloadKg) || 0,
           max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
-          max_destination_radius_km: maxDestRadiusKm ? parseFloat(maxDestRadiusKm) : null,
           trip_description: tripDescription || null,
           route_link: routeLink || null,
           itinerary_image_url: itineraryImageUrl,
@@ -428,25 +426,56 @@ export default function PostRoute() {
             </CardContent>
           </Card>
 
-          {/* Capacity - Space & Payload */}
+          {/* Vehicle, Capacity & Notes */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Scale className="h-5 w-5 text-carrier" />
-                Available Capacity
+                <Truck className="h-5 w-5 text-carrier" />
+                Vehicle & Capacity
               </CardTitle>
-              <CardDescription>How much space and weight can you carry?</CardDescription>
+              <CardDescription>Vehicle type is required for cargo matching</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <SpaceInput
-                spaceType={spaceType}
-                spaceValue={spaceValue}
-                onSpaceTypeChange={setSpaceType}
-                onSpaceValueChange={setSpaceValue}
-                disabled={isSubmitting}
-                showDimensions={false}
-                label="How much space is available?"
-              />
+              <div>
+                <Label htmlFor="vehicleType">Vehicle Type <span className="text-destructive">*</span></Label>
+                <Select
+                  value={formData.vehicleType}
+                  onValueChange={(value) => setFormData({ ...formData, vehicleType: value })}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select vehicle type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="goodsAccepted">Goods Accepted</Label>
+                <Input
+                  id="goodsAccepted"
+                  placeholder="e.g., General cargo, palletized, dry goods"
+                  className="mt-1"
+                  value={goodsAccepted}
+                  onChange={(e) => setGoodsAccepted(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="pt-4 border-t">
+                <SpaceInput
+                  spaceType={spaceType}
+                  spaceValue={spaceValue}
+                  onSpaceTypeChange={setSpaceType}
+                  onSpaceValueChange={setSpaceValue}
+                  disabled={isSubmitting}
+                  showDimensions={false}
+                  label="How much space is available?"
+                />
+              </div>
               
               <div className="pt-4 border-t">
                 <div className="flex items-center gap-2">
@@ -475,6 +504,18 @@ export default function PostRoute() {
                   disabled={isSubmitting}
                   className="mt-1"
                   required
+                />
+              </div>
+
+              <div className="pt-4 border-t">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Any additional information about this route"
+                  className="mt-1 min-h-[80px]"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
@@ -558,71 +599,6 @@ export default function PostRoute() {
             </CardContent>
           </Card>
 
-          {/* Vehicle & Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-carrier" />
-                Vehicle & Additional Info
-              </CardTitle>
-              <CardDescription>Vehicle type is required for cargo matching</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="vehicleType">Vehicle Type <span className="text-destructive">*</span></Label>
-                <Select
-                  value={formData.vehicleType}
-                  onValueChange={(value) => setFormData({ ...formData, vehicleType: value })}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select vehicle type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicleTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="goodsAccepted">Goods Accepted</Label>
-                <Input
-                  id="goodsAccepted"
-                  placeholder="e.g., General cargo, palletized, dry goods"
-                  className="mt-1"
-                  value={goodsAccepted}
-                  onChange={(e) => setGoodsAccepted(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div>
-                <Label htmlFor="maxDestRadius">Max distance from destination city (km)</Label>
-                <Input
-                  id="maxDestRadius"
-                  type="number" min="0" placeholder="e.g., 50"
-                  className="mt-1 max-w-[200px]"
-                  value={maxDestRadiusKm}
-                  onChange={(e) => setMaxDestRadiusKm(e.target.value)}
-                  disabled={isSubmitting}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Example: if your destination is Munich, 50 km means you can deliver within a 50 km radius
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Any additional information about this route"
-                  className="mt-1 min-h-[80px]"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  disabled={isSubmitting}
-                />
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Trip Description */}
           <Card>
