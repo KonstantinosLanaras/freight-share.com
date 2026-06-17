@@ -101,6 +101,11 @@ const App = () => (
                 <ShipperLoads />
               </ProtectedRoute>
             } />
+            <Route path="/offers/shipper" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <OffersShipper />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/shipper/verify" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <ShipperVerification />
