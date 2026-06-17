@@ -135,10 +135,6 @@ export default function PostRoute() {
       }
     }
 
-    if (formData.openToExtraStops && !formData.flexibilityNote.trim()) {
-      toast.error('Please describe your flexibility for extra stops');
-      return;
-    }
 
     setIsSubmitting(true);
 
