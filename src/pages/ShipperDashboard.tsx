@@ -238,7 +238,7 @@ export default function ShipperDashboard() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="relative">
                 <Truck className="h-8 w-8 text-sidebar-primary" />
                 <Package className="h-4 w-4 text-accent absolute -bottom-1 -right-1" />

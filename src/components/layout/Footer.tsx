@@ -11,7 +11,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="relative">
                 <Truck className="h-8 w-8 text-primary" />
                 <Package className="h-4 w-4 text-accent absolute -bottom-1 -right-1" />
