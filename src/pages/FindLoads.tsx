@@ -156,8 +156,21 @@ export default function FindLoads() {
       load.destination_country.toLowerCase().includes(searchDestination.toLowerCase());
     
     const matchesCargo = cargoFilter === 'all' || load.cargo_type === cargoFilter;
-    
-    // Filter by compatibility if enabled
+
+    // Arrive-by filter with flexibility (+N days)
+    let matchesArriveBy = true;
+    if (arriveBy) {
+      const target = parseISO(arriveBy);
+      if (isValid(target)) {
+        const flex = parseInt(flexibility, 10) || 0;
+        const cutoff = addDays(target, flex);
+        const loadArrival = load.delivery_date_from
+          ? parseISO(load.delivery_date_from)
+          : parseISO(load.pickup_date_to);
+        matchesArriveBy = isValid(loadArrival) && loadArrival <= cutoff;
+      }
+    }
+
     if (showCompatibleOnly && carrierRoute) {
       const compatibility = getLoadCompatibility(load);
       if (compatibility && !compatibility.isMatch) {
@@ -165,8 +178,27 @@ export default function FindLoads() {
       }
     }
     
-    return matchesOrigin && matchesDestination && matchesCargo;
+    return matchesOrigin && matchesDestination && matchesCargo && matchesArriveBy;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'price_asc': {
+        const ap = a.price ?? Number.POSITIVE_INFINITY;
+        const bp = b.price ?? Number.POSITIVE_INFINITY;
+        return ap - bp;
+      }
+      case 'pickup_asc':
+        return new Date(a.pickup_date_from).getTime() - new Date(b.pickup_date_from).getTime();
+      case 'delivery_asc': {
+        const ad = a.delivery_date_from || a.pickup_date_to;
+        const bd = b.delivery_date_from || b.pickup_date_to;
+        return new Date(ad).getTime() - new Date(bd).getTime();
+      }
+      case 'newest':
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
   });
+
 
   const formatDateRange = (from: string, to: string) => {
     const fromDate = new Date(from);
