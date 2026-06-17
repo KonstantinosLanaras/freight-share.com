@@ -155,6 +155,8 @@ export default function RouteOfferPage() {
         delivery_address: `${parsed.data.dropoffCity}, ${parsed.data.dropoffCountry}`,
         goods_type: 'General Cargo',
         status: 'sent',
+        shipment_date: route.departure_date_from,
+        weight_kg: 0,
       } as any).select('id').single();
       if (error) throw error;
       setConfirmation({ type: 'alternative', id: data.id });
