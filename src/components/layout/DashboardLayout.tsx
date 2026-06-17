@@ -122,7 +122,10 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
           </Button>
 
           {/* User info - Desktop */}
-          <div className="hidden lg:flex items-center gap-3 pl-3 border-l border-border">
+          <Link
+            to={`/profile/${role}/${user?.id ?? ""}`}
+            className="hidden lg:flex items-center gap-3 pl-3 border-l border-border hover:opacity-80 transition-opacity"
+          >
             <div className="text-right">
               <div className="text-sm font-medium text-foreground">
                 {profile?.full_name || profile?.company_name || 'User'}
@@ -137,7 +140,7 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
             <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <User className="h-4 w-4 text-muted-foreground" />
             </div>
-          </div>
+          </Link>
 
           {/* Sign Out - Always visible */}
           <Button 
