@@ -614,9 +614,8 @@ export default function CarrierDashboard() {
                 {/* My Routes - Optional */}
                 <Card className="border-dashed">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="h-5 w-5" />
-                      My Routes
                       My Routes
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
