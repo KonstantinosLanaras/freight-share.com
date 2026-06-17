@@ -510,8 +510,8 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
-              {/* Demo: Routes Matching Your Loads */}
-              {isDemoMode && (
+              {/* Routes Matching Your Loads (real data) */}
+              {matchingRoutes.length > 0 && (
                 <Card className="mb-6 border-primary/20">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -521,7 +521,7 @@ export default function ShipperDashboard() {
                           Routes Matching Your Loads
                         </CardTitle>
                         <Badge variant="secondary" className="mt-2 text-xs font-normal">
-                          Based on your shipping history
+                          Based on your active shipments
                         </Badge>
                       </div>
                       <Button variant="ghost" size="sm" asChild>
@@ -534,44 +534,47 @@ export default function ShipperDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {[
-                        { id: 'demo-1', origin: 'Milan, IT', destination: 'Munich, DE', pallets: 6, date: 'Apr 24-26', price: 720, flexible: true },
-                        { id: 'demo-2', origin: 'Rotterdam, NL', destination: 'Lyon, FR', pallets: 12, date: 'Apr 28', price: 1340, flexible: false },
-                        { id: 'demo-3', origin: 'Barcelona, ES', destination: 'Marseille, FR', pallets: 4, date: 'May 2-3', price: 480, flexible: true },
-                      ].map((load) => (
-                        <Link
-                          key={load.id}
-                          to={`/routes?origin=${encodeURIComponent(load.origin)}&destination=${encodeURIComponent(load.destination)}&pallets=${load.pallets}`}
-                          className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
-                        >
-                          <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
-                          <div className="font-medium text-foreground mb-1">
-                            {load.origin} → {load.destination}
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-3">
-                            {load.pallets} pallets · {load.date}
-                          </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-primary font-semibold">€{load.price}</span>
-                            <div className="flex items-center gap-1.5">
-                              {load.flexible && (
-                                <Badge variant="outline" className="text-xs border-success/40 text-success">
-                                  <Shuffle className="h-3 w-3 mr-1" />
-                                  Flexible
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                                Match
-                              </Badge>
+                      {matchingRoutes.map((route) => {
+                        const dateLabel = route.departure_date_from === route.departure_date_to
+                          ? format(new Date(route.departure_date_from), 'MMM d')
+                          : `${format(new Date(route.departure_date_from), 'MMM d')}–${format(new Date(route.departure_date_to), 'd')}`;
+                        return (
+                          <Link
+                            key={route.id}
+                            to={`/routes/${route.id}`}
+                            className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                          >
+                            <BookmarkButton id={route.id} className="absolute top-2 right-2 z-10" />
+                            <div className="font-medium text-foreground mb-1">
+                              {route.origin_city}, {route.origin_country} → {route.destination_city}, {route.destination_country}
                             </div>
-                          </div>
-                        </Link>
-                      ))}
+                            <div className="text-sm text-muted-foreground mb-3">
+                              {route.available_pallets} pallets available · {dateLabel}
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              {route.price_per_pallet != null && (
+                                <span className="text-primary font-semibold">€{route.price_per_pallet}/pallet</span>
+                              )}
+                              <div className="flex items-center gap-1.5 ml-auto">
+                                {route.open_to_extra_stops && (
+                                  <Badge variant="outline" className="text-xs border-success/40 text-success">
+                                    <Shuffle className="h-3 w-3 mr-1" />
+                                    Flexible
+                                  </Badge>
+                                )}
+                                <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                                  Match
+                                </Badge>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
                     </div>
-
                   </CardContent>
                 </Card>
               )}
+
 
               {/* Pickup Requests Status */}
               {pickupRequests.length > 0 && (
