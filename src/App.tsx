@@ -50,6 +50,9 @@ import SavedLoads from "./pages/SavedLoads";
 import RouteOfferPage from "./pages/RouteOfferPage";
 import Resolution from "./pages/Resolution";
 import ResolutionCase from "./pages/ResolutionCase";
+import ShipperProfile from "./pages/ShipperProfile";
+import CarrierProfile from "./pages/CarrierProfile";
+import AdminUsers from "./pages/AdminUsers";
 
 const queryClient = new QueryClient();
 
