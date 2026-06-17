@@ -51,7 +51,7 @@ export function SpaceInput({
 
   return (
     <div className="space-y-4">
-      <Label className="text-base font-medium">{label}</Label>
+      <Label className="text-base font-medium">{label} <span className="text-destructive">*</span></Label>
       
       <RadioGroup
         value={spaceType}
@@ -83,6 +83,7 @@ export function SpaceInput({
                 <Input
                   type="number"
                   min="1"
+                  required
                   placeholder="e.g., 12"
                   value={spaceValue}
                   onChange={(e) => onSpaceValueChange(e.target.value)}
@@ -119,6 +120,7 @@ export function SpaceInput({
                   type="number"
                   min="0.1"
                   step="0.1"
+                  required
                   placeholder="e.g., 4.8"
                   value={spaceValue}
                   onChange={(e) => onSpaceValueChange(e.target.value)}
