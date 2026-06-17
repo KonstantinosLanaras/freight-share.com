@@ -468,7 +468,7 @@ export default function PostRoute() {
                   id="maxPayload"
                   type="number"
                   min="1"
-                  step="100"
+                  step="1"
                   placeholder="e.g., 24000"
                   value={maxPayloadKg}
                   onChange={(e) => setMaxPayloadKg(e.target.value)}
