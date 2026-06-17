@@ -120,6 +120,7 @@ export function SpaceInput({
                   type="number"
                   min="0.1"
                   step="0.1"
+                  required
                   placeholder="e.g., 4.8"
                   value={spaceValue}
                   onChange={(e) => onSpaceValueChange(e.target.value)}
