@@ -84,7 +84,7 @@ export function DashboardLayout({ children, role, navItems, profile }: Dashboard
           </button>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="relative">
               <Truck className="h-7 w-7 text-primary" />
               <Package className="h-3.5 w-3.5 text-accent absolute -bottom-1 -right-1" />
