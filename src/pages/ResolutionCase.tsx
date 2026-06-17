@@ -314,7 +314,10 @@ export default function ResolutionCase() {
                   <ShieldAlert className="h-5 w-5 text-primary" /> {caseData.subject}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {shipperName} ↔ {carrierName}{shipmentSummary ? ` · ${shipmentSummary}` : ''}
+                  <Link to={`/profile/shipper/${caseData.shipper_id}`} className="hover:underline">{shipperName}</Link>
+                  {' ↔ '}
+                  <Link to={`/profile/carrier/${caseData.carrier_id}`} className="hover:underline">{carrierName}</Link>
+                  {shipmentSummary ? ` · ${shipmentSummary}` : ''}
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
