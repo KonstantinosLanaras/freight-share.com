@@ -230,7 +230,14 @@ export default function Resolution() {
                     </div>
                     <h3 className="font-semibold text-foreground truncate">{c.subject}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      With {c.counterparty_name}
+                      With{' '}
+                      <Link
+                        to={`/profile/${role === 'shipper' ? 'carrier' : 'shipper'}/${role === 'shipper' ? c.carrier_id : c.shipper_id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="hover:underline"
+                      >
+                        {c.counterparty_name}
+                      </Link>
                       {c.shipment_summary ? ` · ${c.shipment_summary}` : ''}
                     </p>
                   </div>
