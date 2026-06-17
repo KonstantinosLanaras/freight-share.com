@@ -215,6 +215,16 @@ const App = () => (
                 <AdminPanel />
               </ProtectedRoute>
             } />
+            <Route path="/resolution" element={
+              <ProtectedRoute>
+                <Resolution />
+              </ProtectedRoute>
+            } />
+            <Route path="/resolution/:caseId" element={
+              <ProtectedRoute>
+                <ResolutionCase />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
