@@ -89,10 +89,12 @@ export default function ShipperDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loads, setLoads] = useState<Load[]>([]);
   const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
+  const [matchingRoutes, setMatchingRoutes] = useState<any[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0, pickupRequests: 0 });
+
   const { user, signOut } = useAuth();
   const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
