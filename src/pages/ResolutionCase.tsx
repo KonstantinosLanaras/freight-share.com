@@ -130,7 +130,7 @@ export default function ResolutionCase() {
         if (ship.created_at) events.push({ label: 'Shipment created', at: ship.created_at });
         if (ship.delivery_marked_at) events.push({ label: 'Delivery marked', at: ship.delivery_marked_at });
         const { data: ts } = await supabase.from('shipment_timestamps').select('*').eq('shipment_id', ship.id);
-        (ts || []).forEach((t) => events.push({ label: t.event_type, at: t.recorded_at || t.created_at }));
+        (ts || []).forEach((t) => events.push({ label: `Status: ${t.status}`, at: t.created_at }));
         events.push({ label: 'Case opened', at: c.opened_at });
         events.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
         setTimeline(events);
