@@ -13,13 +13,13 @@ export interface Review {
   created_at: string;
 }
 
-function Stars({ value, size = 4 }: { value: number; size?: number }) {
+function Stars({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className={`h-${size} w-${size} ${i <= Math.round(value) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`}
+          className={`h-4 w-4 ${i <= Math.round(value) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`}
         />
       ))}
     </div>
