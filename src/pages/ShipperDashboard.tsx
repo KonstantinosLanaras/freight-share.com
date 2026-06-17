@@ -174,14 +174,14 @@ export default function ShipperDashboard() {
 
       // Fetch active routes for the matching routes section
       const today = new Date().toISOString().split('T')[0];
-      const { data: routesData } = await supabase
+      const { data: activeRoutesData } = await supabase
         .from('routes')
         .select('id, origin_city, origin_country, destination_city, destination_country, departure_date_from, departure_date_to, available_pallets, price_per_pallet, open_to_extra_stops')
         .in('status', ['planned', 'active'])
         .gte('departure_date_to', today)
         .order('departure_date_from', { ascending: true })
         .limit(6);
-      setMatchingRoutes(routesData || []);
+      setMatchingRoutes(activeRoutesData || []);
 
 
       // Calculate stats
