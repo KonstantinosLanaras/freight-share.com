@@ -277,6 +277,14 @@ export default function CarrierDashboard() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            <Link
+              to="/"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Home className="h-5 w-5" />
+              Home
+            </Link>
+
             {/* Group 1 */}
             <Link
               to="/dashboard/carrier/find-loads"
