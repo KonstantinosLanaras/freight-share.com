@@ -445,48 +445,8 @@ export default function RouteDetails() {
               </Card>
             )}
 
-            {/* Flexibility */}
-            {route.open_to_extra_stops && (
-              <Card className="border-success/30 bg-success/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5 text-success" />
-                    Open to Extra Stops
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {route.flexibility_note && (
-                    <p className="text-muted-foreground">{route.flexibility_note}</p>
-                  )}
-                  {!isOwner && user && route.available_pallets > 0 && (
-                    <Button 
-                      className="mt-4 w-full" 
-                      onClick={() => setDeviationRequestOpen(true)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Request Pickup on This Route
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Request Load CTA for shippers */}
-            {!isOwner && user && route.available_pallets > 0 && (
-              <Card className="border-primary/30 bg-primary/5">
-                <CardContent className="p-6 text-center">
-                  <Package className="h-8 w-8 text-primary mx-auto mb-3" />
-                  <h3 className="font-heading font-bold text-foreground mb-2">Need space on this route?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Send a load request to the carrier with your shipment details.</p>
-                  <Button asChild className="w-full">
-                    <Link to={`/routes/${route.id}/request`}>
-                      <Package className="h-4 w-4 mr-2" />
-                      Request Load on This Route
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Notes */}
             {route.notes && (
