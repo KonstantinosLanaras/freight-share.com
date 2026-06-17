@@ -24,8 +24,10 @@ import {
   XCircle,
   Send,
   Shuffle,
-  Home
+  Home,
+  Handshake
 } from 'lucide-react';
+import { useShipperOffersUnread } from '@/hooks/useShipperOffersUnread';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
