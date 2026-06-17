@@ -542,7 +542,7 @@ export default function PostRoute() {
                   </div>
                   <div>
                     <Label htmlFor="flexibilityNote">
-                      Describe your flexibility <span className="text-destructive">*</span>
+                      Describe your flexibility
                     </Label>
                     <Textarea
                       id="flexibilityNote"
@@ -550,7 +550,6 @@ export default function PostRoute() {
                       className="mt-1 min-h-[80px]"
                       value={formData.flexibilityNote}
                       onChange={(e) => setFormData({ ...formData, flexibilityNote: e.target.value })}
-                      required
                       disabled={isSubmitting}
                     />
                   </div>
