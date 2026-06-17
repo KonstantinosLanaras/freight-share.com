@@ -300,6 +300,7 @@ export default function FindLoads() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No specification</SelectItem>
                       <SelectItem value="0">Exact date</SelectItem>
                       <SelectItem value="1">+1 day</SelectItem>
                       <SelectItem value="2">+2 days</SelectItem>
