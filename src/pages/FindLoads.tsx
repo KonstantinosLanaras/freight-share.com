@@ -435,6 +435,13 @@ export default function FindLoads() {
                             <Calendar className="h-4 w-4" />
                             Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
                           </div>
+                          {load.delivery_date_from && (
+                            <div className="flex items-center gap-1">
+                              <CalendarClock className="h-4 w-4" />
+                              Deliver by: {formatDateRange(load.delivery_date_from, load.delivery_date_to || load.delivery_date_from)}
+                            </div>
+                          )}
+
                           {load.weight_kg > 0 && (
                             <div className="flex items-center gap-1">
                               <Truck className="h-4 w-4" />
