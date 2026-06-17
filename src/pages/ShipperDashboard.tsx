@@ -24,7 +24,8 @@ import {
   XCircle,
   Send,
   Bookmark,
-  Shuffle
+  Shuffle,
+  Home
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
