@@ -22,7 +22,6 @@ import {
   HelpCircle,
   MessageSquare,
   XCircle,
-  Send,
   Shuffle,
   Home,
   Handshake
