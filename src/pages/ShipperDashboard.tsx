@@ -490,29 +490,29 @@ export default function ShipperDashboard() {
                 </Card>
               </div>
 
-              {/* Routes Matching Your Loads (real data) */}
-              {matchingRoutes.length > 0 && (
-                <Card className="mb-6 border-primary/20">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-primary" />
-                          Routes Matching Your Loads
-                        </CardTitle>
-                        <Badge variant="secondary" className="mt-2 text-xs font-normal">
-                          Based on your active shipments
-                        </Badge>
-                      </div>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to="/routes">
-                          View all routes
-                          <ArrowRight className="h-4 w-4 ml-1" />
-                        </Link>
-                      </Button>
+              {/* Routes Matching Your Loads */}
+              <Card className="mb-6 border-primary/20">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        Routes Matching Your Loads
+                      </CardTitle>
+                      <Badge variant="secondary" className="mt-2 text-xs font-normal">
+                        Based on your active shipments
+                      </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/routes">
+                        View all routes
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {matchingRoutes.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {matchingRoutes.map((route) => {
                         const dateLabel = route.departure_date_from === route.departure_date_to
@@ -551,9 +551,17 @@ export default function ShipperDashboard() {
                         );
                       })}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MapPin className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                      <p className="mb-2">No active routes match your current loads.</p>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/routes">Browse all routes</Link>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
 
               {/* Pickup Requests Status */}
