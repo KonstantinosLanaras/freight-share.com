@@ -338,16 +338,6 @@ export default function ShipperDashboard() {
               </Link>
             </div>
 
-            {/* Divider + Group 3 */}
-            <div className="pt-3 mt-3 border-t border-sidebar-border">
-              <Link
-                to="/saved-loads"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              >
-                <Bookmark className="h-5 w-5" />
-                Saved Loads
-              </Link>
-            </div>
 
           </nav>
 
