@@ -575,6 +575,7 @@ export default function PostRoute() {
                       value={formData.flexibilityNote}
                       onChange={(e) => setFormData({ ...formData, flexibilityNote: e.target.value })}
                       disabled={isSubmitting}
+                      required={false}
                     />
                   </div>
                 </>
