@@ -51,7 +51,7 @@ export function SpaceInput({
 
   return (
     <div className="space-y-4">
-      <Label className="text-base font-medium">{label}</Label>
+      <Label className="text-base font-medium">{label} <span className="text-destructive">*</span></Label>
       
       <RadioGroup
         value={spaceType}
