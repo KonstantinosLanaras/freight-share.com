@@ -53,6 +53,7 @@ import ResolutionCase from "./pages/ResolutionCase";
 import ShipperProfile from "./pages/ShipperProfile";
 import CarrierProfile from "./pages/CarrierProfile";
 import AdminUsers from "./pages/AdminUsers";
+import OffersShipper from "./pages/OffersShipper";
 
 const queryClient = new QueryClient();
 
