@@ -71,7 +71,7 @@ export default function FindLoads() {
   const [searchDestination, setSearchDestination] = useState('');
   const [cargoFilter, setCargoFilter] = useState<string>('all');
   const [arriveBy, setArriveBy] = useState<string>('');
-  const [flexibility, setFlexibility] = useState<string>('0');
+  const [flexibility, setFlexibility] = useState<string>('none');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [carrierRoute, setCarrierRoute] = useState<CarrierRoute | null>(null);
   const [showCompatibleOnly, setShowCompatibleOnly] = useState(false);
@@ -157,9 +157,9 @@ export default function FindLoads() {
     
     const matchesCargo = cargoFilter === 'all' || load.cargo_type === cargoFilter;
 
-    // Arrive-by filter with flexibility (+N days)
+    // Arrive-by filter with flexibility (+N days), or skip if no specification
     let matchesArriveBy = true;
-    if (arriveBy) {
+    if (arriveBy && flexibility !== 'none') {
       const target = parseISO(arriveBy);
       if (isValid(target)) {
         const flex = parseInt(flexibility, 10) || 0;
@@ -300,6 +300,7 @@ export default function FindLoads() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No specification</SelectItem>
                       <SelectItem value="0">Exact date</SelectItem>
                       <SelectItem value="1">+1 day</SelectItem>
                       <SelectItem value="2">+2 days</SelectItem>
@@ -323,12 +324,12 @@ export default function FindLoads() {
                     </SelectContent>
                   </Select>
                 </div>
-                {(arriveBy || sortBy !== 'newest' || flexibility !== '0') && (
+                {(arriveBy || sortBy !== 'newest' || flexibility !== 'none') && (
                   <div className="flex items-end">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => { setArriveBy(''); setFlexibility('0'); setSortBy('newest'); }}
+                      onClick={() => { setArriveBy(''); setFlexibility('none'); setSortBy('newest'); }}
                     >
                       Reset
                     </Button>
