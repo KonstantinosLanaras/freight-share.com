@@ -1,68 +1,80 @@
+# Profile Pages — Shipper, Carrier, and Admin Users
 
-# Plan: Route Bidding, Flexible Offers & Resolution Center
+A large feature spanning routing, two new public-facing profile pages, an admin users table, and link wiring across the existing app. Outlined below; will implement after approval.
 
-This is a large, multi-area feature. Breaking it into 4 shippable phases, each verifiable on its own. I'll confirm phase order with you before building.
+## 1. Routes (in `src/App.tsx`)
+- `/profile/shipper/:userId` → `ShipperProfile.tsx`
+- `/profile/carrier/:userId` → `CarrierProfile.tsx`
+- `/admin/users` → `AdminUsers.tsx` (admin-only, suspended-user check)
+- All three redirect to `/login` (existing `/auth`) when unauthenticated.
 
----
+## 2. Database (single migration)
+New columns / tables to back the spec. Will need approval.
 
-## Phase 1 — Carrier Route Flexibility (foundation)
+**`profiles` additions:** `logo_url`, `bio` (≤200), `contact_email`, `vat_number`, `vat_status` (`unverified|pending|verified`), `preferred_cargo_types text[]`, `shipment_frequency`, `fleet_description`, `operating_countries text[]`, `vehicle_types text[]`, `max_pallet_capacity int`, `operator_licence`, `cmr_insurance bool`, `cmr_expiry date`, `route_flexibility_default bool`, `is_suspended bool`, `last_active_at`, `profile_completion int`.
 
-Without this flag the rest of the bidding flow has nothing to branch on, so it goes first.
+**New storage bucket:** `company-logos` (public).
 
-- **DB migration**: add `allow_flexible_stops boolean default false` on `routes`, and `allow_flexible_stops_default boolean default false` on `profiles` (carrier-level default).
-- **Carrier dashboard → Settings / Route Preferences**: toggle "Allow flexible stop requests" with subtext.
-- **Route posting form**: checkbox "Allow shippers to request alternative stops on this route" (pre-filled from carrier default).
-- **Route cards**: green "Flexible" pill on:
-  - Shipper dashboard "Routes Matching Your Loads"
-  - `/routes` listing page
-  - Find Loads / browse views that show route cards
+**RLS:**
+- Authenticated users can read minimal profile fields of any non-suspended user.
+- Contact email + VAT number visible only when (a) own profile, (b) admin, or (c) a `shipments` row links the two users in active/completed status.
+- Own-profile update policy unchanged. Admins (via `has_role`) can update verified flags + `is_suspended`.
 
-## Phase 2 — Route Offer Page & Bid Inbox
+## 3. Page structure
 
-- **New route**: `/routes/:id/offer` (Shipper-only).
-  - Header: origin → destination, pallets, date range, listed price.
-  - Tabs: **Direct Bid** | **Alternative Route Offer** (second tab hidden + tooltip when flexibility off).
-  - Direct Bid: price (prefilled), pallet qty, message → "Place Bid".
-  - Alternative: read-only carrier route, editable pickup/dropoff with helper text + example prefill, price, pallets, justification note → "Propose Alternative Stop".
-- **Wire matched route cards** (shipper dashboard + `/routes`) to navigate here instead of current behavior.
-- **DB migration**: extend `offers` (or create `route_offers`) with: `offer_type` enum (`direct` | `alternative`), `proposed_pickup_city/country`, `proposed_dropoff_city/country`, `note`.
-- **Carrier Bid Inbox**: section already exists for offers — add badge "Alternative Stop Proposed" with proposed pickup/dropoff displayed, plus Accept / Counter / Decline actions.
-- **Confirmation screen** after submit: bid type, route summary, status "Pending carrier review".
-- **Shipper tracking view**: show Direct vs Alternative tag on each offer row.
+### Header (shared component `ProfileHeader`)
+Logo (or initials fallback) · company name · verified badge / pending badge / Profile Complete badge · member since · country flag(s) · bio/fleet description.
 
-## Phase 3 — Resolution Center
+### Stats bar (`ProfileStats`)
+Shipper: loads posted, completed shipments, bid acceptance %, **own-only** total spend.  
+Carrier: routes posted, completed shipments, on-time %, avg rating, **own-only** total earned.
 
-- **DB migrations**:
-  - `resolution_cases`: shipment_id, shipper_id, carrier_id, opened_by, issue_type enum (`late_delivery`,`cargo_damage`,`no_show`,`payment_dispute`,`route_deviation`,`other`), status enum (`open`,`under_review`,`decision_pending`,`resolved`), opened_at, resolved_at.
-  - `resolution_messages`: case_id, sender_id, sender_role (`shipper`/`carrier`/`support`/`system`), body, created_at, read_by jsonb.
-  - `resolution_evidence`: case_id, uploader_id, file_path, kind (photo/cmr/invoice/other).
-  - Storage bucket `resolution-evidence` (private) with RLS.
-  - `admin` role added to `app_role` enum for FreightShare Support.
-- **Routes**:
-  - `/resolution` — list of cases for current user (id, counterparty, route summary, status, opened date, filter open/closed).
-  - `/resolution/:caseId` — case detail with: header, issue tag, shipment timeline, evidence upload grid, status tracker, embedded chat panel.
-  - Auto system message on case open: "Your case has been received…".
-  - Quick actions: Mark as Resolved (both-party agreement), Escalate to FreightShare (→ Under Review), Download Case Summary (PDF).
-- **Chat**: realtime via Supabase channel on `resolution_messages`, send on Enter/button, attributed badges (Shipper/Carrier/**Support**), timestamps.
-- **PDF export**: client-side using existing PDF approach for case summary (header + timeline + messages + evidence list).
+### Sections (own + public)
+- Active Loads / Active Routes with "View All".
+- Shipment / Route History — paginated table, 10 rows/page.
+- Reviews & Ratings — average + cards, read-only.
 
-## Phase 4 — Navigation & Badges
+### Own-profile extras
+- Profile completion bar at top + expandable checklist of missing items.
+- Inline edit dialog/sheet for the editable fields listed in the spec (different field sets per role).
+- Fleet & Compliance card (carrier only) with vehicle types multi-select, max pallets, insurance doc upload (`insurance-documents` bucket already exists) showing Uploaded/Pending/Verified, operator licence, CMR checkbox + expiry. Locked (disabled) on public view.
 
-- Add "Resolution Center" entry to shipper and carrier sidebars/hamburger menu.
-- Unread badge: count of cases with unread messages for current user (computed from `read_by` jsonb).
-- Verify existing dashboard sections (stats, recent loads, routes) remain intact.
+### Contact details gating
+Compute `canSeeContact = ownProfile || isAdmin || hasSharedShipment(viewer, profileUser)`. Hide contact email / phone otherwise.
 
----
+## 4. Link wiring
+- Dashboard nav company name/avatar → own profile.
+- Carrier bid inbox (`CarrierRequests`) shipper name → public profile in a `Sheet` slide-over.
+- `RouteOfferPage` carrier name → public profile slide-over.
+- `Resolution` / `ResolutionCase` counterparty name → public profile.
+- Review cards across the app → reviewer profile.
+Implement a small `ProfileLink` + `ProfilePeekSheet` so the slide-over is reusable.
 
-## Tech notes
-- Reuses existing tables: `routes`, `offers`, `shipments`, `profiles`, `user_roles`, `shipment_timestamps`.
-- All new tables follow the standard CREATE → GRANT → ENABLE RLS → POLICY pattern with `service_role` full access; admin role policies use `has_role(auth.uid(),'admin')`.
-- Resolution chat scoped strictly to the case (matches existing "scoped messaging" memory).
-- No GPS / no automated status changes (manual-operations memory respected).
-- Bidding/payment unchanged — this layer only handles offer creation and post-match disputes.
+## 5. Admin `/admin/users`
+Table: name, email, role, country, verified, member since, completion %, last active. Row click → admin edit mode of the profile page (verified toggle, VAT approve, insurance verify, suspend/deactivate). Suspended users hitting `/auth` see "Account suspended. Please contact support." Add a global gate in the auth provider that signs suspended users out with that toast.
 
----
+## 6. Profile completion formula
+Weight the editable fields equally; the checklist surfaces the same list of missing items. Recomputed on save via a small util shared by both profiles.
 
-## Question before I start
+## 7. Files to add
+```text
+src/pages/ShipperProfile.tsx
+src/pages/CarrierProfile.tsx
+src/pages/AdminUsers.tsx
+src/components/profile/ProfileHeader.tsx
+src/components/profile/ProfileStats.tsx
+src/components/profile/ProfileCompletion.tsx
+src/components/profile/ReviewsSection.tsx
+src/components/profile/ProfilePeekSheet.tsx
+src/components/profile/EditProfileDialog.tsx
+src/components/profile/FleetComplianceCard.tsx
+src/lib/profileCompletion.ts
+supabase/migrations/<timestamp>_profiles_extend.sql
+```
 
-Do you want me to **build all 4 phases in one go**, or **ship phase by phase** (Phase 1 → review → Phase 2, etc.)? Phase-by-phase is safer for a change this size; one-go is faster but riskier to review.
+## 8. Out of scope / assumptions
+- "Login" route = existing `/auth`.
+- Bid acceptance %, on-time %, total spend/earned derived from existing `offers` / `shipments` / `ratings` tables; if a metric has no data source it shows `—`.
+- Admin role check uses existing `has_role(auth.uid(),'admin')`; if no admin role exists yet I'll add it to the `app_role` enum in the same migration.
+
+Approve and I'll ship it in order: migration → shared components → shipper page → carrier page → admin page → cross-app link wiring.

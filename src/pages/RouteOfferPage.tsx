@@ -231,7 +231,11 @@ export default function RouteOfferPage() {
           <div>
             <h1 className="text-xl font-heading font-bold">Make an offer</h1>
             <p className="text-sm text-muted-foreground">
-              {carrierProfile?.company_name || carrierProfile?.full_name || 'Carrier route'}
+              {route?.carrier_id ? (
+                <Link to={`/profile/carrier/${route.carrier_id}`} className="hover:underline">
+                  {carrierProfile?.company_name || carrierProfile?.full_name || 'Carrier route'}
+                </Link>
+              ) : (carrierProfile?.company_name || carrierProfile?.full_name || 'Carrier route')}
             </p>
           </div>
         </div>

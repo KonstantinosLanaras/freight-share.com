@@ -406,61 +406,115 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_verified: boolean
           avatar_url: string | null
           billing_address: string | null
+          bio: string | null
+          cmr_expiry: string | null
+          cmr_insurance: boolean
           company_name: string | null
+          contact_email: string | null
           country: string | null
           created_at: string
           email: string
+          fleet_description: string | null
           full_name: string | null
           id: string
+          insurance_doc_status: string
+          is_suspended: boolean
+          last_active_at: string | null
           legal_company_name: string | null
+          logo_url: string | null
+          max_pallet_capacity: number | null
+          operating_countries: string[]
+          operator_licence: string | null
           phone: string | null
+          preferred_cargo_types: string[]
           registered_address: string | null
+          route_flexibility_default: boolean
+          shipment_frequency: string | null
           terms_accepted_at: string | null
           terms_version: string | null
           updated_at: string
           vat_number: string | null
+          vat_status: string
+          vehicle_types: string[]
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
             | null
         }
         Insert: {
+          admin_verified?: boolean
           avatar_url?: string | null
           billing_address?: string | null
+          bio?: string | null
+          cmr_expiry?: string | null
+          cmr_insurance?: boolean
           company_name?: string | null
+          contact_email?: string | null
           country?: string | null
           created_at?: string
           email: string
+          fleet_description?: string | null
           full_name?: string | null
           id: string
+          insurance_doc_status?: string
+          is_suspended?: boolean
+          last_active_at?: string | null
           legal_company_name?: string | null
+          logo_url?: string | null
+          max_pallet_capacity?: number | null
+          operating_countries?: string[]
+          operator_licence?: string | null
           phone?: string | null
+          preferred_cargo_types?: string[]
           registered_address?: string | null
+          route_flexibility_default?: boolean
+          shipment_frequency?: string | null
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string
           vat_number?: string | null
+          vat_status?: string
+          vehicle_types?: string[]
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
             | null
         }
         Update: {
+          admin_verified?: boolean
           avatar_url?: string | null
           billing_address?: string | null
+          bio?: string | null
+          cmr_expiry?: string | null
+          cmr_insurance?: boolean
           company_name?: string | null
+          contact_email?: string | null
           country?: string | null
           created_at?: string
           email?: string
+          fleet_description?: string | null
           full_name?: string | null
           id?: string
+          insurance_doc_status?: string
+          is_suspended?: boolean
+          last_active_at?: string | null
           legal_company_name?: string | null
+          logo_url?: string | null
+          max_pallet_capacity?: number | null
+          operating_countries?: string[]
+          operator_licence?: string | null
           phone?: string | null
+          preferred_cargo_types?: string[]
           registered_address?: string | null
+          route_flexibility_default?: boolean
+          shipment_frequency?: string | null
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string
           vat_number?: string | null
+          vat_status?: string
+          vehicle_types?: string[]
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
             | null
@@ -1127,6 +1181,11 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      profile_completion_pct: { Args: { _user_id: string }; Returns: number }
+      users_share_shipment: {
+        Args: { _a: string; _b: string }
         Returns: boolean
       }
     }

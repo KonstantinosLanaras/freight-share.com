@@ -113,10 +113,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    if (!error && data.user) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('is_suspended')
+        .eq('id', data.user.id)
+        .maybeSingle();
+      if (prof?.is_suspended) {
+        await supabase.auth.signOut();
+        return { error: new Error('Account suspended. Please contact support.') };
+      }
+    }
 
     return { error: error as Error | null };
   };
