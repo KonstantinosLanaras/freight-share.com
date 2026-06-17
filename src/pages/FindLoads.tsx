@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Package, 
+import {
+  Package,
   ArrowLeft,
   ArrowRight,
   Loader2,
   MapPin,
   Calendar,
+  CalendarClock,
   Euro,
   Search,
   Filter,
@@ -20,15 +21,18 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Lock
+  Lock,
+  Zap,
+  ArrowUpDown,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { format, addDays, parseISO, isValid } from 'date-fns';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BookmarkButton } from '@/components/BookmarkButton';
+
 
 interface Load {
   id: string;
