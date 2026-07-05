@@ -84,6 +84,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/payments" element={<HowPaymentsWork />} />
             <Route path="/research" element={<Research />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
+
             {/* Public route details */}
             <Route path="/routes/:id" element={<RouteDetails />} />
             {/* Shipper Routes */}
