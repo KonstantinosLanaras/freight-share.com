@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { z } from 'zod';
+import { notifyOfferReceived } from '@/lib/notify';
 
 const directSchema = z.object({
   price: z.coerce.number().positive('Bid price must be greater than 0'),
