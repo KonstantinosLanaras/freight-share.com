@@ -117,6 +117,16 @@ export default function RouteOfferPage() {
         weight_kg: 0,
       } as any).select('id').single();
       if (error) throw error;
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${route.origin_city}, ${route.origin_country} → ${route.destination_city}, ${route.destination_country}`,
+        price: parsed.data.price,
+        pallets: parsed.data.pallets,
+        kind: 'bid',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${data.id}`,
+        idempotencyKey: `bid-direct-${data.id}`,
+      });
       setConfirmation({ type: 'direct', id: data.id });
     } catch (err: any) {
       toast.error(err?.message || 'Failed to place bid');
