@@ -152,8 +152,20 @@ export default function OffersShipper() {
   );
 
   const acceptOfferReceived = async (offerId: string) => {
+    const offer = received.find((o) => o.id === offerId);
     const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
     if (error) return toast.error('Failed to accept offer');
+    if (offer?.carrier_id) {
+      const load = offer.load;
+      notifyOfferAccepted({
+        recipientUserId: offer.carrier_id,
+        fromName: 'The shipper',
+        route: load ? `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}` : undefined,
+        price: offer.price,
+        actionUrl: `${window.location.origin}/dashboard/carrier`,
+        idempotencyKey: `offer-accept-${offerId}`,
+      });
+    }
     toast.success('Offer accepted');
     setSelected(null);
     fetchData();
@@ -168,8 +180,20 @@ export default function OffersShipper() {
   };
 
   const acceptCounter = async (reqId: string) => {
+    const req = made.find((r) => r.id === reqId);
     const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
     if (error) return toast.error('Failed to accept counter');
+    if (req?.carrier_id) {
+      notifyOfferAccepted({
+        recipientUserId: req.carrier_id,
+        fromName: 'The shipper',
+        route: req.route ? `${req.route.origin_city}, ${req.route.origin_country} → ${req.route.destination_city}, ${req.route.destination_country}` : undefined,
+        price: req.offer_price,
+        pallets: req.pallets_requested,
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${reqId}`,
+        idempotencyKey: `counter-accept-${reqId}`,
+      });
+    }
     toast.success('Counter accepted');
     setSelected(null);
     fetchData();
