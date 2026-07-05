@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
