@@ -170,6 +170,16 @@ export default function RouteOfferPage() {
         weight_kg: 0,
       } as any).select('id').single();
       if (error) throw error;
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${parsed.data.pickupCity} → ${parsed.data.dropoffCity}`,
+        price: parsed.data.price,
+        pallets: parsed.data.pallets,
+        kind: 'request',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${data.id}`,
+        idempotencyKey: `bid-alt-${data.id}`,
+      });
       setConfirmation({ type: 'alternative', id: data.id });
     } catch (err: any) {
       toast.error(err?.message || 'Failed to submit alternative offer');
