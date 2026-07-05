@@ -207,6 +207,20 @@ export default function CarrierRequestDetails() {
 
       setRequest({ ...request, status: 'accepted' });
       setShowAcceptForm(false);
+
+      if (request.shipper_id) {
+        notifyOfferAccepted({
+          recipientUserId: request.shipper_id,
+          fromName: 'The carrier',
+          route: request.pickup_address && request.delivery_address
+            ? `${request.pickup_address} → ${request.delivery_address}` : undefined,
+          price: request.offer_price,
+          pallets: request.pallets_requested ?? request.pallets,
+          actionUrl: `${window.location.origin}/dashboard/shipper/offers`,
+          idempotencyKey: `req-accept-${requestId}`,
+        });
+      }
+
       toast.success('Request accepted! Route updated.');
     } catch (err: any) {
       toast.error(err.message || 'Failed to accept');
