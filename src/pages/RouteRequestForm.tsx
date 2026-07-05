@@ -118,6 +118,17 @@ export default function RouteRequestForm() {
 
       if (reqError) throw reqError;
 
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${form.pickupAddress} → ${form.deliveryAddress}`,
+        pallets: parseInt(form.pallets) || 1,
+        kind: 'request',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${request.id}`,
+        idempotencyKey: `request-new-${request.id}`,
+      });
+
+
       // Create system message
       await supabase.from('route_request_messages').insert({
         request_id: request.id,
