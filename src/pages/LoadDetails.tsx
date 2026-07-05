@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
@@ -281,13 +282,30 @@ export default function LoadDetails() {
 
     setSubmittingOffer(true);
     try {
-      const { error } = await supabase.from('offers').insert({
+      const { data: newOffer, error } = await supabase.from('offers').insert({
         load_id: load.id,
         carrier_id: user.id,
         price: amount,
         message: offerMessage.trim() || null,
-      });
+      }).select('id').single();
       if (error) throw error;
+
+      // Notify the shipper by email (fire-and-forget)
+      const { data: me } = await supabase
+        .from('public_profiles')
+        .select('full_name, company_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      notifyOfferReceived({
+        recipientUserId: load.shipper_id,
+        fromName: (me as any)?.company_name || (me as any)?.full_name || 'A carrier',
+        route: `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}`,
+        price: amount,
+        pallets: load.pallets,
+        kind: 'offer',
+        actionUrl: `${window.location.origin}/dashboard/shipper/offers`,
+        idempotencyKey: `offer-new-${newOffer.id}`,
+      });
 
       toast.success('Offer submitted successfully!');
       resetFlow();

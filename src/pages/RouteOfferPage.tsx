@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { z } from 'zod';
+import { notifyOfferReceived } from '@/lib/notify';
 
 const directSchema = z.object({
   price: z.coerce.number().positive('Bid price must be greater than 0'),
@@ -116,6 +117,16 @@ export default function RouteOfferPage() {
         weight_kg: 0,
       } as any).select('id').single();
       if (error) throw error;
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${route.origin_city}, ${route.origin_country} → ${route.destination_city}, ${route.destination_country}`,
+        price: parsed.data.price,
+        pallets: parsed.data.pallets,
+        kind: 'bid',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${data.id}`,
+        idempotencyKey: `bid-direct-${data.id}`,
+      });
       setConfirmation({ type: 'direct', id: data.id });
     } catch (err: any) {
       toast.error(err?.message || 'Failed to place bid');
@@ -159,6 +170,16 @@ export default function RouteOfferPage() {
         weight_kg: 0,
       } as any).select('id').single();
       if (error) throw error;
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${parsed.data.pickupCity} → ${parsed.data.dropoffCity}`,
+        price: parsed.data.price,
+        pallets: parsed.data.pallets,
+        kind: 'request',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${data.id}`,
+        idempotencyKey: `bid-alt-${data.id}`,
+      });
       setConfirmation({ type: 'alternative', id: data.id });
     } catch (err: any) {
       toast.error(err?.message || 'Failed to submit alternative offer');

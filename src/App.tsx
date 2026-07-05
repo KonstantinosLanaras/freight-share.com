@@ -48,6 +48,7 @@ import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
 import RouteOfferPage from "./pages/RouteOfferPage";
+import Unsubscribe from "./pages/Unsubscribe";
 import Resolution from "./pages/Resolution";
 import ResolutionCase from "./pages/ResolutionCase";
 import ShipperProfile from "./pages/ShipperProfile";
@@ -83,6 +84,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/payments" element={<HowPaymentsWork />} />
             <Route path="/research" element={<Research />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
+
             {/* Public route details */}
             <Route path="/routes/:id" element={<RouteDetails />} />
             {/* Shipper Routes */}

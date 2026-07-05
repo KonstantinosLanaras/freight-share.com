@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { notifyOfferReceived } from '@/lib/notify';
 
 const cargoTypes = [
   'General Cargo', 'Palletized Goods', 'Fragile', 'Refrigerated',
@@ -116,6 +117,17 @@ export default function RouteRequestForm() {
         .single();
 
       if (reqError) throw reqError;
+
+      notifyOfferReceived({
+        recipientUserId: route.carrier_id,
+        fromName: 'A shipper',
+        route: `${form.pickupAddress} → ${form.deliveryAddress}`,
+        pallets: parseInt(form.pallets) || 1,
+        kind: 'request',
+        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${request.id}`,
+        idempotencyKey: `request-new-${request.id}`,
+      });
+
 
       // Create system message
       await supabase.from('route_request_messages').insert({
