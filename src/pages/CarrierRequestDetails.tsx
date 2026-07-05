@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
+import { notifyOfferAccepted } from '@/lib/notify';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
