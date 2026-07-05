@@ -48,6 +48,7 @@ import CarrierRequestDetails from "./pages/CarrierRequestDetails";
 import CarrierInsuranceSetup from "./pages/CarrierInsuranceSetup";
 import SavedLoads from "./pages/SavedLoads";
 import RouteOfferPage from "./pages/RouteOfferPage";
+import Unsubscribe from "./pages/Unsubscribe";
 import Resolution from "./pages/Resolution";
 import ResolutionCase from "./pages/ResolutionCase";
 import ShipperProfile from "./pages/ShipperProfile";
