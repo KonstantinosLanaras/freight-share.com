@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { notifyOfferReceived } from '@/lib/notify';
 
 const cargoTypes = [
   'General Cargo', 'Palletized Goods', 'Fragile', 'Refrigerated',
