@@ -261,7 +261,32 @@ export default function ShipmentDetails() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {paymentResult === 'success' && (
+          <div className="mb-6 rounded-lg border border-success/30 bg-success/10 p-4 flex items-start gap-3">
+            <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-medium text-foreground">Payment confirmed</div>
+              <div className="text-sm text-muted-foreground">
+                Your carrier has been notified. Funds are held securely and will be released on delivery confirmation.
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={dismissPaymentBanner}>Dismiss</Button>
+          </div>
+        )}
+        {paymentResult === 'cancelled' && (
+          <div className="mb-6 rounded-lg border border-warning/30 bg-warning/10 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-medium text-foreground">Payment cancelled</div>
+              <div className="text-sm text-muted-foreground">
+                You cancelled the checkout. You can retry payment at any time to confirm this shipment.
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={dismissPaymentBanner}>Dismiss</Button>
+          </div>
+        )}
         <div className="grid lg:grid-cols-3 gap-6">
+
           {/* Left Column - Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Route Card */}
