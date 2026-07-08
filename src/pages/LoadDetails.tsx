@@ -27,6 +27,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 // ── Types ──────────────────────────────────────────────────
 
