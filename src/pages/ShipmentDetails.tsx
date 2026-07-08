@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,6 +64,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function ShipmentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paymentResult = searchParams.get('payment');
   const { user, role } = useAuth();
   const { isDemoMode } = useDemoMode();
 
@@ -85,6 +87,31 @@ export default function ShipmentDetails() {
   useEffect(() => {
     if (id) fetchShipmentData();
   }, [id]);
+
+  // Verify Stripe payment after redirect back from Checkout
+  useEffect(() => {
+    if (!id || paymentResult !== 'success') return;
+    (async () => {
+      try {
+        await supabase.functions.invoke('verify-shipment-payment', {
+          body: { shipmentId: id },
+        });
+      } catch (err) {
+        console.error('Payment verification failed:', err);
+      } finally {
+        // Refresh shipment to pick up updated payment_status
+        fetchShipmentData();
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, paymentResult]);
+
+  const dismissPaymentBanner = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('payment');
+    setSearchParams(next, { replace: true });
+  };
+
 
   const fetchShipmentData = async () => {
     try {
@@ -234,7 +261,32 @@ export default function ShipmentDetails() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {paymentResult === 'success' && (
+          <div className="mb-6 rounded-lg border border-success/30 bg-success/10 p-4 flex items-start gap-3">
+            <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-medium text-foreground">Payment confirmed</div>
+              <div className="text-sm text-muted-foreground">
+                Your carrier has been notified. Funds are held securely and will be released on delivery confirmation.
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={dismissPaymentBanner}>Dismiss</Button>
+          </div>
+        )}
+        {paymentResult === 'cancelled' && (
+          <div className="mb-6 rounded-lg border border-warning/30 bg-warning/10 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-medium text-foreground">Payment cancelled</div>
+              <div className="text-sm text-muted-foreground">
+                You cancelled the checkout. You can retry payment at any time to confirm this shipment.
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={dismissPaymentBanner}>Dismiss</Button>
+          </div>
+        )}
         <div className="grid lg:grid-cols-3 gap-6">
+
           {/* Left Column - Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Route Card */}
