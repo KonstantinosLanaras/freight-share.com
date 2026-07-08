@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { notifyOfferAccepted } from '@/lib/notify';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
