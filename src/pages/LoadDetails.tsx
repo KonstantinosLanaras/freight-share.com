@@ -768,8 +768,6 @@ export default function LoadDetails() {
             <Card>
               <CardHeader>
 
-            <Card>
-              <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Euro className="h-4 w-4 text-primary" />
                   Pricing
