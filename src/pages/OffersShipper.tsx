@@ -335,16 +335,12 @@ export default function OffersShipper() {
                             <div className="flex-1">
                               <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <Badge className={statusPill[s]}>{statusLabel[s]}</Badge>
-                                {o.carrier && (
-                                  <Link
-                                    to={`/profile/carrier/${o.carrier.id}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-sm font-medium text-primary hover:underline"
-                                  >
-                                    {o.carrier.company_name || o.carrier.full_name || 'Carrier'}
-                                  </Link>
-                                )}
                               </div>
+                              {o.carrier?.id && (
+                                <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                                  <CounterpartyCard userId={o.carrier.id} role="carrier" variant="inline" />
+                                </div>
+                              )}
                               {o.load && (
                                 <div className="flex items-center gap-2 text-sm text-foreground mb-1">
                                   <MapPin className="h-3.5 w-3.5" />
