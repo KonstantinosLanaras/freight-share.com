@@ -644,23 +644,14 @@ export default function LoadDetails() {
                             } transition-colors`}
                           >
                             <div className="flex items-start justify-between gap-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <User className="h-5 w-5 text-primary" />
-                                </div>
-                                <div>
-                                  <div className="font-medium">
-                                    {offer.carrier_profile?.company_name || offer.carrier_profile?.full_name || 'Carrier'}
-                                  </div>
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                                    {offer.carrier_profile?.verification_status === 'verified' && (
-                                      <Badge variant="outline" className="text-xs text-primary border-primary/30">
-                                        <ShieldCheck className="h-3 w-3 mr-1" />
-                                        Verified
-                                      </Badge>
-                                    )}
-                                    <span>{format(new Date(offer.created_at), 'MMM d, yyyy')}</span>
-                                  </div>
+                              <div className="flex-1 min-w-0">
+                                <CounterpartyCard
+                                  userId={offer.carrier_id}
+                                  role="carrier"
+                                  variant="inline"
+                                />
+                                <div className="text-xs text-muted-foreground mt-1 ml-11">
+                                  Offered {format(new Date(offer.created_at), 'MMM d, yyyy')}
                                 </div>
                               </div>
                               <div className="text-right">
@@ -673,6 +664,7 @@ export default function LoadDetails() {
                                 )}
                               </div>
                             </div>
+
 
                             {/* Carrier Insurance Info */}
                             <div className="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
