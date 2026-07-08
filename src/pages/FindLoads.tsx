@@ -451,7 +451,12 @@ export default function FindLoads() {
                             </div>
                           )}
                         </div>
+
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <CounterpartyCard userId={load.shipper_id} role="shipper" variant="inline" />
+                        </div>
                       </div>
+
 
                       <div className="flex flex-col items-end gap-3">
                         <div className="text-right">
