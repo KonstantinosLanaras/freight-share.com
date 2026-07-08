@@ -480,7 +480,7 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
     <>
       <SheetHeader>
         <SheetTitle className="flex items-center gap-2">
-          Offer from {offer.carrier?.company_name || offer.carrier?.full_name || 'Carrier'}
+          Offer received
           <Badge className={statusPill[s]}>{statusLabel[s]}</Badge>
         </SheetTitle>
         <SheetDescription>
@@ -489,6 +489,12 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
       </SheetHeader>
 
       <div className="mt-6 space-y-4 text-sm">
+        {offer.carrier?.id && (
+          <div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">From</div>
+            <CounterpartyCard userId={offer.carrier.id} role="carrier" variant="card" />
+          </div>
+        )}
         {offer.load && (
           <Row label="Load">
             {offer.load.origin_city} → {offer.load.destination_city} · pickup {format(new Date(offer.load.pickup_date_from), 'PPP')}
@@ -496,14 +502,8 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
         )}
         <Row label="Proposed price">€{Number(offer.price).toLocaleString()}</Row>
         {offer.message && <Row label="Carrier message">{offer.message}</Row>}
-        {offer.carrier && (
-          <Row label="Carrier profile">
-            <Link to={`/profile/carrier/${offer.carrier.id}`} className="text-primary hover:underline">
-              View profile
-            </Link>
-          </Row>
-        )}
       </div>
+
 
       <div className="mt-8 flex flex-wrap gap-2">
         {s === 'pending' && (
