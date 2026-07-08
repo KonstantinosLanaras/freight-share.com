@@ -740,7 +740,34 @@ export default function LoadDetails() {
 
           {/* ── Right Sidebar ── */}
           <div className="space-y-6">
+            {/* Posted by (shipper identity) — visible to non-owners */}
+            {!isOwner && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Posted by</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CounterpartyCard userId={load.shipper_id} role="shipper" variant="inline" />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Accepted carrier — visible to shipper once matched */}
+            {isOwner && acceptedOffer && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Your carrier</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CounterpartyCard userId={acceptedOffer.carrier_id} role="carrier" variant="inline" />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Pricing Card */}
+            <Card>
+              <CardHeader>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
