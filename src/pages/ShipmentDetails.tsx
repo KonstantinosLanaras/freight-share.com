@@ -15,6 +15,7 @@ import { DetailedRatingForm, DetailedRatingDisplay } from '@/components/ratings'
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 interface ShipmentData {
   id: string;
