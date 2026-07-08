@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
+import { CityCombobox, type CityOption } from '@/components/CityCombobox';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
+import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { 
   MapPin, 
   Calendar,
@@ -35,8 +38,14 @@ interface Route {
   carrier_id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
+  destination_lat: number | null;
+  destination_lng: number | null;
+  max_deviation_km: number | null;
+  max_destination_radius_km: number | null;
   available_pallets: number;
   departure_date_from: string;
   departure_date_to: string;
@@ -73,6 +82,8 @@ export default function BrowseRoutes() {
     minPallets: '',
     dateFrom: '',
   });
+  const [searchOriginCity, setSearchOriginCity] = useState<CityOption | null>(null);
+  const [searchDestinationCity, setSearchDestinationCity] = useState<CityOption | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -128,6 +139,21 @@ export default function BrowseRoutes() {
     }
   };
 
+  // Distance from a searched origin/destination city to this route's own
+  // origin/destination, tiered against the carrier's own stated
+  // max_deviation_km / max_destination_radius_km tolerance.
+  const getRouteProximity = (route: Route) => {
+    const originKm = searchOriginCity && route.origin_lat != null && route.origin_lng != null
+      ? haversineKm(searchOriginCity.lat, searchOriginCity.lng, route.origin_lat, route.origin_lng)
+      : null;
+    const destKm = searchDestinationCity && route.destination_lat != null && route.destination_lng != null
+      ? haversineKm(searchDestinationCity.lat, searchDestinationCity.lng, route.destination_lat, route.destination_lng)
+      : null;
+    const originTier = originKm != null ? getProximityTier(originKm, route.max_deviation_km) : null;
+    const destTier = destKm != null ? getProximityTier(destKm, route.max_destination_radius_km) : null;
+    return { originKm, destKm, originTier, destTier };
+  };
+
   const filteredRoutes = routes.filter(route => {
     if (filters.originCountry && route.origin_country !== filters.originCountry) {
       // Also check stops
@@ -141,6 +167,19 @@ export default function BrowseRoutes() {
     }
     if (filters.minPallets && route.available_pallets < parseInt(filters.minPallets)) return false;
     if (filters.dateFrom && route.departure_date_to < filters.dateFrom) return false;
+
+    // Hide routes that don't have coordinates to compare, or fall outside
+    // the carrier's own stated tolerance, only when the shipper searched a city.
+    if (searchOriginCity) {
+      if (route.origin_lat == null || route.origin_lng == null) return false;
+      const { originTier } = getRouteProximity(route);
+      if (!originTier) return false;
+    }
+    if (searchDestinationCity) {
+      if (route.destination_lat == null || route.destination_lng == null) return false;
+      const { destTier } = getRouteProximity(route);
+      if (!destTier) return false;
+    }
     return true;
   });
 
@@ -160,9 +199,11 @@ export default function BrowseRoutes() {
       minPallets: '',
       dateFrom: '',
     });
+    setSearchOriginCity(null);
+    setSearchDestinationCity(null);
   };
 
-  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  const hasActiveFilters = Object.values(filters).some(v => v !== '') || !!searchOriginCity || !!searchDestinationCity;
 
   return (
     <div className="min-h-screen bg-background">
@@ -204,6 +245,24 @@ export default function BrowseRoutes() {
           <Card className="mb-6">
             <CardContent className="p-6">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label>Near Origin City</Label>
+                  <CityCombobox
+                    value={searchOriginCity?.name || ''}
+                    onSelect={setSearchOriginCity}
+                    placeholder="Any city"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Near Destination City</Label>
+                  <CityCombobox
+                    value={searchDestinationCity?.name || ''}
+                    onSelect={setSearchDestinationCity}
+                    placeholder="Any city"
+                    className="mt-1"
+                  />
+                </div>
                 <div>
                   <Label>Origin Country</Label>
                   <SchengenCountrySelect
@@ -299,7 +358,9 @@ export default function BrowseRoutes() {
               {filteredRoutes.length} route{filteredRoutes.length !== 1 ? 's' : ''} available
             </div>
 
-            {filteredRoutes.map((route) => (
+            {filteredRoutes.map((route) => {
+              const proximity = getRouteProximity(route);
+              return (
               <Card key={route.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
@@ -338,9 +399,10 @@ export default function BrowseRoutes() {
                       </div>
 
                       {/* Route Path */}
-                      <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-4">
+                      <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-4 flex-wrap">
                         <MapPin className="h-5 w-5 text-carrier" />
                         <span>{route.origin_city}, {route.origin_country}</span>
+                        {proximity.originKm != null && <ProximityBadge distanceKm={proximity.originKm} tier={proximity.originTier} label="Distance from your searched origin" />}
                         {route.route_stops && route.route_stops.length > 0 && (
                           <>
                             <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -351,6 +413,7 @@ export default function BrowseRoutes() {
                         )}
                         <ArrowRight className="h-4 w-4 text-muted-foreground" />
                         <span>{route.destination_city}, {route.destination_country}</span>
+                        {proximity.destKm != null && <ProximityBadge distanceKm={proximity.destKm} tier={proximity.destTier} label="Distance from your searched destination" />}
                       </div>
 
                       {/* Route Details */}
@@ -426,7 +489,8 @@ export default function BrowseRoutes() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
