@@ -64,6 +64,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function ShipmentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paymentResult = searchParams.get('payment');
   const { user, role } = useAuth();
   const { isDemoMode } = useDemoMode();
 
