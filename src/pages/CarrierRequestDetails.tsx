@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, MapPin, Package, Truck, Send, Loader2,
   MessageSquare, CheckCircle, XCircle, Eye, AlertTriangle,
-  Scale, Upload, Link as LinkIcon, Image, ShieldCheck
+  Scale, Upload, Link as LinkIcon, Image, ShieldCheck, User
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
 import { notifyOfferAccepted } from '@/lib/notify';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
@@ -458,6 +459,14 @@ export default function CarrierRequestDetails() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Shipper identity */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="h-4 w-4 text-primary" /> Shipper</CardTitle></CardHeader>
+              <CardContent>
+                <CounterpartyCard userId={request.shipper_id} role="shipper" variant="inline" />
+              </CardContent>
+            </Card>
 
             {/* Shipper Request */}
             <Card>

@@ -28,6 +28,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addDays, parseISO, isValid } from 'date-fns';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -450,7 +451,12 @@ export default function FindLoads() {
                             </div>
                           )}
                         </div>
+
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <CounterpartyCard userId={load.shipper_id} role="shipper" variant="inline" />
+                        </div>
                       </div>
+
 
                       <div className="flex flex-col items-end gap-3">
                         <div className="text-right">

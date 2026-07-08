@@ -15,6 +15,7 @@ import { DetailedRatingForm, DetailedRatingDisplay } from '@/components/ratings'
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 interface ShipmentData {
   id: string;
@@ -448,15 +449,7 @@ export default function ShipmentDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-medium">{shipperProfile?.full_name || 'Shipper'}</div>
-                    <div className="text-sm text-muted-foreground">{shipperProfile?.company_name || ''}</div>
-                  </div>
-                </div>
+                <CounterpartyCard userId={shipment.shipper_id} role="shipper" variant="inline" />
               </CardContent>
             </Card>
 
@@ -469,17 +462,10 @@ export default function ShipmentDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-medium">{carrierProfile?.full_name || 'Carrier'}</div>
-                    <div className="text-sm text-muted-foreground">{carrierProfile?.company_name || ''}</div>
-                  </div>
-                </div>
+                <CounterpartyCard userId={shipment.carrier_id} role="carrier" variant="inline" />
               </CardContent>
             </Card>
+
 
             {/* Payment Status */}
             <Card className="bg-primary/5 border-primary/20">

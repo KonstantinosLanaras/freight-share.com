@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { notifyOfferAccepted } from '@/lib/notify';
+import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -295,6 +296,11 @@ export default function OffersShipper() {
                                   <Clock className="h-3 w-3" /> {format(new Date(r.created_at), 'MMM d, yyyy')}
                                 </span>
                               </div>
+                              {r.carrier?.id && (
+                                <div className="mt-3 pt-3 border-t border-border" onClick={(e) => e.stopPropagation()}>
+                                  <CounterpartyCard userId={r.carrier.id} role="carrier" variant="inline" />
+                                </div>
+                              )}
                             </div>
                             <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
                           </div>
@@ -329,16 +335,12 @@ export default function OffersShipper() {
                             <div className="flex-1">
                               <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <Badge className={statusPill[s]}>{statusLabel[s]}</Badge>
-                                {o.carrier && (
-                                  <Link
-                                    to={`/profile/carrier/${o.carrier.id}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-sm font-medium text-primary hover:underline"
-                                  >
-                                    {o.carrier.company_name || o.carrier.full_name || 'Carrier'}
-                                  </Link>
-                                )}
                               </div>
+                              {o.carrier?.id && (
+                                <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                                  <CounterpartyCard userId={o.carrier.id} role="carrier" variant="inline" />
+                                </div>
+                              )}
                               {o.load && (
                                 <div className="flex items-center gap-2 text-sm text-foreground mb-1">
                                   <MapPin className="h-3.5 w-3.5" />
@@ -433,7 +435,12 @@ function MadeDetail({ req, onAcceptCounter, onDecline, onProceed }: any) {
             {req.route.origin_city}, {req.route.origin_country} → {req.route.destination_city}, {req.route.destination_country}
           </Row>
         )}
-        {req.carrier && <Row label="Carrier">{req.carrier.company_name || req.carrier.full_name}</Row>}
+        {req.carrier?.id && (
+          <div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">Carrier</div>
+            <CounterpartyCard userId={req.carrier.id} role="carrier" variant="inline" />
+          </div>
+        )}
         <Row label="Pallets">{req.pallets}</Row>
         <Row label="Goods">{req.goods_type} · {req.weight_kg} kg</Row>
         {req.offer_price != null && <Row label="Your offered price">€{Number(req.offer_price).toLocaleString()}</Row>}
@@ -473,7 +480,7 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
     <>
       <SheetHeader>
         <SheetTitle className="flex items-center gap-2">
-          Offer from {offer.carrier?.company_name || offer.carrier?.full_name || 'Carrier'}
+          Offer received
           <Badge className={statusPill[s]}>{statusLabel[s]}</Badge>
         </SheetTitle>
         <SheetDescription>
@@ -482,6 +489,12 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
       </SheetHeader>
 
       <div className="mt-6 space-y-4 text-sm">
+        {offer.carrier?.id && (
+          <div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">From</div>
+            <CounterpartyCard userId={offer.carrier.id} role="carrier" variant="card" />
+          </div>
+        )}
         {offer.load && (
           <Row label="Load">
             {offer.load.origin_city} → {offer.load.destination_city} · pickup {format(new Date(offer.load.pickup_date_from), 'PPP')}
@@ -489,14 +502,8 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
         )}
         <Row label="Proposed price">€{Number(offer.price).toLocaleString()}</Row>
         {offer.message && <Row label="Carrier message">{offer.message}</Row>}
-        {offer.carrier && (
-          <Row label="Carrier profile">
-            <Link to={`/profile/carrier/${offer.carrier.id}`} className="text-primary hover:underline">
-              View profile
-            </Link>
-          </Row>
-        )}
       </div>
+
 
       <div className="mt-8 flex flex-wrap gap-2">
         {s === 'pending' && (
