@@ -459,6 +459,14 @@ export default function CarrierRequestDetails() {
               </Card>
             )}
 
+            {/* Shipper identity */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="h-4 w-4 text-primary" /> Shipper</CardTitle></CardHeader>
+              <CardContent>
+                <CounterpartyCard userId={request.shipper_id} role="shipper" variant="inline" />
+              </CardContent>
+            </Card>
+
             {/* Shipper Request */}
             <Card>
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Shipper Request</CardTitle></CardHeader>
