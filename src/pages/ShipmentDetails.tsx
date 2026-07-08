@@ -88,6 +88,31 @@ export default function ShipmentDetails() {
     if (id) fetchShipmentData();
   }, [id]);
 
+  // Verify Stripe payment after redirect back from Checkout
+  useEffect(() => {
+    if (!id || paymentResult !== 'success') return;
+    (async () => {
+      try {
+        await supabase.functions.invoke('verify-shipment-payment', {
+          body: { shipmentId: id },
+        });
+      } catch (err) {
+        console.error('Payment verification failed:', err);
+      } finally {
+        // Refresh shipment to pick up updated payment_status
+        fetchShipmentData();
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, paymentResult]);
+
+  const dismissPaymentBanner = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('payment');
+    setSearchParams(next, { replace: true });
+  };
+
+
   const fetchShipmentData = async () => {
     try {
       // Fetch shipment
