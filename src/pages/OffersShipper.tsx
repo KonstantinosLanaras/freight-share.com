@@ -296,6 +296,11 @@ export default function OffersShipper() {
                                   <Clock className="h-3 w-3" /> {format(new Date(r.created_at), 'MMM d, yyyy')}
                                 </span>
                               </div>
+                              {r.carrier?.id && (
+                                <div className="mt-3 pt-3 border-t border-border" onClick={(e) => e.stopPropagation()}>
+                                  <CounterpartyCard userId={r.carrier.id} role="carrier" variant="inline" />
+                                </div>
+                              )}
                             </div>
                             <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
                           </div>
