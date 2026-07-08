@@ -435,7 +435,12 @@ function MadeDetail({ req, onAcceptCounter, onDecline, onProceed }: any) {
             {req.route.origin_city}, {req.route.origin_country} → {req.route.destination_city}, {req.route.destination_country}
           </Row>
         )}
-        {req.carrier && <Row label="Carrier">{req.carrier.company_name || req.carrier.full_name}</Row>}
+        {req.carrier?.id && (
+          <div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">Carrier</div>
+            <CounterpartyCard userId={req.carrier.id} role="carrier" variant="inline" />
+          </div>
+        )}
         <Row label="Pallets">{req.pallets}</Row>
         <Row label="Goods">{req.goods_type} · {req.weight_kg} kg</Row>
         {req.offer_price != null && <Row label="Your offered price">€{Number(req.offer_price).toLocaleString()}</Row>}
