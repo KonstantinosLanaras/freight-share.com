@@ -277,6 +277,7 @@ export default function CarrierDashboard() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            {/* Group 1: Home, Browse Loads, Share Route */}
             <Link
               to="/"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
@@ -284,8 +285,6 @@ export default function CarrierDashboard() {
               <Home className="h-5 w-5" />
               Home
             </Link>
-
-            {/* Group 1 */}
             <Link
               to="/dashboard/carrier/find-loads"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
@@ -294,14 +293,39 @@ export default function CarrierDashboard() {
               Browse Loads
             </Link>
             <Link
-              to="/dashboard/carrier/shipments"
+              to="/dashboard/carrier/routes/new"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
-              <Truck className="h-5 w-5" />
-              Shipments
+              <Plus className="h-5 w-5" />
+              Share Route
             </Link>
 
-            {/* Divider + Communication group */}
+            {/* Group 2: My Shipments, My Routes, Saved Loads */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
+              <Link
+                to="/dashboard/carrier/shipments"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Truck className="h-5 w-5" />
+                My Shipments
+              </Link>
+              <Link
+                to="/dashboard/carrier/routes"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <MapPin className="h-5 w-5" />
+                My Routes
+              </Link>
+              <Link
+                to="/saved-loads"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Bookmark className="h-5 w-5" />
+                Saved Loads
+              </Link>
+            </div>
+
+            {/* Group 3: Communication */}
             <div className="pt-3 mt-3 border-t border-sidebar-border">
               <div className="px-4 mb-2">
                 <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Communication</span>
@@ -322,24 +346,6 @@ export default function CarrierDashboard() {
                 {stats.pendingRequests > 0 && (
                   <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
                 )}
-              </Link>
-            </div>
-
-            {/* Divider + Group 3 */}
-            <div className="pt-3 mt-3 border-t border-sidebar-border">
-              <Link
-                to="/dashboard/carrier/routes"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              >
-                <MapPin className="h-5 w-5" />
-                My Routes
-              </Link>
-              <Link
-                to="/saved-loads"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              >
-                <Bookmark className="h-5 w-5" />
-                Saved Loads
               </Link>
             </div>
           </nav>
