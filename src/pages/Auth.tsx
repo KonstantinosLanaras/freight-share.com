@@ -19,10 +19,10 @@ type UserRole = 'shipper' | 'carrier';
 const emailSchema = z.string().email('Please enter a valid email address');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 
-// Rate limiting configuration
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
-const ATTEMPT_WINDOW = 5 * 60 * 1000; // 5 minute window for counting attempts
+// Rate limiting configuration — kept gentle so genuine users aren't stressed
+const MAX_ATTEMPTS = 10;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+const ATTEMPT_WINDOW = 10 * 60 * 1000; // 10 minute window for counting attempts
 
 // Get stored rate limit data
 const getRateLimitData = (): { attempts: number[]; lockoutUntil: number | null } => {
