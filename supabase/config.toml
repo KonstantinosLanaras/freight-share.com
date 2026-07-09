@@ -29,6 +29,3 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
-
-[functions.seed-cities]
-verify_jwt = false
