@@ -14,45 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      cities: {
-        Row: {
-          alt_names: string
-          ascii_name: string
-          country: string
-          created_at: string
-          geoname_id: number
-          id: string
-          lat: number
-          lng: number
-          name: string
-          population: number
-        }
-        Insert: {
-          alt_names: string
-          ascii_name: string
-          country: string
-          created_at?: string
-          geoname_id: number
-          id?: string
-          lat: number
-          lng: number
-          name: string
-          population: number
-        }
-        Update: {
-          alt_names?: string
-          ascii_name?: string
-          country?: string
-          created_at?: string
-          geoname_id?: number
-          id?: string
-          lat?: number
-          lng?: number
-          name?: string
-          population?: number
-        }
-        Relationships: []
-      }
       cargo_vehicle_compatibility: {
         Row: {
           cargo_type: string
@@ -369,16 +330,12 @@ export type Database = {
           delivery_date_to: string
           destination_city: string
           destination_country: string
-          destination_lat: number | null
-          destination_lng: number | null
           height_cm: number | null
           id: string
           length_cm: number | null
           notes: string | null
           origin_city: string
           origin_country: string
-          origin_lat: number | null
-          origin_lng: number | null
           pallets: number
           pickup_date_from: string
           pickup_date_to: string
@@ -401,16 +358,12 @@ export type Database = {
           delivery_date_to: string
           destination_city: string
           destination_country: string
-          destination_lat?: number | null
-          destination_lng?: number | null
           height_cm?: number | null
           id?: string
           length_cm?: number | null
           notes?: string | null
           origin_city: string
           origin_country: string
-          origin_lat?: number | null
-          origin_lng?: number | null
           pallets: number
           pickup_date_from: string
           pickup_date_to: string
@@ -433,16 +386,12 @@ export type Database = {
           delivery_date_to?: string
           destination_city?: string
           destination_country?: string
-          destination_lat?: number | null
-          destination_lng?: number | null
           height_cm?: number | null
           id?: string
           length_cm?: number | null
           notes?: string | null
           origin_city?: string
           origin_country?: string
-          origin_lat?: number | null
-          origin_lng?: number | null
           pallets?: number
           pickup_date_from?: string
           pickup_date_to?: string
@@ -1012,8 +961,6 @@ export type Database = {
           departure_time: string | null
           destination_city: string
           destination_country: string
-          destination_lat: number | null
-          destination_lng: number | null
           flexibility_note: string | null
           goods_accepted: string | null
           id: string
@@ -1026,8 +973,6 @@ export type Database = {
           open_to_extra_stops: boolean
           origin_city: string
           origin_country: string
-          origin_lat: number | null
-          origin_lng: number | null
           route_link: string | null
           space_ldm: number | null
           space_type: string
@@ -1049,8 +994,6 @@ export type Database = {
           departure_time?: string | null
           destination_city: string
           destination_country: string
-          destination_lat?: number | null
-          destination_lng?: number | null
           flexibility_note?: string | null
           goods_accepted?: string | null
           id?: string
@@ -1063,8 +1006,6 @@ export type Database = {
           open_to_extra_stops?: boolean
           origin_city: string
           origin_country: string
-          origin_lat?: number | null
-          origin_lng?: number | null
           route_link?: string | null
           space_ldm?: number | null
           space_type?: string
@@ -1086,8 +1027,6 @@ export type Database = {
           departure_time?: string | null
           destination_city?: string
           destination_country?: string
-          destination_lat?: number | null
-          destination_lng?: number | null
           flexibility_note?: string | null
           goods_accepted?: string | null
           id?: string
@@ -1100,8 +1039,6 @@ export type Database = {
           open_to_extra_stops?: boolean
           origin_city?: string
           origin_country?: string
-          origin_lat?: number | null
-          origin_lng?: number | null
           route_link?: string | null
           space_ldm?: number | null
           space_type?: string
