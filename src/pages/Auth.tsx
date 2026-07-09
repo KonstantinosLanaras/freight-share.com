@@ -19,10 +19,10 @@ type UserRole = 'shipper' | 'carrier';
 const emailSchema = z.string().email('Please enter a valid email address');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 
-// Rate limiting configuration
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
-const ATTEMPT_WINDOW = 5 * 60 * 1000; // 5 minute window for counting attempts
+// Rate limiting configuration — kept gentle so genuine users aren't stressed
+const MAX_ATTEMPTS = 10;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+const ATTEMPT_WINDOW = 10 * 60 * 1000; // 10 minute window for counting attempts
 
 // Get stored rate limit data
 const getRateLimitData = (): { attempts: number[]; lockoutUntil: number | null } => {
@@ -168,7 +168,7 @@ export default function Auth() {
       if (mode === 'login') {
         const rateCheck = checkRateLimit();
         if (!rateCheck.allowed) {
-          toast.error(`Too many failed attempts. Please try again in ${rateCheck.lockoutMinutes} minute${rateCheck.lockoutMinutes !== 1 ? 's' : ''}.`);
+          toast.error(`For your security, sign-in is paused for ${rateCheck.lockoutMinutes} minute${rateCheck.lockoutMinutes !== 1 ? 's' : ''}. You can try again after that, or reset your password if you've forgotten it.`);
           setIsSubmitting(false);
           return;
         }
@@ -227,9 +227,15 @@ export default function Auth() {
           const rateCheck = checkRateLimit();
           
           if (isLocked) {
-            toast.error(`Too many failed attempts. Account locked for 15 minutes.`);
+            const mins = Math.ceil(LOCKOUT_DURATION / 60000);
+            toast.error(`Sign-in paused for ${mins} minutes for your security. You can try again after that, or reset your password if needed.`);
           } else if (error.message.includes('Invalid login credentials')) {
-            toast.error(`Invalid email or password. ${rateCheck.remainingAttempts} attempt${rateCheck.remainingAttempts !== 1 ? 's' : ''} remaining.`);
+            const remaining = rateCheck.remainingAttempts ?? 0;
+            if (remaining <= 3) {
+              toast.error(`Incorrect email or password. ${remaining} attempt${remaining !== 1 ? 's' : ''} left before a short cooldown.`);
+            } else {
+              toast.error('Incorrect email or password. Please try again.');
+            }
           } else {
             toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
           }
