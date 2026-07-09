@@ -168,7 +168,7 @@ export default function Auth() {
       if (mode === 'login') {
         const rateCheck = checkRateLimit();
         if (!rateCheck.allowed) {
-          toast.error(`Too many failed attempts. Please try again in ${rateCheck.lockoutMinutes} minute${rateCheck.lockoutMinutes !== 1 ? 's' : ''}.`);
+          toast.error(`For your security, sign-in is paused for ${rateCheck.lockoutMinutes} minute${rateCheck.lockoutMinutes !== 1 ? 's' : ''}. You can try again after that, or reset your password if you've forgotten it.`);
           setIsSubmitting(false);
           return;
         }
