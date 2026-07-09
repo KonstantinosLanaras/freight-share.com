@@ -14,45 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      cities: {
-        Row: {
-          alt_names: string
-          ascii_name: string
-          country: string
-          created_at: string
-          geoname_id: number
-          id: string
-          lat: number
-          lng: number
-          name: string
-          population: number
-        }
-        Insert: {
-          alt_names: string
-          ascii_name: string
-          country: string
-          created_at?: string
-          geoname_id: number
-          id?: string
-          lat: number
-          lng: number
-          name: string
-          population: number
-        }
-        Update: {
-          alt_names?: string
-          ascii_name?: string
-          country?: string
-          created_at?: string
-          geoname_id?: number
-          id?: string
-          lat?: number
-          lng?: number
-          name?: string
-          population?: number
-        }
-        Relationships: []
-      }
       cargo_vehicle_compatibility: {
         Row: {
           cargo_type: string
@@ -152,6 +113,45 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["verification_status"] | null
           submitted_at?: string | null
+        }
+        Relationships: []
+      }
+      cities: {
+        Row: {
+          alt_names: string
+          ascii_name: string
+          country: string
+          created_at: string
+          geoname_id: number
+          id: string
+          lat: number
+          lng: number
+          name: string
+          population: number
+        }
+        Insert: {
+          alt_names: string
+          ascii_name: string
+          country: string
+          created_at?: string
+          geoname_id: number
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          population: number
+        }
+        Update: {
+          alt_names?: string
+          ascii_name?: string
+          country?: string
+          created_at?: string
+          geoname_id?: number
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          population?: number
         }
         Relationships: []
       }
