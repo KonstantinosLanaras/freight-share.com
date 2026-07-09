@@ -227,9 +227,15 @@ export default function Auth() {
           const rateCheck = checkRateLimit();
           
           if (isLocked) {
-            toast.error(`Too many failed attempts. Account locked for 15 minutes.`);
+            const mins = Math.ceil(LOCKOUT_DURATION / 60000);
+            toast.error(`Sign-in paused for ${mins} minutes for your security. You can try again after that, or reset your password if needed.`);
           } else if (error.message.includes('Invalid login credentials')) {
-            toast.error(`Invalid email or password. ${rateCheck.remainingAttempts} attempt${rateCheck.remainingAttempts !== 1 ? 's' : ''} remaining.`);
+            const remaining = rateCheck.remainingAttempts ?? 0;
+            if (remaining <= 3) {
+              toast.error(`Incorrect email or password. ${remaining} attempt${remaining !== 1 ? 's' : ''} left before a short cooldown.`);
+            } else {
+              toast.error('Incorrect email or password. Please try again.');
+            }
           } else {
             toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
           }
