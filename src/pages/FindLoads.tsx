@@ -31,6 +31,8 @@ import { format, addDays, parseISO, isValid } from 'date-fns';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
+import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BookmarkButton } from '@/components/BookmarkButton';
 
@@ -39,8 +41,12 @@ interface Load {
   id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
+  destination_lat: number | null;
+  destination_lng: number | null;
   pallets: number;
   weight_kg: number;
   space_ldm: number | null;
@@ -63,6 +69,12 @@ interface CarrierRoute {
   available_pallets: number;
   max_payload_kg: number;
   space_ldm: number | null;
+  origin_lat: number | null;
+  origin_lng: number | null;
+  destination_lat: number | null;
+  destination_lng: number | null;
+  max_deviation_km: number | null;
+  max_destination_radius_km: number | null;
 }
 
 export default function FindLoads() {
@@ -89,14 +101,14 @@ export default function FindLoads() {
     // Get carrier's most recent route with all capacity info
     const { data } = await supabase
       .from('routes')
-      .select('id, vehicle_type, available_pallets, max_payload_kg, space_ldm')
+      .select('id, vehicle_type, available_pallets, max_payload_kg, space_ldm, origin_lat, origin_lng, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km')
       .eq('carrier_id', user.id)
       .in('status', ['planned', 'active'])
       .not('vehicle_type', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    
+
     if (data) {
       setCarrierRoute({
         id: data.id,
@@ -104,6 +116,12 @@ export default function FindLoads() {
         available_pallets: data.available_pallets || 0,
         max_payload_kg: data.max_payload_kg || 0,
         space_ldm: data.space_ldm,
+        origin_lat: data.origin_lat,
+        origin_lng: data.origin_lng,
+        destination_lat: data.destination_lat,
+        destination_lng: data.destination_lng,
+        max_deviation_km: data.max_deviation_km,
+        max_destination_radius_km: data.max_destination_radius_km,
       });
     }
   };
@@ -112,7 +130,7 @@ export default function FindLoads() {
     try {
       const { data, error } = await supabase
         .from('loads')
-        .select('id, origin_city, origin_country, destination_city, destination_country, pallets, weight_kg, space_ldm, status, price, pricing_type, pickup_date_from, pickup_date_to, delivery_date_from, delivery_date_to, cargo_type, created_at, shipper_id')
+        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, pallets, weight_kg, space_ldm, status, price, pricing_type, pickup_date_from, pickup_date_to, delivery_date_from, delivery_date_to, cargo_type, created_at, shipper_id')
         .eq('status', 'posted')
         .order('created_at', { ascending: false });
 
@@ -147,6 +165,25 @@ export default function FindLoads() {
     );
   };
 
+  // Distance (in km) between this carrier's route and a load's origin/destination,
+  // and whether it's within the carrier's own stated deviation/radius tolerance.
+  const getLoadProximity = (load: Load) => {
+    if (
+      !carrierRoute ||
+      carrierRoute.origin_lat == null || carrierRoute.origin_lng == null ||
+      carrierRoute.destination_lat == null || carrierRoute.destination_lng == null ||
+      load.origin_lat == null || load.origin_lng == null ||
+      load.destination_lat == null || load.destination_lng == null
+    ) {
+      return null;
+    }
+    const originKm = haversineKm(carrierRoute.origin_lat, carrierRoute.origin_lng, load.origin_lat, load.origin_lng);
+    const destKm = haversineKm(carrierRoute.destination_lat, carrierRoute.destination_lng, load.destination_lat, load.destination_lng);
+    const originTier = getProximityTier(originKm, carrierRoute.max_deviation_km);
+    const destTier = getProximityTier(destKm, carrierRoute.max_destination_radius_km);
+    return { originKm, destKm, originTier, destTier };
+  };
+
   const filteredLoads = loads.filter(load => {
     const matchesOrigin = !searchOrigin || 
       load.origin_city.toLowerCase().includes(searchOrigin.toLowerCase()) ||
@@ -178,7 +215,15 @@ export default function FindLoads() {
         return false;
       }
     }
-    
+
+    // Hide loads that are geocoded but fall outside this carrier's stated
+    // deviation/radius tolerance on either leg. Loads without coordinates yet
+    // (posted before this feature) are never hidden by this check.
+    const proximity = getLoadProximity(load);
+    if (proximity && (!proximity.originTier || !proximity.destTier)) {
+      return false;
+    }
+
     return matchesOrigin && matchesDestination && matchesCargo && matchesArriveBy;
   }).sort((a, b) => {
     switch (sortBy) {
@@ -367,7 +412,8 @@ export default function FindLoads() {
             {filteredLoads.map((load) => {
               const compatibility = getLoadCompatibility(load);
               const isIncompatible = compatibility && !compatibility.isMatch;
-              
+              const proximity = getLoadProximity(load);
+
               return (
                 <Card key={load.id} className={`relative hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''}`}>
                   <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
@@ -421,11 +467,13 @@ export default function FindLoads() {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2">
+                        <div className="flex items-center gap-2 text-lg font-medium text-foreground mb-2 flex-wrap">
                           <MapPin className="h-5 w-5 text-primary" />
                           <span>{load.origin_city}, {load.origin_country}</span>
+                          {proximity && <ProximityBadge distanceKm={proximity.originKm} tier={proximity.originTier} label="Pickup distance from your route" />}
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <span>{load.destination_city}, {load.destination_country}</span>
+                          {proximity && <ProximityBadge distanceKm={proximity.destKm} tier={proximity.destTier} label="Drop-off distance from your route" />}
                         </div>
 
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

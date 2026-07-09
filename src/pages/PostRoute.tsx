@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
+import { CityCombobox } from '@/components/CityCombobox';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
@@ -55,9 +56,13 @@ export default function PostRoute() {
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
+    originLat: null as number | null,
+    originLng: null as number | null,
     originPlannedDateTime: '',
     destinationCity: '',
     destinationCountry: '',
+    destinationLat: null as number | null,
+    destinationLng: null as number | null,
     destinationPlannedDateTime: '',
     departureStart: '',
     departureTime: '',
@@ -96,6 +101,11 @@ export default function PostRoute() {
 
     if (!formData.originCountry || !formData.destinationCountry) {
       toast.error('Please select both origin and destination countries');
+      return;
+    }
+
+    if (!formData.originCity || !formData.destinationCity) {
+      toast.error('Please select both origin and destination cities');
       return;
     }
 
@@ -161,8 +171,12 @@ export default function PostRoute() {
           carrier_id: user.id,
           origin_city: formData.originCity,
           origin_country: formData.originCountry,
+          origin_lat: formData.originLat,
+          origin_lng: formData.originLng,
           destination_city: formData.destinationCity,
           destination_country: formData.destinationCountry,
+          destination_lat: formData.destinationLat,
+          destination_lng: formData.destinationLng,
           departure_date_from: formData.originPlannedDateTime.split('T')[0],
           departure_date_to: formData.originPlannedDateTime.split('T')[0],
           departure_time: formData.originPlannedDateTime.split('T')[1] || null,
@@ -260,13 +274,11 @@ export default function PostRoute() {
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="originCity">City <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="originCity"
+                  <CityCombobox
+                    value={formData.originCity}
+                    onSelect={(city) => setFormData({ ...formData, originCity: city.name, originLat: city.lat, originLng: city.lng })}
                     placeholder="e.g., Rotterdam"
                     className="mt-1"
-                    value={formData.originCity}
-                    onChange={(e) => setFormData({ ...formData, originCity: e.target.value })}
-                    required
                     disabled={isSubmitting}
                   />
                 </div>
@@ -387,13 +399,11 @@ export default function PostRoute() {
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="destinationCity">City <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="destinationCity"
+                  <CityCombobox
+                    value={formData.destinationCity}
+                    onSelect={(city) => setFormData({ ...formData, destinationCity: city.name, destinationLat: city.lat, destinationLng: city.lng })}
                     placeholder="e.g., Munich"
                     className="mt-1"
-                    value={formData.destinationCity}
-                    onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
-                    required
                     disabled={isSubmitting}
                   />
                 </div>
