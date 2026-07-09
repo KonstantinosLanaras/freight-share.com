@@ -29,7 +29,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold mb-4">{t('footer.platform')}</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
-              <li><a href="/#how-it-works" className="hover:text-secondary-foreground transition-colors">{t('nav.howItWorks')}</a></li>
+              <li><Link to="/how-it-works" className="hover:text-secondary-foreground transition-colors">{t('nav.howItWorks')}</Link></li>
               <li><Link to="/auth?mode=signup&role=shipper" className="hover:text-secondary-foreground transition-colors">{t('nav.forShippers')}</Link></li>
               <li><Link to="/auth?mode=signup&role=carrier" className="hover:text-secondary-foreground transition-colors">{t('nav.forCarriers')}</Link></li>
             </ul>
