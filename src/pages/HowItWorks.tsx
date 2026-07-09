@@ -92,7 +92,7 @@ const HowItWorksPage = () => {
       <FloatingHelpWidget />
       
       {/* Hero Section - Compact */}
-      <section className="pt-20 pb-6">
+      <section className="pt-32 md:pt-36 pb-6">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3 text-center">
