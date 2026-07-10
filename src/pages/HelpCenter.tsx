@@ -309,7 +309,7 @@ export default function HelpCenter() {
                 </div>
                 <div className="pt-2">
                   <p className="text-sm text-muted-foreground">
-                    Email: <span className="text-foreground">support@freightshare.eu</span>
+                    Email: <a href="mailto:contact@freight-share.com" className="text-foreground hover:underline">contact@freight-share.com</a> · Phone: <a href="tel:+393480567378" className="text-foreground hover:underline">+39 348 056 7378</a>
                   </p>
                 </div>
               </CardContent>
