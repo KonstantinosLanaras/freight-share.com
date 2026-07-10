@@ -273,6 +273,45 @@ export type Database = {
           },
         ]
       }
+      early_access_requests: {
+        Row: {
+          challenge: string | null
+          company_name: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          challenge?: string | null
+          company_name: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          role: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          challenge?: string | null
+          company_name?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
