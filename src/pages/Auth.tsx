@@ -11,7 +11,7 @@ import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
-import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
+import { ForgotPasswordDialog, isRecoveryDialogOpen } from '@/components/auth/ForgotPasswordDialog';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
