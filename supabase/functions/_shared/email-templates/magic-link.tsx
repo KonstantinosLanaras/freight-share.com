@@ -35,8 +35,8 @@ export const MagicLinkEmail = ({
         <table role="presentation" cellPadding={0} cellSpacing={0} border={0} style={btnTable}>
           <tbody>
             <tr>
-              <td align="center" style={btnCell}>
-                <a href={confirmationUrl} style={btnLink}>Log In</a>
+              <td align="center" bgcolor="#16a34a" style={btnCell}>
+                <a href={confirmationUrl} target="_blank" style={btnLink}>Log In</a>
               </td>
             </tr>
           </tbody>
@@ -72,16 +72,14 @@ const btnTable = { margin: '0 0 25px', borderCollapse: 'separate' as const }
 const btnCell = {
   backgroundColor: '#16a34a',
   borderRadius: '10px',
-  border: '1px solid #15803d',
+  padding: '14px 28px',
+  mso_padding_alt: '14px 28px',
 }
 const btnLink = {
   display: 'inline-block',
-  padding: '14px 28px',
   fontSize: '15px',
   fontWeight: 'bold' as const,
   color: '#ffffff',
-  backgroundColor: '#16a34a',
-  borderRadius: '10px',
   textDecoration: 'none',
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
 }
