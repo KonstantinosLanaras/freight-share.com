@@ -73,21 +73,21 @@ const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: 'hsl(222, 47%, 11%)',
+  color: '#0f172a',
   margin: '0 0 20px',
 }
 const text = {
   fontSize: '14px',
-  color: 'hsl(215, 16%, 47%)',
+  color: '#64748b',
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
 const btnTable = { margin: '0 0 25px', borderCollapse: 'separate' as const }
 const btnCell = {
-  backgroundColor: 'hsl(142, 76%, 36%)',
+  backgroundColor: '#16a34a',
   borderRadius: '10px',
-  border: '1px solid hsl(142, 76%, 30%)',
+  border: '1px solid #15803d',
 }
 const btnLink = {
   display: 'inline-block',
@@ -95,19 +95,19 @@ const btnLink = {
   fontSize: '15px',
   fontWeight: 'bold' as const,
   color: '#ffffff',
-  backgroundColor: 'hsl(142, 76%, 36%)',
+  backgroundColor: '#16a34a',
   borderRadius: '10px',
   textDecoration: 'none',
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
 }
 const fallbackText = {
   fontSize: '13px',
-  color: 'hsl(215, 16%, 47%)',
+  color: '#64748b',
   lineHeight: '1.5',
   margin: '20px 0 0',
 }
 const inlineLink = {
-  color: 'hsl(142, 76%, 30%)',
+  color: '#15803d',
   textDecoration: 'underline',
   fontWeight: 'bold' as const,
 }
