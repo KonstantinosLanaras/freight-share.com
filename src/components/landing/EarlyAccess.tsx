@@ -162,7 +162,12 @@ export const EarlyAccess = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="ea-phone">Phone Number</Label>
+                  <Label htmlFor="ea-phone">
+                    Phone Number{' '}
+                    <span className="text-muted-foreground font-normal">
+                      (with country code)
+                    </span>
+                  </Label>
                   <Input
                     id="ea-phone"
                     type="tel"
@@ -173,7 +178,11 @@ export const EarlyAccess = () => {
                     maxLength={30}
                     required
                     className="mt-1"
+                    aria-describedby="ea-phone-help"
                   />
+                  <p id="ea-phone-help" className="mt-1 text-xs text-muted-foreground">
+                    Include your country code, e.g. <span className="font-medium text-foreground">+30 69 12345678</span> for Greece or <span className="font-medium text-foreground">+39 340 1234567</span> for Italy.
+                  </p>
                 </div>
               </div>
 
