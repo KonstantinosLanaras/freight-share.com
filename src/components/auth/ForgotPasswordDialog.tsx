@@ -29,6 +29,7 @@ export function ForgotPasswordDialog() {
 
       // Always show success message - don't reveal if email exists
       // This prevents email enumeration attacks
+      toast.dismiss();
       setIsSuccess(true);
       
       if (error) {
