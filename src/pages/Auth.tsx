@@ -583,6 +583,8 @@ export default function Auth() {
 
                 <div>
                   <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
                     {mode === 'login' && (
                       <ForgotPasswordDialog />
@@ -601,6 +603,24 @@ export default function Auth() {
                     />
                   </div>
                 </div>
+
+                {mode === 'signup' && (
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="mt-1">
+                      <PasswordInput
+                        id="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={(value) => setFormData({ ...formData, confirmPassword: value })}
+                        disabled={isSubmitting}
+                        placeholder="Re-enter your password"
+                      />
+                    </div>
+                    {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password && (
+                      <p className="mt-1 text-xs text-destructive">Passwords do not match</p>
+                    )}
+                  </div>
+                )}
 
                 <Button 
                   type="submit" 
