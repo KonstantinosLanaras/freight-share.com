@@ -9,6 +9,7 @@ import {
   Head,
   Heading,
   Html,
+  Link,
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
@@ -35,6 +36,12 @@ export const RecoveryEmail = ({
         <Button style={button} href={confirmationUrl}>
           Reset Password
         </Button>
+        <Text style={fallbackText}>
+          If the button is not visible, open this reset link:{' '}
+          <Link href={confirmationUrl} style={visibleLink}>
+            {confirmationUrl}
+          </Link>
+        </Text>
         <Text style={footer}>
           If you didn't request a password reset, you can safely ignore this
           email. Your password will not be changed.
@@ -67,5 +74,18 @@ const button = {
   borderRadius: '10px',
   padding: '12px 20px',
   textDecoration: 'none',
+}
+const fallbackText = {
+  fontSize: '13px',
+  color: 'hsl(215, 16%, 47%)',
+  lineHeight: '1.5',
+  margin: '20px 0 0',
+  wordBreak: 'break-word' as const,
+}
+const visibleLink = {
+  color: 'hsl(142, 76%, 30%)',
+  textDecoration: 'underline',
+  fontWeight: 'bold' as const,
+  wordBreak: 'break-all' as const,
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
