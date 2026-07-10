@@ -42,6 +42,12 @@ export const InviteEmail = ({
         <Button style={button} href={confirmationUrl}>
           Accept Invitation
         </Button>
+        <Text style={fallbackText}>
+          If the button is not visible, open this invitation link:{' '}
+          <Link href={confirmationUrl} style={visibleLink}>
+            {confirmationUrl}
+          </Link>
+        </Text>
         <Text style={footer}>
           If you weren't expecting this invitation, you can safely ignore this
           email.
@@ -75,5 +81,18 @@ const button = {
   borderRadius: '10px',
   padding: '12px 20px',
   textDecoration: 'none',
+}
+const fallbackText = {
+  fontSize: '13px',
+  color: 'hsl(215, 16%, 47%)',
+  lineHeight: '1.5',
+  margin: '20px 0 0',
+  wordBreak: 'break-word' as const,
+}
+const visibleLink = {
+  color: 'hsl(142, 76%, 30%)',
+  textDecoration: 'underline',
+  fontWeight: 'bold' as const,
+  wordBreak: 'break-all' as const,
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
