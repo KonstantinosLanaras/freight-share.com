@@ -4,7 +4,6 @@ import * as React from 'npm:react@18.3.1'
 
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
@@ -33,14 +32,17 @@ export const MagicLinkEmail = ({
           Click the button below to log in to {siteName}. This link will expire
           shortly.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Log In
-        </Button>
+        <table role="presentation" cellPadding={0} cellSpacing={0} border={0} style={btnTable}>
+          <tbody>
+            <tr>
+              <td align="center" style={btnCell}>
+                <a href={confirmationUrl} style={btnLink}>Log In</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <Text style={fallbackText}>
-          If the button is not visible, open this login link:{' '}
-          <Link href={confirmationUrl} style={visibleLink}>
-            {confirmationUrl}
-          </Link>
+          Button not showing? <Link href={confirmationUrl} style={inlineLink}>Click here to log in</Link>.
         </Text>
         <Text style={footer}>
           If you didn't request this link, you can safely ignore this email.
@@ -66,25 +68,32 @@ const text = {
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
-const button = {
+const btnTable = { margin: '0 0 25px', borderCollapse: 'separate' as const }
+const btnCell = {
   backgroundColor: 'hsl(142, 76%, 36%)',
-  color: '#ffffff',
-  fontSize: '14px',
   borderRadius: '10px',
-  padding: '12px 20px',
+  border: '1px solid hsl(142, 76%, 30%)',
+}
+const btnLink = {
+  display: 'inline-block',
+  padding: '14px 28px',
+  fontSize: '15px',
+  fontWeight: 'bold' as const,
+  color: '#ffffff',
+  backgroundColor: 'hsl(142, 76%, 36%)',
+  borderRadius: '10px',
   textDecoration: 'none',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
 }
 const fallbackText = {
   fontSize: '13px',
   color: 'hsl(215, 16%, 47%)',
   lineHeight: '1.5',
   margin: '20px 0 0',
-  wordBreak: 'break-word' as const,
 }
-const visibleLink = {
+const inlineLink = {
   color: 'hsl(142, 76%, 30%)',
   textDecoration: 'underline',
   fontWeight: 'bold' as const,
-  wordBreak: 'break-all' as const,
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
