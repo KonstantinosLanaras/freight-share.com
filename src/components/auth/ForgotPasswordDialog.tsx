@@ -48,7 +48,11 @@ export function ForgotPasswordDialog() {
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    if (!newOpen) {
+    if (newOpen) {
+      // Dismiss any lingering toasts (e.g. a prior "Incorrect email or password")
+      // so they aren't confused for a message about the recovery flow.
+      toast.dismiss();
+    } else {
       // Reset state when dialog closes
       setTimeout(() => {
         setEmail('');
