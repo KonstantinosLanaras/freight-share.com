@@ -33,15 +33,25 @@ export function ForgotPasswordDialog() {
         redirectTo: `${window.location.origin}/auth?mode=reset`,
       });
 
-      // Always show success message - don't reveal if email exists
-      // This prevents email enumeration attacks
+      if (error) {
+        console.error('Password reset error:', error);
+
+        const status = 'status' in error ? error.status : undefined;
+        const isRateLimited = status === 429 || /rate limit/i.test(error.message);
+
+        if (isRateLimited) {
+          toast.error('Too many reset emails were requested. Please wait a few minutes before trying again.');
+          return;
+        }
+
+        toast.error('We could not send the reset email right now. Please try again in a few minutes.');
+        return;
+      }
+
+      // Show the same success message for existing and non-existing accounts to
+      // avoid revealing whether an email address is registered.
       toast.dismiss();
       setIsSuccess(true);
-      
-      if (error) {
-        // Log error for debugging but don't show to user
-        console.error('Password reset error:', error);
-      }
     } catch (err) {
       if (err instanceof z.ZodError) {
         toast.error(err.errors[0].message);
