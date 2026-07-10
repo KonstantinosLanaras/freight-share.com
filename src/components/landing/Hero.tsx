@@ -8,7 +8,7 @@ export const Hero = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
+    <section className="relative min-h-screen flex items-center pt-28 sm:pt-24 md:pt-16 overflow-hidden">
       {/* European map background image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
