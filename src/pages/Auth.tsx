@@ -583,8 +583,6 @@ export default function Auth() {
 
                 <div>
                   <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
                     {mode === 'login' && (
                       <ForgotPasswordDialog />
