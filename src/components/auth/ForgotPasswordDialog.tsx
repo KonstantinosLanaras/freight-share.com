@@ -1,4 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Module-level flag so the sign-in form can suppress its error toasts
+// while the recovery dialog is open (avoids the stale "Incorrect email
+// or password" toast appearing behind the reset success screen).
+let recoveryDialogOpen = false;
+export const isRecoveryDialogOpen = () => recoveryDialogOpen;
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
