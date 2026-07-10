@@ -62,6 +62,7 @@ export default function Auth() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     company: '',
     country: '',
