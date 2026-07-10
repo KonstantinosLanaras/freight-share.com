@@ -98,6 +98,9 @@ export function ForgotPasswordDialog() {
               <DialogDescription className="text-center mt-2">
                 If an account exists for <strong className="text-foreground">{email}</strong>, 
                 we've sent a password reset link. The link expires in 60 minutes.
+                <span className="block mt-2">
+                  Don't see it? Please check your <strong className="text-foreground">spam</strong> or junk folder.
+                </span>
               </DialogDescription>
             </DialogHeader>
             <Button 
