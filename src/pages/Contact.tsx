@@ -27,8 +27,8 @@ import { toast } from 'sonner';
 const supportContact = {
   name: 'Support Team',
   company: 'FreightShare',
-  email: 'support@freightshare.eu',
-  phone: '+31 10 123 4567',
+  email: 'contact@freight-share.com',
+  phone: '+39 348 056 7378',
   referenceId: 'SUP-2024',
 };
 
