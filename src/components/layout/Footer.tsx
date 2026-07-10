@@ -55,11 +55,11 @@ export const Footer = () => {
             <ul className="space-y-3 text-sm text-secondary-foreground/70">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>freightshare.eu@gmail.com</span>
+                <a href="mailto:contact@freight-share.com" className="hover:text-secondary-foreground transition-colors">contact@freight-share.com</a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <span>+31 6 53 11 46 05</span>
+                <a href="tel:+393480567378" className="hover:text-secondary-foreground transition-colors">+39 348 056 7378</a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5" />
