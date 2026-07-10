@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -108,6 +108,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+
+    // Supabase returns a user with an empty `identities` array when the email
+    // is already registered (obfuscated to prevent enumeration). Surface it
+    // clearly so users don't think a new account was created.
+    if (!error && data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return {
+        error: new Error(
+          'An account with this email already exists. Please log in instead, or use "Forgot password?" to reset it.'
+        ),
+      };
+    }
 
     return { error: error as Error | null };
   };
