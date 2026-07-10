@@ -35,8 +35,8 @@ export const RecoveryEmail = ({
         <table role="presentation" cellPadding={0} cellSpacing={0} border={0} style={btnTable}>
           <tbody>
             <tr>
-              <td align="center" style={btnCell}>
-                <a href={confirmationUrl} style={btnLink}>Reset Password</a>
+              <td align="center" bgcolor="#16a34a" style={btnCell}>
+                <a href={confirmationUrl} target="_blank" style={btnLink}>Reset Password</a>
               </td>
             </tr>
           </tbody>
