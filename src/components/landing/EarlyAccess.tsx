@@ -192,8 +192,15 @@ export const EarlyAccess = () => {
                 />
               </div>
 
-              <Button type="submit" variant="accent" size="lg" className="w-full">
-                Request Early Access
+              <Button type="submit" variant="accent" size="lg" className="w-full" disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Request Early Access'
+                )}
               </Button>
             </form>
           )}
