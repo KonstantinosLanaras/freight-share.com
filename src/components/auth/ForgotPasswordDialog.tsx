@@ -1,4 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Module-level flag so the sign-in form can suppress its error toasts
+// while the recovery dialog is open (avoids the stale "Incorrect email
+// or password" toast appearing behind the reset success screen).
+let recoveryDialogOpen = false;
+export const isRecoveryDialogOpen = () => recoveryDialogOpen;
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +55,7 @@ export function ForgotPasswordDialog() {
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    recoveryDialogOpen = newOpen;
     if (newOpen) {
       // Dismiss any lingering toasts (e.g. a prior "Incorrect email or password")
       // so they aren't confused for a message about the recovery flow.
@@ -61,6 +68,14 @@ export function ForgotPasswordDialog() {
       }, 200);
     }
   };
+
+  // Keep late-arriving toasts from a still-pending sign-in request from
+  // showing while the recovery dialog is visible.
+  useEffect(() => {
+    if (!open) return;
+    const interval = setInterval(() => toast.dismiss(), 100);
+    return () => clearInterval(interval);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

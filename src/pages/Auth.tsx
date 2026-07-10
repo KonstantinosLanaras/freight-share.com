@@ -11,7 +11,7 @@ import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
-import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
+import { ForgotPasswordDialog, isRecoveryDialogOpen } from '@/components/auth/ForgotPasswordDialog';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
@@ -223,21 +223,28 @@ export default function Auth() {
         const { error } = await signIn(formData.email, formData.password);
         
         if (error) {
-          const isLocked = recordFailedAttempt();
-          const rateCheck = checkRateLimit();
-          
-          if (isLocked) {
-            const mins = Math.ceil(LOCKOUT_DURATION / 60000);
-            toast.error(`Sign-in paused for ${mins} minutes for your security. You can try again after that, or reset your password if needed.`);
-          } else if (error.message.includes('Invalid login credentials')) {
-            const remaining = rateCheck.remainingAttempts ?? 0;
-            if (remaining <= 3) {
-              toast.error(`Incorrect email or password. ${remaining} attempt${remaining !== 1 ? 's' : ''} left before a short cooldown.`);
-            } else {
-              toast.error('Incorrect email or password. Please try again.');
-            }
+          // If the user opened the password recovery dialog while sign-in was
+          // still in flight, don't surface the sign-in error toast on top of it.
+          if (isRecoveryDialogOpen()) {
+            // still record the failed attempt for rate limiting
+            recordFailedAttempt();
           } else {
-            toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
+            const isLocked = recordFailedAttempt();
+            const rateCheck = checkRateLimit();
+
+            if (isLocked) {
+              const mins = Math.ceil(LOCKOUT_DURATION / 60000);
+              toast.error(`Sign-in paused for ${mins} minutes for your security. You can try again after that, or reset your password if needed.`);
+            } else if (error.message.includes('Invalid login credentials')) {
+              const remaining = rateCheck.remainingAttempts ?? 0;
+              if (remaining <= 3) {
+                toast.error(`Incorrect email or password. ${remaining} attempt${remaining !== 1 ? 's' : ''} left before a short cooldown.`);
+              } else {
+                toast.error('Incorrect email or password. Please try again.');
+              }
+            } else {
+              toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
+            }
           }
         } else {
           clearRateLimit();
