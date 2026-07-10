@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { CheckCircle2, Mail } from 'lucide-react';
+import { CheckCircle2, Mail, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const schema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100),
@@ -24,6 +25,7 @@ const schema = z.object({
 
 export const EarlyAccess = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     fullName: '',
     companyName: '',
@@ -33,15 +35,40 @@ export const EarlyAccess = () => {
     challenge: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       toast.error(parsed.error.errors[0]?.message || 'Please review the form');
       return;
     }
-    // Demo: log locally, no backend call
-    setSubmitted(true);
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('early_access_requests').insert({
+        full_name: parsed.data.fullName,
+        company_name: parsed.data.companyName,
+        role: parsed.data.role,
+        email: parsed.data.email,
+        phone: parsed.data.phone,
+        challenge: parsed.data.challenge || null,
+      });
+
+      if (error) {
+        console.error('Early access submission error:', error);
+        toast.error('Could not submit your request. Please try again shortly.');
+        return;
+      }
+
+      // Fire-and-forget notification email to the FreightShare team
+      supabase.functions.invoke('notify-early-access', {
+        body: parsed.data,
+      }).catch((err) => console.error('Notify error:', err));
+
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
