@@ -27,8 +27,8 @@ import { toast } from 'sonner';
 const supportContact = {
   name: 'Support Team',
   company: 'FreightShare',
-  email: 'support@freightshare.eu',
-  phone: '+31 10 123 4567',
+  email: 'contact@freight-share.com',
+  phone: '+39 348 056 7378',
   referenceId: 'SUP-2024',
 };
 
@@ -130,7 +130,7 @@ export default function Contact() {
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"><MessageSquare className="h-6 w-6 text-primary" /></div>
                       <div>
                         <h3 className="font-semibold text-foreground mb-1">General Support</h3>
-                        <a href="mailto:support@freightshare.eu" className="text-primary hover:underline text-sm">support@freightshare.eu</a>
+                        <a href="mailto:contact@freight-share.com" className="text-primary hover:underline text-sm">contact@freight-share.com</a>
                       </div>
                     </div>
                   </CardContent>
@@ -141,7 +141,7 @@ export default function Contact() {
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"><Building className="h-6 w-6 text-primary" /></div>
                       <div>
                         <h3 className="font-semibold text-foreground mb-1">Business Inquiries</h3>
-                        <a href="mailto:business@freightshare.eu" className="text-primary hover:underline text-sm">business@freightshare.eu</a>
+                        <a href="mailto:contact@freight-share.com" className="text-primary hover:underline text-sm">contact@freight-share.com</a>
                       </div>
                     </div>
                   </CardContent>
@@ -152,17 +152,16 @@ export default function Contact() {
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"><Scale className="h-6 w-6 text-primary" /></div>
                       <div>
                         <h3 className="font-semibold text-foreground mb-1">Legal & Disputes</h3>
-                        <a href="mailto:legal@freightshare.eu" className="text-primary hover:underline text-sm">legal@freightshare.eu</a>
+                        <a href="mailto:contact@freight-share.com" className="text-primary hover:underline text-sm">contact@freight-share.com</a>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-muted/30">
                   <CardContent className="p-6 space-y-4">
-                    <h3 className="font-semibold text-foreground">Our Office</h3>
+                    <h3 className="font-semibold text-foreground">Reach us</h3>
                     <div className="space-y-3 text-sm">
-                      <div className="flex items-start gap-3"><MapPin className="h-5 w-5 text-primary mt-0.5" /><div><p className="text-foreground">FreightShare B.V.</p><p className="text-muted-foreground">Rotterdam, Netherlands</p></div></div>
-                      <div className="flex items-center gap-3"><Phone className="h-5 w-5 text-primary" /><span className="text-muted-foreground">+31 10 123 4567</span></div>
+                      <div className="flex items-center gap-3"><Phone className="h-5 w-5 text-primary" /><a href="tel:+393480567378" className="text-muted-foreground hover:text-foreground">+39 348 056 7378</a></div>
                       <div className="flex items-center gap-3"><Clock className="h-5 w-5 text-primary" /><span className="text-muted-foreground">Mon-Fri: 9:00 - 18:00 CET</span></div>
                     </div>
                   </CardContent>
