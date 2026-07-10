@@ -62,6 +62,7 @@ export default function Auth() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     company: '',
     country: '',
@@ -185,6 +186,12 @@ export default function Auth() {
         const passwordValidation = validatePassword(formData.password, formData.email, formData.name);
         if (!passwordValidation.valid) {
           toast.error(passwordValidation.error);
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          toast.error('Passwords do not match. Please re-enter them.');
           setIsSubmitting(false);
           return;
         }
@@ -594,6 +601,24 @@ export default function Auth() {
                     />
                   </div>
                 </div>
+
+                {mode === 'signup' && (
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="mt-1">
+                      <PasswordInput
+                        id="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={(value) => setFormData({ ...formData, confirmPassword: value })}
+                        disabled={isSubmitting}
+                        placeholder="Re-enter your password"
+                      />
+                    </div>
+                    {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password && (
+                      <p className="mt-1 text-xs text-destructive">Passwords do not match</p>
+                    )}
+                  </div>
+                )}
 
                 <Button 
                   type="submit" 
