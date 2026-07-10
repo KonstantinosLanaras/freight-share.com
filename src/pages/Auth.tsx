@@ -189,6 +189,12 @@ export default function Auth() {
           setIsSubmitting(false);
           return;
         }
+
+        if (formData.password !== formData.confirmPassword) {
+          toast.error('Passwords do not match. Please re-enter them.');
+          setIsSubmitting(false);
+          return;
+        }
         
         if (!role) {
           toast.error('Please select a role');
