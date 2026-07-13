@@ -335,7 +335,7 @@ export default function RouteDetails() {
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="text-sm text-muted-foreground mb-1">Departure</div>
+                    <div className="text-sm text-muted-foreground mb-1">Leave by</div>
                     <div className="font-medium text-foreground">
                       {format(new Date(route.departure_date_from), 'EEEE, MMMM d, yyyy')}
                     </div>
