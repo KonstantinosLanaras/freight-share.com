@@ -50,6 +50,7 @@ interface RouteStop {
   country: string;
   available_pallets: number;
   stop_order: number;
+  planned_datetime: string | null;
 }
 
 interface Route {
