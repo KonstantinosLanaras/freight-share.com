@@ -106,6 +106,11 @@ const App = () => (
                 <ShipperLoads />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/shipper/loads/:id/edit" element={
+              <ProtectedRoute allowedRoles={['shipper']}>
+                <PostLoad />
+              </ProtectedRoute>
+            } />
             <Route path="/offers/shipper" element={
               <ProtectedRoute allowedRoles={['shipper']}>
                 <OffersShipper />
