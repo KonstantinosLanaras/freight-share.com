@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { CityCombobox, type CityOption } from '@/components/CityCombobox';
+import { countryNameFromCode } from '@/lib/countryCodes';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { 
@@ -249,7 +250,11 @@ export default function BrowseRoutes() {
                   <Label>Near Origin City</Label>
                   <CityCombobox
                     value={searchOriginCity?.name || ''}
-                    onSelect={setSearchOriginCity}
+                    countryCode={searchOriginCity?.country}
+                    onSelect={(city) => {
+                      setSearchOriginCity(city);
+                      setFilters({ ...filters, originCountry: countryNameFromCode(city.country) });
+                    }}
                     placeholder="Any city"
                     className="mt-1"
                   />
@@ -258,7 +263,11 @@ export default function BrowseRoutes() {
                   <Label>Near Destination City</Label>
                   <CityCombobox
                     value={searchDestinationCity?.name || ''}
-                    onSelect={setSearchDestinationCity}
+                    countryCode={searchDestinationCity?.country}
+                    onSelect={(city) => {
+                      setSearchDestinationCity(city);
+                      setFilters({ ...filters, destinationCountry: countryNameFromCode(city.country) });
+                    }}
                     placeholder="Any city"
                     className="mt-1"
                   />
