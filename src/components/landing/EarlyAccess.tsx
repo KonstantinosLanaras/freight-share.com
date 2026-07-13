@@ -60,9 +60,20 @@ export const EarlyAccess = () => {
         return;
       }
 
-      // Fire-and-forget notification email to the FreightShare team
-      supabase.functions.invoke('notify-early-access', {
-        body: parsed.data,
+      // Fire-and-forget notification email to the FreightShare team (contact@freight-share.com)
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'early-access-notification',
+          idempotencyKey: `early-access-${parsed.data.email}-${Date.now()}`,
+          templateData: {
+            fullName: parsed.data.fullName,
+            companyName: parsed.data.companyName,
+            role: parsed.data.role,
+            email: parsed.data.email,
+            phone: parsed.data.phone,
+            challenge: parsed.data.challenge || '',
+          },
+        },
       }).catch((err) => console.error('Notify error:', err));
 
       setSubmitted(true);

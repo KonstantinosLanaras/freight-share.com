@@ -2,6 +2,7 @@
 import type * as React from 'npm:react@18.3.1'
 import { template as offerReceived } from './offer-received.tsx'
 import { template as offerAccepted } from './offer-accepted.tsx'
+import { template as earlyAccessNotification } from './early-access-notification.tsx'
 
 export interface TemplateEntry {
   component: React.ComponentType<any>
@@ -14,4 +15,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'offer-received': offerReceived,
   'offer-accepted': offerAccepted,
+  'early-access-notification': earlyAccessNotification,
 }
