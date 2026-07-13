@@ -68,8 +68,25 @@ export default function Auth() {
     country: '',
   });
 
+  // If the URL contains a Supabase recovery token, forward straight to the
+  // dedicated reset-password page (preserving the hash so the session is created there).
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    const isRecoveryHash = hash.includes('type=recovery');
+    const isResetMode = searchParams.get('mode') === 'reset';
+    if (isRecoveryHash || isResetMode) {
+      navigate(`/reset-password${hash}`, { replace: true });
+    }
+  }, [navigate, searchParams]);
+
   // Handle redirect after auth
   useEffect(() => {
+    // Don't redirect authenticated users away if they're in a recovery flow
+    const hash = window.location.hash || '';
+    if (hash.includes('type=recovery') || searchParams.get('mode') === 'reset') {
+      return;
+    }
+
     if (user && userRole) {
       const roleParam = searchParams.get('role');
       
