@@ -32,6 +32,9 @@ const cargoTypes = [
 export default function PostLoad() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
+  const [loadingExisting, setLoadingExisting] = useState(isEditMode);
   const [openToOffers, setOpenToOffers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
@@ -59,6 +62,58 @@ export default function PostLoad() {
     notes: '',
     cargoNotes: '',
   });
+
+  useEffect(() => {
+    if (!isEditMode || !editId || !user) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('loads')
+        .select('*')
+        .eq('id', editId)
+        .single();
+      if (error || !data) {
+        toast.error('Failed to load');
+        navigate('/dashboard/shipper/loads');
+        return;
+      }
+      if (data.shipper_id !== user.id) {
+        toast.error('You cannot edit this load');
+        navigate('/dashboard/shipper/loads');
+        return;
+      }
+      setFormData({
+        originCity: data.origin_city || '',
+        originCountry: data.origin_country || '',
+        originCountryCode: '',
+        originLat: data.origin_lat,
+        originLng: data.origin_lng,
+        destinationCity: data.destination_city || '',
+        destinationCountry: data.destination_country || '',
+        destinationCountryCode: '',
+        destinationLat: data.destination_lat,
+        destinationLng: data.destination_lng,
+        pickupDateStart: data.pickup_date_from || '',
+        pickupDateEnd: data.pickup_date_to || '',
+        deliveryDateStart: data.delivery_date_from || '',
+        deliveryDateEnd: data.delivery_date_to || '',
+        pallets: String(data.pallets || ''),
+        cargoType: data.cargo_type || 'general',
+        fixedPrice: data.price ? String(data.price) : '',
+        notes: data.notes || '',
+        cargoNotes: data.cargo_notes || '',
+      });
+      setOpenToOffers(data.pricing_type === 'open_to_offers');
+      setSpaceType((data.space_type as SpaceType) || 'epe');
+      setSpaceValue(data.space_value ? String(data.space_value) : '');
+      setDimensions({
+        lengthCm: data.length_cm ? String(data.length_cm) : '',
+        widthCm: data.width_cm ? String(data.width_cm) : '',
+        heightCm: data.height_cm ? String(data.height_cm) : '',
+      });
+      setWeightKg(data.weight_kg ? String(data.weight_kg) : '');
+      setLoadingExisting(false);
+    })();
+  }, [isEditMode, editId, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
