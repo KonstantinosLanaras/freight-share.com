@@ -319,6 +319,14 @@ export default function PostRoute() {
     }
   };
 
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -331,8 +339,8 @@ export default function PostRoute() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">Post a New Route</h1>
-              <p className="text-sm text-muted-foreground">Share your upcoming journey to find loads</p>
+              <h1 className="text-xl font-heading font-bold text-foreground">{isEditMode ? 'Edit Route' : 'Post a New Route'}</h1>
+              <p className="text-sm text-muted-foreground">{isEditMode ? 'Update your planned journey' : 'Share your upcoming journey to find loads'}</p>
             </div>
           </div>
         </div>
