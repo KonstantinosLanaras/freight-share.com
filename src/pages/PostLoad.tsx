@@ -160,8 +160,7 @@ export default function PostLoad() {
         } : undefined
       );
 
-      const { error } = await supabase.from('loads').insert({
-        shipper_id: user.id,
+      const payload = {
         origin_city: formData.originCity,
         origin_country: formData.originCountry,
         origin_lat: formData.originLat,
@@ -176,10 +175,9 @@ export default function PostLoad() {
         delivery_date_to: formData.deliveryDateEnd,
         pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
         cargo_type: formData.cargoType as any,
-        pricing_type: openToOffers ? 'open_to_offers' : 'fixed',
+        pricing_type: openToOffers ? 'open_to_offers' : 'fixed' as any,
         price: openToOffers ? null : parseFloat(formData.fixedPrice) || null,
         notes: formData.notes || null,
-        // New capacity fields
         space_type: spaceType,
         space_value: parseFloat(spaceValue) || 0,
         space_ldm: spaceLdm,
@@ -188,12 +186,19 @@ export default function PostLoad() {
         width_cm: spaceType === 'dimensions' ? parseFloat(dimensions.widthCm) || null : null,
         height_cm: spaceType === 'dimensions' ? parseFloat(dimensions.heightCm) || null : null,
         cargo_notes: formData.cargoNotes || null,
-      });
+      };
 
-      if (error) throw error;
-
-      toast.success('Load posted successfully!');
-      navigate('/dashboard/shipper');
+      if (isEditMode && editId) {
+        const { error } = await supabase.from('loads').update(payload).eq('id', editId);
+        if (error) throw error;
+        toast.success('Load updated');
+        navigate(`/load/${editId}`);
+      } else {
+        const { error } = await supabase.from('loads').insert({ ...payload, shipper_id: user.id });
+        if (error) throw error;
+        toast.success('Load posted successfully!');
+        navigate('/dashboard/shipper');
+      }
     } catch (error: any) {
       console.error('Error posting load:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to post load'));
