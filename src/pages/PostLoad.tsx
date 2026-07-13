@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { CityCombobox } from '@/components/CityCombobox';
+import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,10 +41,12 @@ export default function PostLoad() {
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
+    originCountryCode: '',
     originLat: null as number | null,
     originLng: null as number | null,
     destinationCity: '',
     destinationCountry: '',
+    destinationCountryCode: '',
     destinationLat: null as number | null,
     destinationLng: null as number | null,
     pickupDateStart: '',
@@ -63,11 +65,6 @@ export default function PostLoad() {
     
     if (!user) {
       toast.error('You must be logged in to post a load');
-      return;
-    }
-
-    if (!formData.originCountry || !formData.destinationCountry) {
-      toast.error('Please select both origin and destination countries');
       return;
     }
 
@@ -187,20 +184,32 @@ export default function PostLoad() {
                   <Label htmlFor="originCity">Origin City</Label>
                   <CityCombobox
                     value={formData.originCity}
-                    onSelect={(city) => setFormData({ ...formData, originCity: city.name, originLat: city.lat, originLng: city.lng })}
+                    countryCode={formData.originCountryCode}
+                    onSelect={(city) => setFormData({
+                      ...formData,
+                      originCity: city.name,
+                      originCountry: countryNameFromCode(city.country),
+                      originCountryCode: city.country,
+                      originLat: city.lat,
+                      originLng: city.lng,
+                    })}
                     placeholder="e.g., Rotterdam"
                     className="mt-1"
                     disabled={isSubmitting}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="originCountry">Origin Country</Label>
-                  <SchengenCountrySelect
-                    value={formData.originCountry}
-                    onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
+                  <Label>Origin Country</Label>
+                  <div className="mt-1 flex h-10 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm">
+                    {formData.originCountryCode ? (
+                      <>
+                        <span className="text-lg">{countryCodeToFlag(formData.originCountryCode)}</span>
+                        <span>{formData.originCountry}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Auto-detected from city</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -210,20 +219,32 @@ export default function PostLoad() {
                   <Label htmlFor="destinationCity">Destination City</Label>
                   <CityCombobox
                     value={formData.destinationCity}
-                    onSelect={(city) => setFormData({ ...formData, destinationCity: city.name, destinationLat: city.lat, destinationLng: city.lng })}
+                    countryCode={formData.destinationCountryCode}
+                    onSelect={(city) => setFormData({
+                      ...formData,
+                      destinationCity: city.name,
+                      destinationCountry: countryNameFromCode(city.country),
+                      destinationCountryCode: city.country,
+                      destinationLat: city.lat,
+                      destinationLng: city.lng,
+                    })}
                     placeholder="e.g., Munich"
                     className="mt-1"
                     disabled={isSubmitting}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="destinationCountry">Destination Country</Label>
-                  <SchengenCountrySelect
-                    value={formData.destinationCountry}
-                    onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
+                  <Label>Destination Country</Label>
+                  <div className="mt-1 flex h-10 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm">
+                    {formData.destinationCountryCode ? (
+                      <>
+                        <span className="text-lg">{countryCodeToFlag(formData.destinationCountryCode)}</span>
+                        <span>{formData.destinationCountry}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Auto-detected from city</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>

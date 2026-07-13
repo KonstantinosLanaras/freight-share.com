@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { countryCodeToFlag } from '@/lib/countryCodes';
 
 export interface CityOption {
   id: string;
@@ -16,6 +17,7 @@ export interface CityOption {
 
 interface CityComboboxProps {
   value: string;
+  countryCode?: string;
   onSelect: (city: CityOption) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -24,6 +26,7 @@ interface CityComboboxProps {
 
 export function CityCombobox({
   value,
+  countryCode,
   onSelect,
   placeholder = 'Search city...',
   disabled = false,
@@ -70,7 +73,10 @@ export function CityCombobox({
             className
           )}
         >
-          {label}
+          <span className="flex items-center gap-2 truncate">
+            {countryCode && <span>{countryCodeToFlag(countryCode)}</span>}
+            <span className="truncate">{label}</span>
+          </span>
           <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -91,6 +97,7 @@ export function CityCombobox({
                     setOpen(false);
                   }}
                 >
+                  <span className="mr-2">{countryCodeToFlag(city.country)}</span>
                   <span>{city.name}</span>
                   <span className="ml-1 text-muted-foreground">({city.country})</span>
                   <Check

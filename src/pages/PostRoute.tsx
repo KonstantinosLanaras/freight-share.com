@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SchengenCountrySelect } from '@/components/SchengenCountrySelect';
 import { CityCombobox } from '@/components/CityCombobox';
+import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
@@ -22,6 +22,7 @@ interface RouteStop {
   id: string;
   city: string;
   country: string;
+  countryCode: string;
   availablePallets: string;
   plannedDateTime: string;
 }
@@ -56,11 +57,13 @@ export default function PostRoute() {
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
+    originCountryCode: '',
     originLat: null as number | null,
     originLng: null as number | null,
     originPlannedDateTime: '',
     destinationCity: '',
     destinationCountry: '',
+    destinationCountryCode: '',
     destinationLat: null as number | null,
     destinationLng: null as number | null,
     destinationPlannedDateTime: '',
@@ -77,7 +80,7 @@ export default function PostRoute() {
   const addStop = () => {
     setStops([
       ...stops,
-      { id: crypto.randomUUID(), city: '', country: '', availablePallets: '', plannedDateTime: '' }
+      { id: crypto.randomUUID(), city: '', country: '', countryCode: '', availablePallets: '', plannedDateTime: '' }
     ]);
   };
 
@@ -86,8 +89,16 @@ export default function PostRoute() {
   };
 
   const updateStop = (id: string, field: keyof RouteStop, value: string) => {
-    setStops(stops.map(stop => 
+    setStops(stops.map(stop =>
       stop.id === id ? { ...stop, [field]: value } : stop
+    ));
+  };
+
+  const updateStopCity = (id: string, city: { name: string; country: string }) => {
+    setStops(stops.map(stop =>
+      stop.id === id
+        ? { ...stop, city: city.name, country: countryNameFromCode(city.country), countryCode: city.country }
+        : stop
     ));
   };
 
@@ -96,11 +107,6 @@ export default function PostRoute() {
     
     if (!user) {
       toast.error('You must be logged in to post a route');
-      return;
-    }
-
-    if (!formData.originCountry || !formData.destinationCountry) {
-      toast.error('Please select both origin and destination countries');
       return;
     }
 
@@ -138,8 +144,12 @@ export default function PostRoute() {
       return;
     }
 
-    // Validate stops have planned datetime
+    // Validate stops have a city and planned datetime
     for (const stop of stops) {
+      if (!stop.city) {
+        toast.error('Please select a city for all stops');
+        return;
+      }
       if (!stop.plannedDateTime) {
         toast.error('Please enter planned date/time for all stops');
         return;
@@ -276,20 +286,32 @@ export default function PostRoute() {
                   <Label htmlFor="originCity">City <span className="text-destructive">*</span></Label>
                   <CityCombobox
                     value={formData.originCity}
-                    onSelect={(city) => setFormData({ ...formData, originCity: city.name, originLat: city.lat, originLng: city.lng })}
+                    countryCode={formData.originCountryCode}
+                    onSelect={(city) => setFormData({
+                      ...formData,
+                      originCity: city.name,
+                      originCountry: countryNameFromCode(city.country),
+                      originCountryCode: city.country,
+                      originLat: city.lat,
+                      originLng: city.lng,
+                    })}
                     placeholder="e.g., Rotterdam"
                     className="mt-1"
                     disabled={isSubmitting}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="originCountry">Country <span className="text-destructive">*</span></Label>
-                  <SchengenCountrySelect
-                    value={formData.originCountry}
-                    onValueChange={(value) => setFormData({ ...formData, originCountry: value })}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
+                  <Label>Country</Label>
+                  <div className="mt-1 flex h-10 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm">
+                    {formData.originCountryCode ? (
+                      <>
+                        <span className="text-lg">{countryCodeToFlag(formData.originCountryCode)}</span>
+                        <span>{formData.originCountry}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Auto-detected from city</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="originPlannedDateTime">Planned Departure <span className="text-destructive">*</span></Label>
@@ -332,23 +354,27 @@ export default function PostRoute() {
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <Label>City <span className="text-destructive">*</span></Label>
-                        <Input
+                        <CityCombobox
+                          value={stop.city}
+                          countryCode={stop.countryCode}
+                          onSelect={(city) => updateStopCity(stop.id, city)}
                           placeholder="e.g., Düsseldorf"
                           className="mt-1"
-                          value={stop.city}
-                          onChange={(e) => updateStop(stop.id, 'city', e.target.value)}
-                          required
                           disabled={isSubmitting}
                         />
                       </div>
                       <div>
-                        <Label>Country <span className="text-destructive">*</span></Label>
-                        <SchengenCountrySelect
-                          value={stop.country}
-                          onValueChange={(value) => updateStop(stop.id, 'country', value)}
-                          disabled={isSubmitting}
-                          className="mt-1"
-                        />
+                        <Label>Country</Label>
+                        <div className="mt-1 flex h-10 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm">
+                          {stop.countryCode ? (
+                            <>
+                              <span className="text-lg">{countryCodeToFlag(stop.countryCode)}</span>
+                              <span className="truncate">{stop.country}</span>
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">Auto-detected</span>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <Label>Available pallets <span className="text-destructive">*</span></Label>
@@ -401,20 +427,32 @@ export default function PostRoute() {
                   <Label htmlFor="destinationCity">City <span className="text-destructive">*</span></Label>
                   <CityCombobox
                     value={formData.destinationCity}
-                    onSelect={(city) => setFormData({ ...formData, destinationCity: city.name, destinationLat: city.lat, destinationLng: city.lng })}
+                    countryCode={formData.destinationCountryCode}
+                    onSelect={(city) => setFormData({
+                      ...formData,
+                      destinationCity: city.name,
+                      destinationCountry: countryNameFromCode(city.country),
+                      destinationCountryCode: city.country,
+                      destinationLat: city.lat,
+                      destinationLng: city.lng,
+                    })}
                     placeholder="e.g., Munich"
                     className="mt-1"
                     disabled={isSubmitting}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="destinationCountry">Country <span className="text-destructive">*</span></Label>
-                  <SchengenCountrySelect
-                    value={formData.destinationCountry}
-                    onValueChange={(value) => setFormData({ ...formData, destinationCountry: value })}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
+                  <Label>Country</Label>
+                  <div className="mt-1 flex h-10 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm">
+                    {formData.destinationCountryCode ? (
+                      <>
+                        <span className="text-lg">{countryCodeToFlag(formData.destinationCountryCode)}</span>
+                        <span>{formData.destinationCountry}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Auto-detected from city</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="destinationPlannedDateTime">Planned Arrival <span className="text-destructive">*</span></Label>
