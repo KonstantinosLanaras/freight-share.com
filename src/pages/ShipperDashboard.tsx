@@ -34,13 +34,19 @@ import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { ShipperVerificationForm } from '@/components/verification/ShipperVerificationForm';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { useDemoMode } from '@/hooks/useDemoMode';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
+import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 
 interface Load {
   id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
+  destination_lat: number | null;
+  destination_lng: number | null;
   pallets: number;
   status: string;
   price: number | null;
@@ -48,6 +54,22 @@ interface Load {
   pickup_date_to: string;
   created_at: string;
   offer_count?: number;
+}
+
+interface MatchingRoute {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  destination_city: string;
+  destination_country: string;
+  departure_date_from: string;
+  departure_date_to: string;
+  available_pallets: number;
+  open_to_extra_stops: boolean;
+  originKm: number;
+  destKm: number;
+  originTier: 'green' | 'yellow' | null;
+  destTier: 'green' | 'yellow' | null;
 }
 
 interface Profile {
@@ -89,7 +111,7 @@ export default function ShipperDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loads, setLoads] = useState<Load[]>([]);
   const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
-  const [matchingRoutes, setMatchingRoutes] = useState<any[]>([]);
+  const [matchingRoutes, setMatchingRoutes] = useState<MatchingRoute[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
@@ -174,16 +196,40 @@ export default function ShipperDashboard() {
 
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
-      // Fetch active routes for the matching routes section
+      // Fetch active routes and match them against this shipper's own loads
+      // by real distance (same Haversine + tolerance logic as BrowseRoutes),
+      // not just "any active route" and not exact city-name equality.
       const today = new Date().toISOString().split('T')[0];
       const { data: activeRoutesData } = await supabase
         .from('routes')
-        .select('id, origin_city, origin_country, destination_city, destination_country, departure_date_from, departure_date_to, available_pallets, price_per_pallet, open_to_extra_stops')
+        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km, departure_date_from, departure_date_to, available_pallets, open_to_extra_stops')
         .in('status', ['planned', 'active'])
         .gte('departure_date_to', today)
         .order('departure_date_from', { ascending: true })
-        .limit(6);
-      setMatchingRoutes(activeRoutesData || []);
+        .limit(50);
+
+      const loadsWithCoords = loadsWithOffers.filter(
+        (l): l is typeof l & { origin_lat: number; origin_lng: number; destination_lat: number; destination_lng: number } =>
+          l.origin_lat != null && l.origin_lng != null && l.destination_lat != null && l.destination_lng != null
+      );
+
+      const matched: MatchingRoute[] = [];
+      for (const route of activeRoutesData || []) {
+        if (route.origin_lat == null || route.origin_lng == null || route.destination_lat == null || route.destination_lng == null) continue;
+        let best: { originKm: number; destKm: number; originTier: 'green' | 'yellow'; destTier: 'green' | 'yellow' } | null = null;
+        for (const load of loadsWithCoords) {
+          const originKm = haversineKm(route.origin_lat, route.origin_lng, load.origin_lat, load.origin_lng);
+          const destKm = haversineKm(route.destination_lat, route.destination_lng, load.destination_lat, load.destination_lng);
+          const originTier = getProximityTier(originKm, route.max_deviation_km);
+          const destTier = getProximityTier(destKm, route.max_destination_radius_km);
+          if (originTier && destTier && (!best || originKm + destKm < best.originKm + best.destKm)) {
+            best = { originKm, destKm, originTier, destTier };
+          }
+        }
+        if (best) matched.push({ ...route, ...best });
+      }
+      matched.sort((a, b) => (a.originKm + a.destKm) - (b.originKm + b.destKm));
+      setMatchingRoutes(matched.slice(0, 6));
 
 
       // Calculate stats
@@ -523,16 +569,17 @@ export default function ShipperDashboard() {
                             className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                           >
                             <BookmarkButton id={route.id} className="absolute top-2 right-2 z-10" />
-                            <div className="font-medium text-foreground mb-1">
-                              {route.origin_city}, {route.origin_country} → {route.destination_city}, {route.destination_country}
+                            <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
+                              <span>{route.origin_city}, {route.origin_country}</span>
+                              <ProximityBadge distanceKm={route.originKm} tier={route.originTier} label="Distance from your load's pickup" />
+                              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>{route.destination_city}, {route.destination_country}</span>
+                              <ProximityBadge distanceKm={route.destKm} tier={route.destTier} label="Distance from your load's drop-off" />
                             </div>
                             <div className="text-sm text-muted-foreground mb-3">
                               {route.available_pallets} pallets available · {dateLabel}
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                              {route.price_per_pallet != null && (
-                                <span className="text-primary font-semibold">€{route.price_per_pallet}/pallet</span>
-                              )}
                               <div className="flex items-center gap-1.5 ml-auto">
                                 {route.open_to_extra_stops && (
                                   <Badge variant="outline" className="text-xs border-success/40 text-success">
@@ -540,9 +587,6 @@ export default function ShipperDashboard() {
                                     Flexible
                                   </Badge>
                                 )}
-                                <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                                  Match
-                                </Badge>
                               </div>
                             </div>
                           </Link>
