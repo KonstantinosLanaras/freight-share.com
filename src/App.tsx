@@ -179,6 +179,11 @@ const App = () => (
                 <RouteDetails />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/carrier/routes/:id/edit" element={
+              <ProtectedRoute allowedRoles={['carrier']}>
+                <PostRoute />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/carrier/find-loads" element={
               <ProtectedRoute allowedRoles={['carrier']}>
                 <FindLoads />
