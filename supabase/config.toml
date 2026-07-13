@@ -21,5 +21,7 @@ project_id = "yiwpooztihgmhncxwgsd"
     verify_jwt = true
   [functions.stripe-webhook]
     verify_jwt = false
+  [functions.sync-early-access-airtable]
+    verify_jwt = false
   [functions.verify-shipment-payment]
     verify_jwt = false

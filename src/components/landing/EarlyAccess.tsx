@@ -76,6 +76,19 @@ export const EarlyAccess = () => {
         },
       }).catch((err) => console.error('Notify error:', err));
 
+      // Fire-and-forget sync to Airtable CRM
+      supabase.functions.invoke('sync-early-access-airtable', {
+        body: {
+          fullName: parsed.data.fullName,
+          companyName: parsed.data.companyName,
+          role: parsed.data.role,
+          email: parsed.data.email,
+          phone: parsed.data.phone,
+          challenge: parsed.data.challenge || '',
+          source: 'freight-share.com',
+        },
+      }).catch((err) => console.error('Airtable sync error:', err));
+
       setSubmitted(true);
     } finally {
       setSubmitting(false);
