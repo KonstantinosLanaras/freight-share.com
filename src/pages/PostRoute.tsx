@@ -44,6 +44,9 @@ const vehicleTypes = [
 export default function PostRoute() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
+  const [loadingExisting, setLoadingExisting] = useState(isEditMode);
   const [stops, setStops] = useState<RouteStop[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
