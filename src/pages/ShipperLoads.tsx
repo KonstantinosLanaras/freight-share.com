@@ -68,6 +68,7 @@ export default function ShipperLoads() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
