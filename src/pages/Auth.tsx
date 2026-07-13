@@ -90,9 +90,22 @@ export default function Auth() {
       return;
     }
 
+    // While a submit is in flight (e.g. we're verifying role match and may
+    // sign the user out), or a role mismatch was just detected, hold off.
+    if (isSubmitting || roleMismatch) {
+      return;
+    }
+
     if (user && userRole) {
       const roleParam = searchParams.get('role');
-      
+
+      // If the login form was scoped to a specific role and the account
+      // doesn't have it, the submit handler will already have signed the
+      // user out and shown an inline error. Don't route them anywhere here.
+      if (roleParam && roleParam !== userRole && role && role !== userRole) {
+        return;
+      }
+
       if (roleParam && roleParam !== userRole) {
         setShowRoleSwitchWarning(true);
         setIntendedRole(roleParam as UserRole);
@@ -106,7 +119,7 @@ export default function Auth() {
         navigate('/select-role', { replace: true });
       }
     }
-  }, [user, userRole, navigate, searchParams, role]);
+  }, [user, userRole, navigate, searchParams, role, isSubmitting, roleMismatch]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
