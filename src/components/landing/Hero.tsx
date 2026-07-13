@@ -36,8 +36,8 @@ export const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Button variant="hero" asChild>
-                <Link to="/auth?role=shipper">
-                  {t('hero.postLoad')}
+                <Link to="/select-role">
+                  {t('hero.exploreBeta')}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
