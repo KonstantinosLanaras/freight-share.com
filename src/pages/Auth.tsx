@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
 import { ForgotPasswordDialog, isRecoveryDialogOpen } from '@/components/auth/ForgotPasswordDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { AlertCircle } from 'lucide-react';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
