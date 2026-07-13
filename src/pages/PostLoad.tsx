@@ -207,6 +207,14 @@ export default function PostLoad() {
     }
   };
 
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -219,8 +227,8 @@ export default function PostLoad() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">Post a New Load</h1>
-              <p className="text-sm text-muted-foreground">Fill in the details to find carriers</p>
+              <h1 className="text-xl font-heading font-bold text-foreground">{isEditMode ? 'Edit Load' : 'Post a New Load'}</h1>
+              <p className="text-sm text-muted-foreground">{isEditMode ? 'Update the load details' : 'Fill in the details to find carriers'}</p>
             </div>
           </div>
         </div>
