@@ -769,12 +769,12 @@ export default function PostRoute() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Posting...
+                  {isEditMode ? 'Saving...' : 'Posting...'}
                 </>
               ) : (
                 <>
                   <Truck className="h-4 w-4" />
-                  Post Route
+                  {isEditMode ? 'Save Changes' : 'Post Route'}
                 </>
               )}
             </Button>
