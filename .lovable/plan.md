@@ -1,80 +1,54 @@
-# Profile Pages — Shipper, Carrier, and Admin Users
+## Goal
 
-A large feature spanning routing, two new public-facing profile pages, an admin users table, and link wiring across the existing app. Outlined below; will implement after approval.
+Make **Edit Load** and **Edit Route** fully functional, and make sure the details pages display the complete departure and arrival information (dates *and* times, plus intermediate stop schedules).
 
-## 1. Routes (in `src/App.tsx`)
-- `/profile/shipper/:userId` → `ShipperProfile.tsx`
-- `/profile/carrier/:userId` → `CarrierProfile.tsx`
-- `/admin/users` → `AdminUsers.tsx` (admin-only, suspended-user check)
-- All three redirect to `/login` (existing `/auth`) when unauthenticated.
+## What currently doesn't work
 
-## 2. Database (single migration)
-New columns / tables to back the spec. Will need approval.
+- **Edit Load** — the dropdown item in `ShipperLoads.tsx` has no `onClick` and no `/edit` route is registered.
+- **Edit Route** — `MyRoutes.tsx` navigates to `/dashboard/carrier/routes/:id/edit` and `RouteDetails.tsx` has an "Edit" button, but neither route exists.
+- **Route details** — `RouteDetails.tsx` shows the departure date and departure time, but the **arrival time is never captured or displayed**, and **intermediate stops' planned date/time is missing** even though it's stored in `route_stops.planned_datetime`.
+- **Load details** already shows pickup/delivery windows, but I'll double-check `LoadDetails.tsx` renders everything the shipper entered.
 
-**`profiles` additions:** `logo_url`, `bio` (≤200), `contact_email`, `vat_number`, `vat_status` (`unverified|pending|verified`), `preferred_cargo_types text[]`, `shipment_frequency`, `fleet_description`, `operating_countries text[]`, `vehicle_types text[]`, `max_pallet_capacity int`, `operator_licence`, `cmr_insurance bool`, `cmr_expiry date`, `route_flexibility_default bool`, `is_suspended bool`, `last_active_at`, `profile_completion int`.
+## Changes
 
-**New storage bucket:** `company-logos` (public).
+### 1. Backend (single migration)
 
-**RLS:**
-- Authenticated users can read minimal profile fields of any non-suspended user.
-- Contact email + VAT number visible only when (a) own profile, (b) admin, or (c) a `shipments` row links the two users in active/completed status.
-- Own-profile update policy unchanged. Admins (via `has_role`) can update verified flags + `is_suspended`.
+- Add `arrival_time time` column to `routes` so we can persist the destination arrival time (currently `PostRoute` throws it away in `.split('T')[0]`).
 
-## 3. Page structure
+### 2. Reuse `PostLoad` / `PostRoute` as edit pages
 
-### Header (shared component `ProfileHeader`)
-Logo (or initials fallback) · company name · verified badge / pending badge / Profile Complete badge · member since · country flag(s) · bio/fleet description.
+Both pages already contain the full form. I'll turn each into a dual-mode page (create + edit) driven by an optional `:id` URL param:
 
-### Stats bar (`ProfileStats`)
-Shipper: loads posted, completed shipments, bid acceptance %, **own-only** total spend.  
-Carrier: routes posted, completed shipments, on-time %, avg rating, **own-only** total earned.
+- On mount, if `id` is present, fetch the row (plus `route_stops` for routes) and pre-populate every field / stop.
+- On submit, branch between `insert` (create) and `update` + reconcile `route_stops` (delete + reinsert) for edit.
+- Header title switches to "Edit Load" / "Edit Route" and button label to "Save changes".
+- Ownership guard: redirect if the current user isn't the owner.
 
-### Sections (own + public)
-- Active Loads / Active Routes with "View All".
-- Shipment / Route History — paginated table, 10 rows/page.
-- Reviews & Ratings — average + cards, read-only.
+### 3. New routes in `App.tsx`
 
-### Own-profile extras
-- Profile completion bar at top + expandable checklist of missing items.
-- Inline edit dialog/sheet for the editable fields listed in the spec (different field sets per role).
-- Fleet & Compliance card (carrier only) with vehicle types multi-select, max pallets, insurance doc upload (`insurance-documents` bucket already exists) showing Uploaded/Pending/Verified, operator licence, CMR checkbox + expiry. Locked (disabled) on public view.
-
-### Contact details gating
-Compute `canSeeContact = ownProfile || isAdmin || hasSharedShipment(viewer, profileUser)`. Hide contact email / phone otherwise.
-
-## 4. Link wiring
-- Dashboard nav company name/avatar → own profile.
-- Carrier bid inbox (`CarrierRequests`) shipper name → public profile in a `Sheet` slide-over.
-- `RouteOfferPage` carrier name → public profile slide-over.
-- `Resolution` / `ResolutionCase` counterparty name → public profile.
-- Review cards across the app → reviewer profile.
-Implement a small `ProfileLink` + `ProfilePeekSheet` so the slide-over is reusable.
-
-## 5. Admin `/admin/users`
-Table: name, email, role, country, verified, member since, completion %, last active. Row click → admin edit mode of the profile page (verified toggle, VAT approve, insurance verify, suspend/deactivate). Suspended users hitting `/auth` see "Account suspended. Please contact support." Add a global gate in the auth provider that signs suspended users out with that toast.
-
-## 6. Profile completion formula
-Weight the editable fields equally; the checklist surfaces the same list of missing items. Recomputed on save via a small util shared by both profiles.
-
-## 7. Files to add
-```text
-src/pages/ShipperProfile.tsx
-src/pages/CarrierProfile.tsx
-src/pages/AdminUsers.tsx
-src/components/profile/ProfileHeader.tsx
-src/components/profile/ProfileStats.tsx
-src/components/profile/ProfileCompletion.tsx
-src/components/profile/ReviewsSection.tsx
-src/components/profile/ProfilePeekSheet.tsx
-src/components/profile/EditProfileDialog.tsx
-src/components/profile/FleetComplianceCard.tsx
-src/lib/profileCompletion.ts
-supabase/migrations/<timestamp>_profiles_extend.sql
+```
+/dashboard/shipper/loads/:id/edit   → PostLoad (edit)     [shipper only]
+/dashboard/carrier/routes/:id/edit  → PostRoute (edit)    [carrier only]
 ```
 
-## 8. Out of scope / assumptions
-- "Login" route = existing `/auth`.
-- Bid acceptance %, on-time %, total spend/earned derived from existing `offers` / `shipments` / `ratings` tables; if a metric has no data source it shows `—`.
-- Admin role check uses existing `has_role(auth.uid(),'admin')`; if no admin role exists yet I'll add it to the `app_role` enum in the same migration.
+### 4. Wire the UI entry points
 
-Approve and I'll ship it in order: migration → shared components → shipper page → carrier page → admin page → cross-app link wiring.
+- `ShipperLoads.tsx`: dropdown "Edit Load" navigates to the edit route (only when status is `draft` or `posted`, i.e. no accepted offers yet).
+- `RouteDetails.tsx`: header "Edit" button navigates to the edit route (owner only, and disabled once status is `active`/`completed`).
+- `MyRoutes.tsx`: existing navigation already points at the new URL — no change.
+
+### 5. Richer detail rendering
+
+- `RouteDetails.tsx` — Schedule card:
+  - Show departure **date + time** together, and the same for arrival (using the new `arrival_time`).
+  - Intermediate Stops list gets a per-stop line showing `planned_datetime` formatted as "MMM d, yyyy · HH:mm".
+- `PostRoute.tsx` — persist `arrival_time` when creating/editing.
+- Quick pass on `LoadDetails.tsx` to confirm pickup/delivery windows, pallets, dimensions, weight, cargo notes, and price/pricing type all render.
+
+## Technical notes
+
+- Edit mode keeps `route_stops` in sync by deleting existing rows for the route and reinserting from form state on save — simple and matches how `PostRoute` already builds them.
+- Ownership is enforced by RLS on `routes` / `loads`; the client still guards with a redirect for a clean UX.
+- No changes to `client.ts` or `types.ts` beyond what the migration regenerates.
+
+Nothing else in the app is touched.

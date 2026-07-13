@@ -1043,6 +1043,7 @@ export type Database = {
         Row: {
           arrival_date_from: string | null
           arrival_date_to: string | null
+          arrival_time: string | null
           available_pallets: number
           carrier_id: string
           created_at: string
@@ -1080,6 +1081,7 @@ export type Database = {
         Insert: {
           arrival_date_from?: string | null
           arrival_date_to?: string | null
+          arrival_time?: string | null
           available_pallets: number
           carrier_id: string
           created_at?: string
@@ -1117,6 +1119,7 @@ export type Database = {
         Update: {
           arrival_date_from?: string | null
           arrival_date_to?: string | null
+          arrival_time?: string | null
           available_pallets?: number
           carrier_id?: string
           created_at?: string
