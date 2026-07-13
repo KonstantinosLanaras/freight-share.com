@@ -80,6 +80,74 @@ export default function PostRoute() {
     flexibilityNote: '',
   });
 
+  useEffect(() => {
+    if (!isEditMode || !editId || !user) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('routes')
+        .select('*, route_stops(*)')
+        .eq('id', editId)
+        .single();
+      if (error || !data) {
+        toast.error('Failed to load route');
+        navigate('/dashboard/carrier/routes');
+        return;
+      }
+      if (data.carrier_id !== user.id) {
+        toast.error('You cannot edit this route');
+        navigate('/dashboard/carrier/routes');
+        return;
+      }
+      const dep = data.departure_date_from && data.departure_time
+        ? `${data.departure_date_from}T${String(data.departure_time).slice(0, 5)}`
+        : data.departure_date_from ? `${data.departure_date_from}T00:00` : '';
+      const arr = data.arrival_date_from && (data as any).arrival_time
+        ? `${data.arrival_date_from}T${String((data as any).arrival_time).slice(0, 5)}`
+        : data.arrival_date_from ? `${data.arrival_date_from}T00:00` : '';
+      setFormData({
+        originCity: data.origin_city || '',
+        originCountry: data.origin_country || '',
+        originCountryCode: '',
+        originLat: data.origin_lat,
+        originLng: data.origin_lng,
+        originPlannedDateTime: dep,
+        destinationCity: data.destination_city || '',
+        destinationCountry: data.destination_country || '',
+        destinationCountryCode: '',
+        destinationLat: data.destination_lat,
+        destinationLng: data.destination_lng,
+        destinationPlannedDateTime: arr,
+        departureStart: '',
+        departureTime: '',
+        departureEnd: '',
+        arrivalStart: '',
+        arrivalEnd: '',
+        vehicleType: data.vehicle_type || '',
+        openToExtraStops: !!data.open_to_extra_stops,
+        flexibilityNote: data.flexibility_note || '',
+      });
+      setSpaceType((data.space_type as SpaceType) || 'epe');
+      setSpaceValue(data.space_value ? String(data.space_value) : '');
+      setMaxPayloadKg(data.max_payload_kg ? String(data.max_payload_kg) : '');
+      setMaxDeviationKm(data.max_deviation_km ? String(data.max_deviation_km) : '');
+      setTripDescription(data.trip_description || '');
+      setRouteLink(data.route_link || '');
+      setGoodsAccepted(data.goods_accepted || '');
+      const existingStops = (data.route_stops || [])
+        .sort((a: any, b: any) => a.stop_order - b.stop_order)
+        .map((s: any) => ({
+          id: s.id,
+          city: s.city,
+          country: s.country,
+          countryCode: '',
+          availablePallets: String(s.available_pallets ?? ''),
+          plannedDateTime: s.planned_datetime ? new Date(s.planned_datetime).toISOString().slice(0, 16) : '',
+        }));
+      setStops(existingStops);
+      setLoadingExisting(false);
+    })();
+  }, [isEditMode, editId, user, navigate]);
+
   const addStop = () => {
     setStops([
       ...stops,
