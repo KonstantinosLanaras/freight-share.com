@@ -532,10 +532,10 @@ export default function PostLoad() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Posting...
+                  {isEditMode ? 'Saving...' : 'Posting...'}
                 </>
               ) : (
-                'Post Load'
+                isEditMode ? 'Save Changes' : 'Post Load'
               )}
             </Button>
           </div>
