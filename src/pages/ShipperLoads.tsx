@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -68,6 +68,7 @@ export default function ShipperLoads() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -214,11 +215,13 @@ export default function ShipperLoads() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => { e.preventDefault(); navigate(`/dashboard/shipper/loads/${load.id}/edit`); }}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Load
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={(e) => { e.preventDefault(); deleteLoad(load.id); }}
                         className="text-destructive"
                       >

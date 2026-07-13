@@ -50,6 +50,7 @@ interface RouteStop {
   country: string;
   available_pallets: number;
   stop_order: number;
+  planned_datetime: string | null;
 }
 
 interface Route {
@@ -64,6 +65,7 @@ interface Route {
   departure_time: string | null;
   arrival_date_from: string | null;
   arrival_date_to: string | null;
+  arrival_time: string | null;
   status: RouteStatus;
   vehicle_type: string | null;
   vehicle_constraints: string | null;
@@ -247,7 +249,7 @@ export default function RouteDetails() {
             </div>
             {isOwner && (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/carrier/routes/${route.id}/edit`)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
@@ -303,7 +305,13 @@ export default function RouteDetails() {
                               {index + 1}
                             </div>
                             <div className="flex-1">
-                              <span className="font-medium">{stop.city}, {stop.country}</span>
+                              <div className="font-medium">{stop.city}, {stop.country}</div>
+                              {stop.planned_datetime && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(stop.planned_datetime), 'MMM d, yyyy · HH:mm')}
+                                </div>
+                              )}
                             </div>
                             <Badge variant="secondary">
                               {stop.available_pallets} available pallets
@@ -327,23 +335,33 @@ export default function RouteDetails() {
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="text-sm text-muted-foreground mb-1">Departure Window</div>
+                    <div className="text-sm text-muted-foreground mb-1">Departure</div>
                     <div className="font-medium text-foreground">
-                      {formatDateRange(route.departure_date_from, route.departure_date_to)}
+                      {format(new Date(route.departure_date_from), 'EEEE, MMMM d, yyyy')}
                     </div>
                     {route.departure_time && (
                       <div className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {route.departure_time}
+                        {String(route.departure_time).slice(0, 5)}
                       </div>
                     )}
                   </div>
-                  {route.arrival_date_from && (
+                  {route.arrival_date_from ? (
                     <div className="p-4 rounded-lg bg-muted/50">
-                      <div className="text-sm text-muted-foreground mb-1">Arrival Window</div>
+                      <div className="text-sm text-muted-foreground mb-1">Arrival</div>
                       <div className="font-medium text-foreground">
-                        {formatDateRange(route.arrival_date_from, route.arrival_date_to || route.arrival_date_from)}
+                        {format(new Date(route.arrival_date_from), 'EEEE, MMMM d, yyyy')}
                       </div>
+                      {route.arrival_time && (
+                        <div className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {String(route.arrival_time).slice(0, 5)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-lg bg-muted/50 border border-dashed">
+                      <div className="text-sm text-muted-foreground">Arrival time not specified</div>
                     </div>
                   )}
                 </div>

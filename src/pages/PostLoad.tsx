@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,9 @@ const cargoTypes = [
 export default function PostLoad() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
+  const [loadingExisting, setLoadingExisting] = useState(isEditMode);
   const [openToOffers, setOpenToOffers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
@@ -59,6 +62,58 @@ export default function PostLoad() {
     notes: '',
     cargoNotes: '',
   });
+
+  useEffect(() => {
+    if (!isEditMode || !editId || !user) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('loads')
+        .select('*')
+        .eq('id', editId)
+        .single();
+      if (error || !data) {
+        toast.error('Failed to load');
+        navigate('/dashboard/shipper/loads');
+        return;
+      }
+      if (data.shipper_id !== user.id) {
+        toast.error('You cannot edit this load');
+        navigate('/dashboard/shipper/loads');
+        return;
+      }
+      setFormData({
+        originCity: data.origin_city || '',
+        originCountry: data.origin_country || '',
+        originCountryCode: '',
+        originLat: data.origin_lat,
+        originLng: data.origin_lng,
+        destinationCity: data.destination_city || '',
+        destinationCountry: data.destination_country || '',
+        destinationCountryCode: '',
+        destinationLat: data.destination_lat,
+        destinationLng: data.destination_lng,
+        pickupDateStart: data.pickup_date_from || '',
+        pickupDateEnd: data.pickup_date_to || '',
+        deliveryDateStart: data.delivery_date_from || '',
+        deliveryDateEnd: data.delivery_date_to || '',
+        pallets: String(data.pallets || ''),
+        cargoType: data.cargo_type || 'general',
+        fixedPrice: data.price ? String(data.price) : '',
+        notes: data.notes || '',
+        cargoNotes: data.cargo_notes || '',
+      });
+      setOpenToOffers(data.pricing_type === 'open_to_offers');
+      setSpaceType((data.space_type as SpaceType) || 'epe');
+      setSpaceValue(data.space_value ? String(data.space_value) : '');
+      setDimensions({
+        lengthCm: data.length_cm ? String(data.length_cm) : '',
+        widthCm: data.width_cm ? String(data.width_cm) : '',
+        heightCm: data.height_cm ? String(data.height_cm) : '',
+      });
+      setWeightKg(data.weight_kg ? String(data.weight_kg) : '');
+      setLoadingExisting(false);
+    })();
+  }, [isEditMode, editId, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,8 +160,7 @@ export default function PostLoad() {
         } : undefined
       );
 
-      const { error } = await supabase.from('loads').insert({
-        shipper_id: user.id,
+      const payload = {
         origin_city: formData.originCity,
         origin_country: formData.originCountry,
         origin_lat: formData.originLat,
@@ -121,10 +175,9 @@ export default function PostLoad() {
         delivery_date_to: formData.deliveryDateEnd,
         pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
         cargo_type: formData.cargoType as any,
-        pricing_type: openToOffers ? 'open_to_offers' : 'fixed',
+        pricing_type: openToOffers ? 'open_to_offers' : 'fixed' as any,
         price: openToOffers ? null : parseFloat(formData.fixedPrice) || null,
         notes: formData.notes || null,
-        // New capacity fields
         space_type: spaceType,
         space_value: parseFloat(spaceValue) || 0,
         space_ldm: spaceLdm,
@@ -133,12 +186,19 @@ export default function PostLoad() {
         width_cm: spaceType === 'dimensions' ? parseFloat(dimensions.widthCm) || null : null,
         height_cm: spaceType === 'dimensions' ? parseFloat(dimensions.heightCm) || null : null,
         cargo_notes: formData.cargoNotes || null,
-      });
+      };
 
-      if (error) throw error;
-
-      toast.success('Load posted successfully!');
-      navigate('/dashboard/shipper');
+      if (isEditMode && editId) {
+        const { error } = await supabase.from('loads').update(payload).eq('id', editId);
+        if (error) throw error;
+        toast.success('Load updated');
+        navigate(`/load/${editId}`);
+      } else {
+        const { error } = await supabase.from('loads').insert({ ...payload, shipper_id: user.id });
+        if (error) throw error;
+        toast.success('Load posted successfully!');
+        navigate('/dashboard/shipper');
+      }
     } catch (error: any) {
       console.error('Error posting load:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to post load'));
@@ -146,6 +206,14 @@ export default function PostLoad() {
       setIsSubmitting(false);
     }
   };
+
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -159,8 +227,8 @@ export default function PostLoad() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">Post a New Load</h1>
-              <p className="text-sm text-muted-foreground">Fill in the details to find carriers</p>
+              <h1 className="text-xl font-heading font-bold text-foreground">{isEditMode ? 'Edit Load' : 'Post a New Load'}</h1>
+              <p className="text-sm text-muted-foreground">{isEditMode ? 'Update the load details' : 'Fill in the details to find carriers'}</p>
             </div>
           </div>
         </div>
@@ -464,10 +532,10 @@ export default function PostLoad() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Posting...
+                  {isEditMode ? 'Saving...' : 'Posting...'}
                 </>
               ) : (
-                'Post Load'
+                isEditMode ? 'Save Changes' : 'Post Load'
               )}
             </Button>
           </div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,6 +44,9 @@ const vehicleTypes = [
 export default function PostRoute() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
+  const [loadingExisting, setLoadingExisting] = useState(isEditMode);
   const [stops, setStops] = useState<RouteStop[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
@@ -76,6 +79,74 @@ export default function PostRoute() {
     openToExtraStops: false,
     flexibilityNote: '',
   });
+
+  useEffect(() => {
+    if (!isEditMode || !editId || !user) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('routes')
+        .select('*, route_stops(*)')
+        .eq('id', editId)
+        .single();
+      if (error || !data) {
+        toast.error('Failed to load route');
+        navigate('/dashboard/carrier/routes');
+        return;
+      }
+      if (data.carrier_id !== user.id) {
+        toast.error('You cannot edit this route');
+        navigate('/dashboard/carrier/routes');
+        return;
+      }
+      const dep = data.departure_date_from && data.departure_time
+        ? `${data.departure_date_from}T${String(data.departure_time).slice(0, 5)}`
+        : data.departure_date_from ? `${data.departure_date_from}T00:00` : '';
+      const arr = data.arrival_date_from && (data as any).arrival_time
+        ? `${data.arrival_date_from}T${String((data as any).arrival_time).slice(0, 5)}`
+        : data.arrival_date_from ? `${data.arrival_date_from}T00:00` : '';
+      setFormData({
+        originCity: data.origin_city || '',
+        originCountry: data.origin_country || '',
+        originCountryCode: '',
+        originLat: data.origin_lat,
+        originLng: data.origin_lng,
+        originPlannedDateTime: dep,
+        destinationCity: data.destination_city || '',
+        destinationCountry: data.destination_country || '',
+        destinationCountryCode: '',
+        destinationLat: data.destination_lat,
+        destinationLng: data.destination_lng,
+        destinationPlannedDateTime: arr,
+        departureStart: '',
+        departureTime: '',
+        departureEnd: '',
+        arrivalStart: '',
+        arrivalEnd: '',
+        vehicleType: data.vehicle_type || '',
+        openToExtraStops: !!data.open_to_extra_stops,
+        flexibilityNote: data.flexibility_note || '',
+      });
+      setSpaceType((data.space_type as SpaceType) || 'epe');
+      setSpaceValue(data.space_value ? String(data.space_value) : '');
+      setMaxPayloadKg(data.max_payload_kg ? String(data.max_payload_kg) : '');
+      setMaxDeviationKm(data.max_deviation_km ? String(data.max_deviation_km) : '');
+      setTripDescription(data.trip_description || '');
+      setRouteLink(data.route_link || '');
+      setGoodsAccepted(data.goods_accepted || '');
+      const existingStops = (data.route_stops || [])
+        .sort((a: any, b: any) => a.stop_order - b.stop_order)
+        .map((s: any) => ({
+          id: s.id,
+          city: s.city,
+          country: s.country,
+          countryCode: '',
+          availablePallets: String(s.available_pallets ?? ''),
+          plannedDateTime: s.planned_datetime ? new Date(s.planned_datetime).toISOString().slice(0, 16) : '',
+        }));
+      setStops(existingStops);
+      setLoadingExisting(false);
+    })();
+  }, [isEditMode, editId, user, navigate]);
 
   const addStop = () => {
     setStops([
@@ -174,49 +245,56 @@ export default function PostRoute() {
         itineraryImageUrl = urlData.publicUrl;
       }
 
-      // Create the route with new fields
-      const { data: routeData, error: routeError } = await supabase
-        .from('routes')
-        .insert({
-          carrier_id: user.id,
-          origin_city: formData.originCity,
-          origin_country: formData.originCountry,
-          origin_lat: formData.originLat,
-          origin_lng: formData.originLng,
-          destination_city: formData.destinationCity,
-          destination_country: formData.destinationCountry,
-          destination_lat: formData.destinationLat,
-          destination_lng: formData.destinationLng,
-          departure_date_from: formData.originPlannedDateTime.split('T')[0],
-          departure_date_to: formData.originPlannedDateTime.split('T')[0],
-          departure_time: formData.originPlannedDateTime.split('T')[1] || null,
-          arrival_date_from: formData.destinationPlannedDateTime.split('T')[0],
-          arrival_date_to: formData.destinationPlannedDateTime.split('T')[0],
-          available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
-          vehicle_type: formData.vehicleType,
-          vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
-          status: 'planned',
-          open_to_extra_stops: formData.openToExtraStops,
-          flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
-          space_type: spaceType,
-          space_value: parseFloat(spaceValue) || 0,
-          space_ldm: spaceLdm,
-          max_payload_kg: parseFloat(maxPayloadKg) || 0,
-          max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
-          trip_description: tripDescription || null,
-          route_link: routeLink || null,
-          itinerary_image_url: itineraryImageUrl,
-          goods_accepted: goodsAccepted || null,
-        })
-        .select()
-        .single();
+      const routePayload: any = {
+        origin_city: formData.originCity,
+        origin_country: formData.originCountry,
+        origin_lat: formData.originLat,
+        origin_lng: formData.originLng,
+        destination_city: formData.destinationCity,
+        destination_country: formData.destinationCountry,
+        destination_lat: formData.destinationLat,
+        destination_lng: formData.destinationLng,
+        departure_date_from: formData.originPlannedDateTime.split('T')[0],
+        departure_date_to: formData.originPlannedDateTime.split('T')[0],
+        departure_time: formData.originPlannedDateTime.split('T')[1] || null,
+        arrival_date_from: formData.destinationPlannedDateTime.split('T')[0],
+        arrival_date_to: formData.destinationPlannedDateTime.split('T')[0],
+        arrival_time: formData.destinationPlannedDateTime.split('T')[1] || null,
+        available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
+        vehicle_type: formData.vehicleType,
+        vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
+        open_to_extra_stops: formData.openToExtraStops,
+        flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
+        space_type: spaceType,
+        space_value: parseFloat(spaceValue) || 0,
+        space_ldm: spaceLdm,
+        max_payload_kg: parseFloat(maxPayloadKg) || 0,
+        max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
+        trip_description: tripDescription || null,
+        route_link: routeLink || null,
+        goods_accepted: goodsAccepted || null,
+      };
+      if (itineraryImageUrl) routePayload.itinerary_image_url = itineraryImageUrl;
 
-      if (routeError) throw routeError;
+      let routeId = editId as string | undefined;
+      if (isEditMode && editId) {
+        const { error: updErr } = await supabase.from('routes').update(routePayload).eq('id', editId);
+        if (updErr) throw updErr;
+        // Reconcile stops: delete + reinsert
+        await supabase.from('route_stops').delete().eq('route_id', editId);
+      } else {
+        const { data: routeData, error: routeError } = await supabase
+          .from('routes')
+          .insert({ ...routePayload, carrier_id: user.id, status: 'planned' })
+          .select()
+          .single();
+        if (routeError) throw routeError;
+        routeId = routeData.id;
+      }
 
-      // Create route stops if any
-      if (stops.length > 0) {
+      if (routeId && stops.length > 0) {
         const stopsToInsert = stops.map((stop, index) => ({
-          route_id: routeData.id,
+          route_id: routeId!,
           city: stop.city,
           country: stop.country,
           available_pallets: parseInt(stop.availablePallets) || 0,
@@ -231,8 +309,8 @@ export default function PostRoute() {
         if (stopsError) throw stopsError;
       }
 
-      toast.success('Route posted successfully!');
-      navigate('/dashboard/carrier/routes');
+      toast.success(isEditMode ? 'Route updated' : 'Route posted successfully!');
+      navigate(isEditMode && routeId ? `/dashboard/carrier/routes/${routeId}` : '/dashboard/carrier/routes');
     } catch (error: any) {
       console.error('Error posting route:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to post route'));
@@ -240,6 +318,14 @@ export default function PostRoute() {
       setIsSubmitting(false);
     }
   };
+
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -253,8 +339,8 @@ export default function PostRoute() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">Post a New Route</h1>
-              <p className="text-sm text-muted-foreground">Share your upcoming journey to find loads</p>
+              <h1 className="text-xl font-heading font-bold text-foreground">{isEditMode ? 'Edit Route' : 'Post a New Route'}</h1>
+              <p className="text-sm text-muted-foreground">{isEditMode ? 'Update your planned journey' : 'Share your upcoming journey to find loads'}</p>
             </div>
           </div>
         </div>
@@ -683,12 +769,12 @@ export default function PostRoute() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Posting...
+                  {isEditMode ? 'Saving...' : 'Posting...'}
                 </>
               ) : (
                 <>
                   <Truck className="h-4 w-4" />
-                  Post Route
+                  {isEditMode ? 'Save Changes' : 'Post Route'}
                 </>
               )}
             </Button>
