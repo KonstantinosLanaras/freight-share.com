@@ -351,7 +351,7 @@ export default function PostRoute() {
                       <X className="h-4 w-4" />
                     </button>
                     <div className="text-sm font-medium text-muted-foreground mb-3">Stop {index + 1}</div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <Label>City <span className="text-destructive">*</span></Label>
                         <CityCombobox
