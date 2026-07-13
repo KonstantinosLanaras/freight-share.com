@@ -60,6 +60,7 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRoleSwitchWarning, setShowRoleSwitchWarning] = useState(false);
   const [intendedRole, setIntendedRole] = useState<UserRole | null>(null);
+  const [roleMismatch, setRoleMismatch] = useState<{ intended: UserRole; accountRoles: UserRole[] } | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
