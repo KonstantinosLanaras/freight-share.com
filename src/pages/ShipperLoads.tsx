@@ -215,11 +215,13 @@ export default function ShipperLoads() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => { e.preventDefault(); navigate(`/dashboard/shipper/loads/${load.id}/edit`); }}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Load
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={(e) => { e.preventDefault(); deleteLoad(load.id); }}
                         className="text-destructive"
                       >
