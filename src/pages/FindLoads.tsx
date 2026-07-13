@@ -506,7 +506,7 @@ export default function FindLoads() {
                       </div>
 
 
-                      <div className="flex flex-col items-end gap-3">
+                      <div className="flex flex-col items-end gap-3 pt-10">
                         <div className="text-right">
                           <div className="text-2xl font-bold text-foreground">
                             {load.price ? `€${load.price}` : 'Open to offers'}
