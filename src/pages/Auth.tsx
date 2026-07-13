@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { PasswordInput, validatePassword } from '@/components/auth/PasswordInput';
 import { ForgotPasswordDialog, isRecoveryDialogOpen } from '@/components/auth/ForgotPasswordDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { AlertCircle } from 'lucide-react';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'shipper' | 'carrier';
@@ -58,6 +60,7 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRoleSwitchWarning, setShowRoleSwitchWarning] = useState(false);
   const [intendedRole, setIntendedRole] = useState<UserRole | null>(null);
+  const [roleMismatch, setRoleMismatch] = useState<{ intended: UserRole; accountRoles: UserRole[] } | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -87,9 +90,22 @@ export default function Auth() {
       return;
     }
 
+    // While a submit is in flight (e.g. we're verifying role match and may
+    // sign the user out), or a role mismatch was just detected, hold off.
+    if (isSubmitting || roleMismatch) {
+      return;
+    }
+
     if (user && userRole) {
       const roleParam = searchParams.get('role');
-      
+
+      // If the login form was scoped to a specific role and the account
+      // doesn't have it, the submit handler will already have signed the
+      // user out and shown an inline error. Don't route them anywhere here.
+      if (roleParam && roleParam !== userRole && role && role !== userRole) {
+        return;
+      }
+
       if (roleParam && roleParam !== userRole) {
         setShowRoleSwitchWarning(true);
         setIntendedRole(roleParam as UserRole);
@@ -103,7 +119,7 @@ export default function Auth() {
         navigate('/select-role', { replace: true });
       }
     }
-  }, [user, userRole, navigate, searchParams, role]);
+  }, [user, userRole, navigate, searchParams, role, isSubmitting, roleMismatch]);
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
@@ -271,7 +287,30 @@ export default function Auth() {
             }
           }
         } else {
+          // If the login form was scoped to a specific role, verify the account
+          // actually has that role. If not, deny access and show an inline
+          // message on the login page.
+          if (role) {
+            const { data: sessionData } = await supabase.auth.getUser();
+            const uid = sessionData.user?.id;
+            if (uid) {
+              const { data: rolesData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', uid);
+              const accountRoles = (rolesData ?? [])
+                .map((r) => r.role as string)
+                .filter((r): r is UserRole => r === 'shipper' || r === 'carrier');
+              if (!accountRoles.includes(role)) {
+                await supabase.auth.signOut();
+                setRoleMismatch({ intended: role, accountRoles });
+                setIsSubmitting(false);
+                return;
+              }
+            }
+          }
           clearRateLimit();
+          setRoleMismatch(null);
           toast.success('Welcome back!');
         }
       }
@@ -527,6 +566,67 @@ export default function Auth() {
                   <ArrowLeft className="h-3 w-3" />
                   Back — change role
                 </button>
+              )}
+
+              {roleMismatch && mode === 'login' && (
+                <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+                  <div className="flex gap-3">
+                    <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground mb-1">
+                        This account isn't registered as a {roleMismatch.intended}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {roleMismatch.accountRoles.length > 0 ? (
+                          <>
+                            Your account is registered as a{' '}
+                            <strong className="text-foreground capitalize">
+                              {roleMismatch.accountRoles.join(' and ')}
+                            </strong>
+                            . Access to the {roleMismatch.intended} area has been denied. Switch to the correct login page, or create a new {roleMismatch.intended} account.
+                          </>
+                        ) : (
+                          <>
+                            Access has been denied. Switch to the correct login page, or create a new {roleMismatch.intended} account.
+                          </>
+                        )}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {roleMismatch.accountRoles.length > 0 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={roleMismatch.accountRoles[0] === 'carrier' ? 'carrier' : 'shipper'}
+                            onClick={() => {
+                              const target = roleMismatch.accountRoles[0];
+                              setRoleMismatch(null);
+                              setRole(target);
+                              navigate(`/auth?mode=login&role=${target}`, { replace: true });
+                            }}
+                          >
+                            Switch to {roleMismatch.accountRoles[0]} login
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const intended = roleMismatch.intended;
+                            setRoleMismatch(null);
+                            setMode('signup');
+                            setRole(intended);
+                            setStep('details');
+                            setFormData((f) => ({ ...f, password: '', confirmPassword: '' }));
+                            navigate(`/auth?mode=signup&role=${intended}`, { replace: true });
+                          }}
+                        >
+                          Create a new {roleMismatch.intended} account
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
