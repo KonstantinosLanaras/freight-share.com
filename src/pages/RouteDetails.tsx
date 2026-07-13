@@ -305,7 +305,13 @@ export default function RouteDetails() {
                               {index + 1}
                             </div>
                             <div className="flex-1">
-                              <span className="font-medium">{stop.city}, {stop.country}</span>
+                              <div className="font-medium">{stop.city}, {stop.country}</div>
+                              {stop.planned_datetime && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(stop.planned_datetime), 'MMM d, yyyy · HH:mm')}
+                                </div>
+                              )}
                             </div>
                             <Badge variant="secondary">
                               {stop.available_pallets} available pallets
