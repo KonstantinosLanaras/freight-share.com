@@ -274,7 +274,30 @@ export default function Auth() {
             }
           }
         } else {
+          // If the login form was scoped to a specific role, verify the account
+          // actually has that role. If not, deny access and show an inline
+          // message on the login page.
+          if (role) {
+            const { data: sessionData } = await supabase.auth.getUser();
+            const uid = sessionData.user?.id;
+            if (uid) {
+              const { data: rolesData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', uid);
+              const accountRoles = (rolesData ?? [])
+                .map((r) => r.role as string)
+                .filter((r): r is UserRole => r === 'shipper' || r === 'carrier');
+              if (!accountRoles.includes(role)) {
+                await supabase.auth.signOut();
+                setRoleMismatch({ intended: role, accountRoles });
+                setIsSubmitting(false);
+                return;
+              }
+            }
+          }
           clearRateLimit();
+          setRoleMismatch(null);
           toast.success('Welcome back!');
         }
       }
