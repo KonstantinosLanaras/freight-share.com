@@ -76,7 +76,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="flex-1 flex items-center justify-center py-16 px-4">
+      <main className="flex-1 flex items-center justify-center pt-32 pb-16 px-4">
         <Card className="w-full max-w-md">
           {status === 'checking' && (
             <CardContent className="py-10 flex flex-col items-center gap-3">
