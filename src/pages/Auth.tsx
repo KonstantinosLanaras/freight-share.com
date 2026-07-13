@@ -555,6 +555,67 @@ export default function Auth() {
                 </button>
               )}
 
+              {roleMismatch && mode === 'login' && (
+                <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+                  <div className="flex gap-3">
+                    <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground mb-1">
+                        This account isn't registered as a {roleMismatch.intended}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {roleMismatch.accountRoles.length > 0 ? (
+                          <>
+                            Your account is registered as a{' '}
+                            <strong className="text-foreground capitalize">
+                              {roleMismatch.accountRoles.join(' and ')}
+                            </strong>
+                            . Access to the {roleMismatch.intended} area has been denied. Switch to the correct login page, or create a new {roleMismatch.intended} account.
+                          </>
+                        ) : (
+                          <>
+                            Access has been denied. Switch to the correct login page, or create a new {roleMismatch.intended} account.
+                          </>
+                        )}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {roleMismatch.accountRoles.length > 0 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={roleMismatch.accountRoles[0] === 'carrier' ? 'carrier' : 'shipper'}
+                            onClick={() => {
+                              const target = roleMismatch.accountRoles[0];
+                              setRoleMismatch(null);
+                              setRole(target);
+                              navigate(`/auth?mode=login&role=${target}`, { replace: true });
+                            }}
+                          >
+                            Switch to {roleMismatch.accountRoles[0]} login
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const intended = roleMismatch.intended;
+                            setRoleMismatch(null);
+                            setMode('signup');
+                            setRole(intended);
+                            setStep('details');
+                            setFormData((f) => ({ ...f, password: '', confirmPassword: '' }));
+                            navigate(`/auth?mode=signup&role=${intended}`, { replace: true });
+                          }}
+                        >
+                          Create a new {roleMismatch.intended} account
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === 'signup' && (
                   <>
