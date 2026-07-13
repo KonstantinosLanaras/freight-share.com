@@ -245,49 +245,56 @@ export default function PostRoute() {
         itineraryImageUrl = urlData.publicUrl;
       }
 
-      // Create the route with new fields
-      const { data: routeData, error: routeError } = await supabase
-        .from('routes')
-        .insert({
-          carrier_id: user.id,
-          origin_city: formData.originCity,
-          origin_country: formData.originCountry,
-          origin_lat: formData.originLat,
-          origin_lng: formData.originLng,
-          destination_city: formData.destinationCity,
-          destination_country: formData.destinationCountry,
-          destination_lat: formData.destinationLat,
-          destination_lng: formData.destinationLng,
-          departure_date_from: formData.originPlannedDateTime.split('T')[0],
-          departure_date_to: formData.originPlannedDateTime.split('T')[0],
-          departure_time: formData.originPlannedDateTime.split('T')[1] || null,
-          arrival_date_from: formData.destinationPlannedDateTime.split('T')[0],
-          arrival_date_to: formData.destinationPlannedDateTime.split('T')[0],
-          available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
-          vehicle_type: formData.vehicleType,
-          vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
-          status: 'planned',
-          open_to_extra_stops: formData.openToExtraStops,
-          flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
-          space_type: spaceType,
-          space_value: parseFloat(spaceValue) || 0,
-          space_ldm: spaceLdm,
-          max_payload_kg: parseFloat(maxPayloadKg) || 0,
-          max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
-          trip_description: tripDescription || null,
-          route_link: routeLink || null,
-          itinerary_image_url: itineraryImageUrl,
-          goods_accepted: goodsAccepted || null,
-        })
-        .select()
-        .single();
+      const routePayload: any = {
+        origin_city: formData.originCity,
+        origin_country: formData.originCountry,
+        origin_lat: formData.originLat,
+        origin_lng: formData.originLng,
+        destination_city: formData.destinationCity,
+        destination_country: formData.destinationCountry,
+        destination_lat: formData.destinationLat,
+        destination_lng: formData.destinationLng,
+        departure_date_from: formData.originPlannedDateTime.split('T')[0],
+        departure_date_to: formData.originPlannedDateTime.split('T')[0],
+        departure_time: formData.originPlannedDateTime.split('T')[1] || null,
+        arrival_date_from: formData.destinationPlannedDateTime.split('T')[0],
+        arrival_date_to: formData.destinationPlannedDateTime.split('T')[0],
+        arrival_time: formData.destinationPlannedDateTime.split('T')[1] || null,
+        available_pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
+        vehicle_type: formData.vehicleType,
+        vehicle_constraints: vehicleTypes.find(v => v.value === formData.vehicleType)?.label || null,
+        open_to_extra_stops: formData.openToExtraStops,
+        flexibility_note: formData.openToExtraStops ? formData.flexibilityNote.trim() : null,
+        space_type: spaceType,
+        space_value: parseFloat(spaceValue) || 0,
+        space_ldm: spaceLdm,
+        max_payload_kg: parseFloat(maxPayloadKg) || 0,
+        max_deviation_km: maxDeviationKm ? parseFloat(maxDeviationKm) : null,
+        trip_description: tripDescription || null,
+        route_link: routeLink || null,
+        goods_accepted: goodsAccepted || null,
+      };
+      if (itineraryImageUrl) routePayload.itinerary_image_url = itineraryImageUrl;
 
-      if (routeError) throw routeError;
+      let routeId = editId as string | undefined;
+      if (isEditMode && editId) {
+        const { error: updErr } = await supabase.from('routes').update(routePayload).eq('id', editId);
+        if (updErr) throw updErr;
+        // Reconcile stops: delete + reinsert
+        await supabase.from('route_stops').delete().eq('route_id', editId);
+      } else {
+        const { data: routeData, error: routeError } = await supabase
+          .from('routes')
+          .insert({ ...routePayload, carrier_id: user.id, status: 'planned' })
+          .select()
+          .single();
+        if (routeError) throw routeError;
+        routeId = routeData.id;
+      }
 
-      // Create route stops if any
-      if (stops.length > 0) {
+      if (routeId && stops.length > 0) {
         const stopsToInsert = stops.map((stop, index) => ({
-          route_id: routeData.id,
+          route_id: routeId!,
           city: stop.city,
           country: stop.country,
           available_pallets: parseInt(stop.availablePallets) || 0,
@@ -302,8 +309,8 @@ export default function PostRoute() {
         if (stopsError) throw stopsError;
       }
 
-      toast.success('Route posted successfully!');
-      navigate('/dashboard/carrier/routes');
+      toast.success(isEditMode ? 'Route updated' : 'Route posted successfully!');
+      navigate(isEditMode && routeId ? `/dashboard/carrier/routes/${routeId}` : '/dashboard/carrier/routes');
     } catch (error: any) {
       console.error('Error posting route:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to post route'));
