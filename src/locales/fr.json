@@ -15,6 +15,7 @@
     "titleHighlight": "Des expéditions optimisées.",
     "description": "La logistique simplifiée entre expéditeurs et transporteurs. Sans intermédiaires. Tarification transparente. Paiements sécurisés.",
     "postLoad": "Publier une demande de transport",
+    "exploreBeta": "Explorer la bêta",
     "browseLoads": "Voir les demandes de transport",
     "learnMore": "En savoir plus",
     "shipperCard": {

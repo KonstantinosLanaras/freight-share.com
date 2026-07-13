@@ -17,6 +17,7 @@
     "titleHighlight": "Ship Smarter.",
     "description": "The freight platform that matches shippers with carriers seamlessly. No intermediaries. Transparent pricing. Secure payments.",
     "postLoad": "Post a Load",
+    "exploreBeta": "Explore the Beta",
     "browseLoads": "Browse Loads",
     "learnMore": "Learn more",
     "shipperCard": {
