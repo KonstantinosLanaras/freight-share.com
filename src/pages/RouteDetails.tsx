@@ -249,7 +249,7 @@ export default function RouteDetails() {
             </div>
             {isOwner && (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/carrier/routes/${route.id}/edit`)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
