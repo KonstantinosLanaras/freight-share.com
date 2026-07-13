@@ -541,7 +541,7 @@ export default function PostRoute() {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="destinationPlannedDateTime">Planned Arrival <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="destinationPlannedDateTime">Arrive by <span className="text-destructive">*</span></Label>
                   <Input
                     id="destinationPlannedDateTime"
                     type="datetime-local"
