@@ -64,6 +64,7 @@ interface Route {
   departure_time: string | null;
   arrival_date_from: string | null;
   arrival_date_to: string | null;
+  arrival_time: string | null;
   status: RouteStatus;
   vehicle_type: string | null;
   vehicle_constraints: string | null;
