@@ -132,11 +132,9 @@ export default function ResetPassword() {
                     <PasswordInput
                       id="new-password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      autoComplete="new-password"
+                      onChange={setPassword}
                       showStrength
                       showRequirements
-                      required
                     />
                   </div>
                   <div>
@@ -144,9 +142,7 @@ export default function ResetPassword() {
                     <PasswordInput
                       id="confirm-password"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      autoComplete="new-password"
-                      required
+                      onChange={setConfirmPassword}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={status === 'saving'}>

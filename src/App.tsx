@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import ShipperDashboard from "./pages/ShipperDashboard";
 import CarrierDashboard from "./pages/CarrierDashboard";
 import PostLoad from "./pages/PostLoad";
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/for-shippers" element={<ForShippers />} />
             <Route path="/for-carriers" element={<ForCarriers />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/routes" element={<BrowseRoutes />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/about" element={<About />} />
