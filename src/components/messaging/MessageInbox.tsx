@@ -6,6 +6,7 @@ import { MessageSquare, Package, Truck, ArrowRight, Inbox } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 interface Conversation {
@@ -109,6 +110,7 @@ export function MessageInbox() {
       setConversations(conversationsWithMessages);
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

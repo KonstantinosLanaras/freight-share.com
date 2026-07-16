@@ -104,6 +104,7 @@ export default function ShipperLoads() {
       setLoads((data || []).map(l => ({ ...l, offer_count: offerCountMap[l.id] || 0 })));
     } catch (error) {
       console.error('Error fetching loads:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

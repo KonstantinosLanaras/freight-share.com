@@ -28,6 +28,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addDays, parseISO, isValid } from 'date-fns';
+import { toast } from 'sonner';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
@@ -138,6 +139,7 @@ export default function FindLoads() {
       setLoads(data || []);
     } catch (error) {
       console.error('Error fetching loads:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

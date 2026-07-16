@@ -58,6 +58,7 @@ export default function CarrierInsuranceSetup() {
       }
     } catch (err) {
       console.error(err);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

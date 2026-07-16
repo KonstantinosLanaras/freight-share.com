@@ -138,6 +138,7 @@ export default function OffersShipper() {
       );
     } catch (e) {
       console.error('fetch offers failed', e);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

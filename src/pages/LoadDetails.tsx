@@ -163,6 +163,7 @@ export default function LoadDetails() {
     } catch (error) {
       console.error('Error fetching load:', error);
       toast.error('Failed to load details');
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }
@@ -193,6 +194,7 @@ export default function LoadDetails() {
       setOffers(enriched);
     } catch (error) {
       console.error('Error fetching offers:', error);
+      toast.error('Failed to load — please try refreshing');
     }
   };
 

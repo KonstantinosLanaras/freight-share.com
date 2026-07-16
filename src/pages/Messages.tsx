@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Shipment {
   id: string;
@@ -63,6 +64,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error('Error fetching shipment:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

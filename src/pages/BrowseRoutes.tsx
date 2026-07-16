@@ -30,6 +30,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
@@ -135,6 +136,7 @@ export default function BrowseRoutes() {
       setRoutes(routesWithCarriers as Route[]);
     } catch (error) {
       console.error('Error fetching routes:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

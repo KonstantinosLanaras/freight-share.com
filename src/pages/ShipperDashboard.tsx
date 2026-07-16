@@ -30,6 +30,7 @@ import { useShipperOffersUnread } from '@/hooks/useShipperOffersUnread';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { ShipperVerificationForm } from '@/components/verification/ShipperVerificationForm';
 import { BookmarkButton } from '@/components/BookmarkButton';
@@ -245,6 +246,7 @@ export default function ShipperDashboard() {
       setStats({ active, pending: totalPendingOffers, completed, totalSpent, pickupRequests: pendingPickups });
     } catch (error) {
       console.error('Error fetching data:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }
