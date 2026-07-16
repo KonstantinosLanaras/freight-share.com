@@ -286,7 +286,7 @@ export default function MyRoutes() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => navigate(`/route/${route.id}`)}>
+                                    <DropdownMenuItem onClick={() => navigate(`/routes/${route.id}`)}>
                                       <Eye className="h-4 w-4 mr-2" />
                                       View Details
                                     </DropdownMenuItem>

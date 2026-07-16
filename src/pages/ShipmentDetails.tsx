@@ -98,6 +98,7 @@ export default function ShipmentDetails() {
         });
       } catch (err) {
         console.error('Payment verification failed:', err);
+        toast.error(getSafeErrorMessage(err, 'Could not confirm your payment. If you were charged, contact support.'));
       } finally {
         // Refresh shipment to pick up updated payment_status
         fetchShipmentData();
