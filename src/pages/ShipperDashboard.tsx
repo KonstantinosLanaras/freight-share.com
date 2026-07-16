@@ -327,31 +327,13 @@ export default function ShipperDashboard() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            {/* Group 1: Home, Browse Routes, Post New Load */}
             <Link
               to="/"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Home className="h-5 w-5" />
               Home
-            </Link>
-
-            {/* Group 1 */}
-            <Link
-              to="/dashboard/shipper/loads"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Package className="h-5 w-5" />
-              My Loads
-            </Link>
-            <Link
-              to="/offers/shipper"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Handshake className="h-5 w-5" />
-              <span className="flex-1">My Offers</span>
-              {offersUnread > 0 && (
-                <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{offersUnread}</Badge>
-              )}
             </Link>
             <Link
               to="/routes"
@@ -360,8 +342,36 @@ export default function ShipperDashboard() {
               <MapPin className="h-5 w-5" />
               Browse Routes
             </Link>
+            <Link
+              to="/dashboard/shipper/loads/new"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Plus className="h-5 w-5" />
+              Post New Load
+            </Link>
 
-            {/* Divider + Communication group */}
+            {/* Group 2: My Loads, My Offers */}
+            <div className="pt-3 mt-3 border-t border-sidebar-border">
+              <Link
+                to="/dashboard/shipper/loads"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Package className="h-5 w-5" />
+                My Loads
+              </Link>
+              <Link
+                to="/offers/shipper"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              >
+                <Handshake className="h-5 w-5" />
+                <span className="flex-1">My Offers</span>
+                {offersUnread > 0 && (
+                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{offersUnread}</Badge>
+                )}
+              </Link>
+            </div>
+
+            {/* Group 3: Communication */}
             <div className="pt-3 mt-3 border-t border-sidebar-border">
               <div className="px-4 mb-2">
                 <span className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Communication</span>
@@ -374,8 +384,6 @@ export default function ShipperDashboard() {
                 Messages
               </Link>
             </div>
-
-
           </nav>
 
           {/* Help & Sign Out — Always visible at bottom */}
