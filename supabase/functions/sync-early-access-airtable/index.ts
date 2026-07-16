@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/airtable';
 const BASE_ID = 'appG2iLyBCXICk8zI';
-const TABLE_ID = 'tblhnWPCSCYr2iT4G'; // "Ealry access from website"
+const TABLE_ID = 'tblhnWPCSCYr2iT4G'; // "Early access from website"
 
 interface Payload {
   fullName: string;
