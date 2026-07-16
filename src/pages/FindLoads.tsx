@@ -28,6 +28,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addDays, parseISO, isValid } from 'date-fns';
+import { toast } from 'sonner';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { checkCompatibility, type CargoType, type VehicleType, vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';

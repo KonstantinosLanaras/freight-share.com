@@ -30,6 +30,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
