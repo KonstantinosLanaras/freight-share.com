@@ -109,6 +109,7 @@ export function MessageInbox() {
       setConversations(conversationsWithMessages);
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

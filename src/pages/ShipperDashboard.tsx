@@ -245,6 +245,7 @@ export default function ShipperDashboard() {
       setStats({ active, pending: totalPendingOffers, completed, totalSpent, pickupRequests: pendingPickups });
     } catch (error) {
       console.error('Error fetching data:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

@@ -63,6 +63,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error('Error fetching shipment:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

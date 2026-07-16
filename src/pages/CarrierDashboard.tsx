@@ -197,6 +197,7 @@ export default function CarrierDashboard() {
       });
     } catch (error) {
       console.error('Error fetching data:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

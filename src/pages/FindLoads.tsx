@@ -138,6 +138,7 @@ export default function FindLoads() {
       setLoads(data || []);
     } catch (error) {
       console.error('Error fetching loads:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

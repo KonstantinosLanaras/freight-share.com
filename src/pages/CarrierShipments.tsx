@@ -135,6 +135,7 @@ export default function CarrierShipments() {
       }
     } catch (error) {
       console.error('Error fetching shipments:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }

@@ -135,6 +135,7 @@ export default function BrowseRoutes() {
       setRoutes(routesWithCarriers as Route[]);
     } catch (error) {
       console.error('Error fetching routes:', error);
+      toast.error('Failed to load — please try refreshing');
     } finally {
       setLoading(false);
     }
