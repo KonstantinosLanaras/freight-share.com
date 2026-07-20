@@ -565,29 +565,22 @@ export default function ShipperDashboard() {
               </div>
 
               {/* Routes Matching Your Loads */}
-              <Card className="mb-6 border-primary/20">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        Routes Matching Your Loads
-                      </CardTitle>
-                      <Badge variant="secondary" className="mt-2 text-xs font-normal">
-                        Based on your active shipments
-                      </Badge>
-                    </div>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/routes">
-                        View all routes
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </Link>
-                    </Button>
-                  </div>
+              <Card className="mb-6">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Routes Matching Your Loads
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/routes">
+                      View all routes
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {matchingRoutes.length > 0 ? (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
                       {matchingRoutes.map((route) => {
                         const dateLabel = route.departure_date_from === route.departure_date_to
                           ? format(new Date(route.departure_date_from), 'MMM d')
@@ -596,7 +589,7 @@ export default function ShipperDashboard() {
                           <Link
                             key={route.id}
                             to={`/routes/${route.id}`}
-                            className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                            className="relative shrink-0 snap-start w-80 block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                           >
                             <BookmarkButton id={route.id} className="absolute top-2 right-2 z-10" />
                             <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
@@ -634,6 +627,7 @@ export default function ShipperDashboard() {
                   )}
                 </CardContent>
               </Card>
+
 
 
               {/* Pickup Requests Status */}

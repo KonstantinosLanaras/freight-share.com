@@ -647,12 +647,12 @@ export default function CarrierDashboard() {
                       </div>
                     ) : (
                       <>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                          {availableLoads.slice(0, 3).map((load) => (
+                        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
+                          {availableLoads.slice(0, 8).map((load) => (
                             <Link
                               key={load.id}
                               to={`/load/${load.id}`}
-                              className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                              className="relative shrink-0 snap-start w-72 block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                             >
                               <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
                               <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
@@ -673,14 +673,15 @@ export default function CarrierDashboard() {
                             </Link>
                           ))}
                         </div>
-                        {availableLoads.length > 3 && (
+                        {availableLoads.length > 8 && (
                           <Button variant="outline" className="w-full mt-4" asChild>
                             <Link to="/dashboard/carrier/find-loads">
-                              View {availableLoads.length - 3} more loads
+                              View {availableLoads.length - 8} more loads
                             </Link>
                           </Button>
                         )}
                       </>
+
                     )}
 
                   </CardContent>
