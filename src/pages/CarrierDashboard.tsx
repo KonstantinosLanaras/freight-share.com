@@ -36,6 +36,10 @@ import { VerificationBadge } from '@/components/verification/VerificationBadge';
 import { CarrierVerificationForm } from '@/components/verification/CarrierVerificationForm';
 import { DeviationRequestCard } from '@/components/routes/DeviationRequestCard';
 import { BookmarkButton } from '@/components/BookmarkButton';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
+import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { checkLoadRouteMatch } from '@/lib/matchingUtils';
+import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -43,9 +47,18 @@ interface Route {
   id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
+  destination_lat: number | null;
+  destination_lng: number | null;
+  max_deviation_km: number | null;
+  max_destination_radius_km: number | null;
   available_pallets: number;
+  vehicle_type: string | null;
+  max_payload_kg: number | null;
+  space_ldm: number | null;
   departure_date_from: string;
   departure_date_to: string;
   status: RouteStatus;
@@ -55,14 +68,28 @@ interface Load {
   id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
+  destination_lat: number | null;
+  destination_lng: number | null;
   pallets: number;
+  cargo_type: string;
+  weight_kg: number | null;
+  space_ldm: number | null;
   price: number | null;
   pricing_type: string;
   pickup_date_from: string;
   pickup_date_to: string;
   shipper_id: string;
+}
+
+interface MatchedLoad extends Load {
+  originKm: number;
+  destKm: number;
+  originTier: 'green' | 'yellow' | null;
+  destTier: 'green' | 'yellow' | null;
 }
 
 interface Profile {
@@ -96,7 +123,7 @@ interface DeviationRequest {
 export default function CarrierDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
-  const [availableLoads, setAvailableLoads] = useState<Load[]>([]);
+  const [availableLoads, setAvailableLoads] = useState<MatchedLoad[]>([]);
   const [deviationRequests, setDeviationRequests] = useState<DeviationRequest[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,18 +171,55 @@ export default function CarrierDashboard() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      setRoutes((routesData as Route[]) || []);
+      const carrierRoutes = (routesData as Route[]) || [];
+      setRoutes(carrierRoutes);
 
-      // Fetch available loads (posted status, not by this user)
+      // Fetch candidate loads (posted status, not by this user), then match
+      // them against this carrier's own routes by real distance -- same
+      // Haversine + tolerance logic used on BrowseRoutes/FindLoads, not
+      // just "any recent load" with a static "Match" label.
       const { data: loadsData } = await supabase
         .from('loads')
         .select('*')
         .eq('status', 'posted')
         .neq('shipper_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(50);
 
-      setAvailableLoads(loadsData || []);
+      const routesWithCoords = carrierRoutes.filter(
+        (r): r is Route & { origin_lat: number; origin_lng: number; destination_lat: number; destination_lng: number } =>
+          r.origin_lat != null && r.origin_lng != null && r.destination_lat != null && r.destination_lng != null
+      );
+
+      const matched: MatchedLoad[] = [];
+      for (const load of (loadsData as Load[]) || []) {
+        if (load.origin_lat == null || load.origin_lng == null || load.destination_lat == null || load.destination_lng == null) continue;
+        let best: { originKm: number; destKm: number; originTier: 'green' | 'yellow'; destTier: 'green' | 'yellow' } | null = null;
+        for (const route of routesWithCoords) {
+          const originKm = haversineKm(route.origin_lat, route.origin_lng, load.origin_lat, load.origin_lng);
+          const destKm = haversineKm(route.destination_lat, route.destination_lng, load.destination_lat, load.destination_lng);
+          const originTier = getProximityTier(originKm, route.max_deviation_km);
+          const destTier = getProximityTier(destKm, route.max_destination_radius_km);
+          if (!originTier || !destTier) continue;
+
+          // Proximity alone isn't enough -- also require the route can
+          // actually carry this load (cargo/vehicle compatibility, pallets
+          // or LDM capacity, weight), same check used on FindLoads, so this
+          // widget doesn't surface a "match" that's really incompatible.
+          const compat = checkLoadRouteMatch(
+            { cargoType: load.cargo_type as CargoType, pallets: load.pallets, weightKg: load.weight_kg || 0, spaceLdm: load.space_ldm ?? undefined },
+            { vehicleType: route.vehicle_type as VehicleType | null, availablePallets: route.available_pallets, maxPayloadKg: route.max_payload_kg || 0, spaceLdm: route.space_ldm ?? undefined }
+          );
+          if (!compat.isMatch) continue;
+
+          if (!best || originKm + destKm < best.originKm + best.destKm) {
+            best = { originKm, destKm, originTier, destTier };
+          }
+        }
+        if (best) matched.push({ ...load, ...best });
+      }
+      matched.sort((a, b) => (a.originKm + a.destKm) - (b.originKm + b.destKm));
+      setAvailableLoads(matched);
 
       // Fetch deviation requests for carrier
       const { data: requestsData } = await supabase
@@ -576,7 +640,9 @@ export default function CarrierDashboard() {
                     {availableLoads.length === 0 ? (
                       <div className="text-center py-8">
                         <Package className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                        <p className="text-muted-foreground mb-3">No loads available right now</p>
+                        <p className="text-muted-foreground mb-3">
+                          {routes.length === 0 ? 'No loads available right now' : 'No loads match your active routes right now'}
+                        </p>
                         <p className="text-sm text-muted-foreground">Check back soon for new opportunities</p>
                       </div>
                     ) : (
@@ -589,8 +655,12 @@ export default function CarrierDashboard() {
                               className="relative block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                             >
                               <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
-                              <div className="font-medium text-foreground mb-1">
-                                {load.origin_city} → {load.destination_city}
+                              <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
+                                <span>{load.origin_city}</span>
+                                <ProximityBadge distanceKm={load.originKm} tier={load.originTier} label="Distance from your route's origin" />
+                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span>{load.destination_city}</span>
+                                <ProximityBadge distanceKm={load.destKm} tier={load.destTier} label="Distance from your route's destination" />
                               </div>
                               <div className="text-sm text-muted-foreground mb-3">
                                 {load.pallets} pallets · {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
@@ -599,9 +669,6 @@ export default function CarrierDashboard() {
                                 <span className="text-primary font-semibold">
                                   {load.price ? `€${load.price}` : 'Open'}
                                 </span>
-                                <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                                  Match
-                                </Badge>
                               </div>
                             </Link>
                           ))}
