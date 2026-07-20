@@ -54,20 +54,25 @@ export function checkLoadRouteMatch(
     }
   }
   
-  // 2. Check capacity constraints (pallets or LDM)
+  // 2. Check capacity constraints. Pallets and LDM are two different units
+  // for declaring the same thing, and a route/load declared in one doesn't
+  // populate the other's raw count (e.g. an LDM-only route stores
+  // availablePallets as 0) -- so LDM, which is always computed for both
+  // sides regardless of how capacity was declared, is the real apples-to-
+  // apples comparison and takes priority. Raw pallet count is only used as
+  // a fallback when LDM isn't available on either side.
   let hasCapacity = true;
   let capacityNote: string | undefined;
-  
-  if (load.pallets > route.availablePallets) {
+
+  if (load.spaceLdm != null && route.spaceLdm != null) {
+    if (load.spaceLdm > route.spaceLdm) {
+      hasCapacity = false;
+      capacityNote = `Load requires ${load.spaceLdm.toFixed(1)} LDM but route only has ${route.spaceLdm.toFixed(1)} available`;
+      reasons.push(capacityNote);
+    }
+  } else if (load.pallets > route.availablePallets) {
     hasCapacity = false;
     capacityNote = `Load requires ${load.pallets} pallets but route only has ${route.availablePallets} available`;
-    reasons.push(capacityNote);
-  }
-  
-  // Also check LDM if available
-  if (load.spaceLdm && route.spaceLdm && load.spaceLdm > route.spaceLdm) {
-    hasCapacity = false;
-    capacityNote = `Load requires ${load.spaceLdm.toFixed(1)} LDM but route only has ${route.spaceLdm.toFixed(1)} available`;
     reasons.push(capacityNote);
   }
   

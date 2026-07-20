@@ -37,6 +37,8 @@ import { BookmarkButton } from '@/components/BookmarkButton';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { checkLoadRouteMatch } from '@/lib/matchingUtils';
+import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
 
 interface Load {
   id: string;
@@ -49,6 +51,9 @@ interface Load {
   destination_lat: number | null;
   destination_lng: number | null;
   pallets: number;
+  cargo_type: string;
+  weight_kg: number | null;
+  space_ldm: number | null;
   status: string;
   price: number | null;
   pickup_date_from: string;
@@ -67,6 +72,9 @@ interface MatchingRoute {
   departure_date_to: string;
   available_pallets: number;
   open_to_extra_stops: boolean;
+  vehicle_type: string | null;
+  max_payload_kg: number | null;
+  space_ldm: number | null;
   originKm: number;
   destKm: number;
   originTier: 'green' | 'yellow' | null;
@@ -203,7 +211,7 @@ export default function ShipperDashboard() {
       const today = new Date().toISOString().split('T')[0];
       const { data: activeRoutesData } = await supabase
         .from('routes')
-        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km, departure_date_from, departure_date_to, available_pallets, open_to_extra_stops')
+        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km, departure_date_from, departure_date_to, available_pallets, open_to_extra_stops, vehicle_type, max_payload_kg, space_ldm')
         .in('status', ['planned', 'active'])
         .gte('departure_date_to', today)
         .order('departure_date_from', { ascending: true })
@@ -223,7 +231,19 @@ export default function ShipperDashboard() {
           const destKm = haversineKm(route.destination_lat, route.destination_lng, load.destination_lat, load.destination_lng);
           const originTier = getProximityTier(originKm, route.max_deviation_km);
           const destTier = getProximityTier(destKm, route.max_destination_radius_km);
-          if (originTier && destTier && (!best || originKm + destKm < best.originKm + best.destKm)) {
+          if (!originTier || !destTier) continue;
+
+          // Proximity alone isn't enough -- also require the route can
+          // actually carry this load (cargo/vehicle compatibility, pallets
+          // or LDM capacity, weight), same check used on FindLoads, so this
+          // widget doesn't surface a "match" that's really incompatible.
+          const compat = checkLoadRouteMatch(
+            { cargoType: load.cargo_type as CargoType, pallets: load.pallets, weightKg: load.weight_kg || 0, spaceLdm: load.space_ldm ?? undefined },
+            { vehicleType: route.vehicle_type as VehicleType | null, availablePallets: route.available_pallets, maxPayloadKg: route.max_payload_kg || 0, spaceLdm: route.space_ldm ?? undefined }
+          );
+          if (!compat.isMatch) continue;
+
+          if (!best || originKm + destKm < best.originKm + best.destKm) {
             best = { originKm, destKm, originTier, destTier };
           }
         }
