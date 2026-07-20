@@ -16,6 +16,17 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
+import { DeliveryEvidenceDialog } from '@/components/shipments/DeliveryEvidenceDialog';
+
+interface EvidenceRecord {
+  kind: 'pickup' | 'delivery';
+  photo_url: string | null;
+  signature_url: string | null;
+  signer_name: string | null;
+  condition: string;
+  condition_notes: string | null;
+  created_at: string;
+}
 
 interface ShipmentData {
   id: string;
@@ -81,6 +92,8 @@ export default function ShipmentDetails() {
   const [otherPartyRating, setOtherPartyRating] = useState<any>(null);
 
   const [timestamps, setTimestamps] = useState<{ status: string; created_at: string }[]>([]);
+  const [evidence, setEvidence] = useState<EvidenceRecord[]>([]);
+  const [evidenceDialog, setEvidenceDialog] = useState<{ open: boolean; kind: 'pickup' | 'delivery' }>({ open: false, kind: 'pickup' });
 
   const backPath = role === 'carrier' ? '/dashboard/carrier/shipments' : '/dashboard/shipper/shipments';
 
@@ -126,19 +139,21 @@ export default function ShipmentDetails() {
       setShipment(shipmentData);
 
       // Fetch load, profiles, timestamps in parallel
-      const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes] = await Promise.all([
+      const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes, evidenceRes] = await Promise.all([
         supabase.from('loads').select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from').eq('id', shipmentData.load_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
         supabase.from('shipment_timestamps').select('status, created_at').eq('shipment_id', id!).order('created_at', { ascending: true }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rater_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rated_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
+        supabase.from('shipment_evidence').select('kind, photo_url, signature_url, signer_name, condition, condition_notes, created_at').eq('shipment_id', id!),
       ]);
 
       setLoad(loadRes.data);
       setShipperProfile(shipperRes.data);
       setCarrierProfile(carrierRes.data);
       setTimestamps(tsRes.data || []);
+      setEvidence((evidenceRes.data as EvidenceRecord[]) || []);
       setExistingRating(myRatingRes.data);
       setOtherPartyRating(theirRatingRes.data);
     } catch (error) {
@@ -392,6 +407,50 @@ export default function ShipmentDetails() {
               </CardContent>
             </Card>
 
+            {/* Proof of Pickup / Delivery */}
+            {evidence.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    Delivery Evidence
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {evidence.map((ev) => (
+                    <div key={ev.kind} className="p-4 rounded-lg bg-muted/50 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium capitalize">{ev.kind}</div>
+                        <Badge
+                          variant="outline"
+                          className={ev.condition === 'good' ? 'text-success border-success/50 bg-success/10' : 'text-destructive border-destructive/50 bg-destructive/10'}
+                        >
+                          {ev.condition === 'good' ? 'Good condition' : 'Damaged'}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {ev.photo_url && (
+                          <img src={ev.photo_url} alt={`${ev.kind} photo`} className="h-24 w-24 rounded-md object-cover border border-border" />
+                        )}
+                        {ev.signature_url && (
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Signed by {ev.signer_name}</div>
+                            <img src={ev.signature_url} alt="Signature" className="h-24 rounded-md border border-border bg-white" />
+                          </div>
+                        )}
+                      </div>
+                      {ev.condition_notes && (
+                        <p className="text-sm text-muted-foreground">{ev.condition_notes}</p>
+                      )}
+                      <div className="text-xs text-muted-foreground">
+                        {format(new Date(ev.created_at), 'MMM d, yyyy HH:mm')}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Transaction Summary */}
             <Card>
               <CardHeader>
@@ -550,7 +609,7 @@ export default function ShipmentDetails() {
                   <Button
                     variant="default"
                     className="w-full"
-                    onClick={() => handleStatusUpdate('picked_up')}
+                    onClick={() => setEvidenceDialog({ open: true, kind: 'pickup' })}
                     disabled={updating}
                   >
                     {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Truck className="h-4 w-4 mr-2" />}
@@ -563,7 +622,7 @@ export default function ShipmentDetails() {
                   <Button
                     variant="default"
                     className="w-full"
-                    onClick={() => handleStatusUpdate('delivered')}
+                    onClick={() => setEvidenceDialog({ open: true, kind: 'delivery' })}
                     disabled={updating}
                   >
                     {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
@@ -640,6 +699,14 @@ export default function ShipmentDetails() {
           </div>
         </div>
       </main>
+
+      <DeliveryEvidenceDialog
+        open={evidenceDialog.open}
+        onOpenChange={(open) => setEvidenceDialog((s) => ({ ...s, open }))}
+        shipmentId={shipment.id}
+        kind={evidenceDialog.kind}
+        onConfirm={() => handleStatusUpdate(evidenceDialog.kind === 'pickup' ? 'picked_up' : 'delivered')}
+      />
     </div>
   );
 }
