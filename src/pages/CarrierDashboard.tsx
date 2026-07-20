@@ -596,10 +596,11 @@ export default function CarrierDashboard() {
                 </Card>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 {/* Pending Pickup Requests - Priority */}
                 {deviationRequests.length > 0 && (
-                  <Card className="lg:col-span-2 border-warning/30 bg-warning/5">
+                  <Card className="border-warning/30 bg-warning/5">
+
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <MessageSquare className="h-5 w-5 text-warning" />
