@@ -37,6 +37,8 @@ import { DeviationRequestCard } from '@/components/routes/DeviationRequestCard';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { checkLoadRouteMatch } from '@/lib/matchingUtils';
+import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -53,6 +55,9 @@ interface Route {
   max_deviation_km: number | null;
   max_destination_radius_km: number | null;
   available_pallets: number;
+  vehicle_type: string | null;
+  max_payload_kg: number | null;
+  space_ldm: number | null;
   departure_date_from: string;
   departure_date_to: string;
   status: RouteStatus;
@@ -69,6 +74,9 @@ interface Load {
   destination_lat: number | null;
   destination_lng: number | null;
   pallets: number;
+  cargo_type: string;
+  weight_kg: number | null;
+  space_ldm: number | null;
   price: number | null;
   pricing_type: string;
   pickup_date_from: string;
@@ -191,7 +199,19 @@ export default function CarrierDashboard() {
           const destKm = haversineKm(route.destination_lat, route.destination_lng, load.destination_lat, load.destination_lng);
           const originTier = getProximityTier(originKm, route.max_deviation_km);
           const destTier = getProximityTier(destKm, route.max_destination_radius_km);
-          if (originTier && destTier && (!best || originKm + destKm < best.originKm + best.destKm)) {
+          if (!originTier || !destTier) continue;
+
+          // Proximity alone isn't enough -- also require the route can
+          // actually carry this load (cargo/vehicle compatibility, pallets
+          // or LDM capacity, weight), same check used on FindLoads, so this
+          // widget doesn't surface a "match" that's really incompatible.
+          const compat = checkLoadRouteMatch(
+            { cargoType: load.cargo_type as CargoType, pallets: load.pallets, weightKg: load.weight_kg || 0, spaceLdm: load.space_ldm ?? undefined },
+            { vehicleType: route.vehicle_type as VehicleType | null, availablePallets: route.available_pallets, maxPayloadKg: route.max_payload_kg || 0, spaceLdm: route.space_ldm ?? undefined }
+          );
+          if (!compat.isMatch) continue;
+
+          if (!best || originKm + destKm < best.originKm + best.destKm) {
             best = { originKm, destKm, originTier, destTier };
           }
         }
