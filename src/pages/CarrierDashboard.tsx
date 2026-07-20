@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,8 @@ import {
   XCircle,
   Inbox,
   Bookmark,
-  Home
+  Home,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,6 +97,8 @@ interface Profile {
   full_name: string | null;
   company_name: string | null;
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
+  stripe_connect_account_id: string | null;
+  stripe_connect_onboarded: boolean;
 }
 
 interface DeviationRequest {
@@ -130,8 +133,10 @@ export default function CarrierDashboard() {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0, pendingRequests: 0 });
+  const [connectingPayouts, setConnectingPayouts] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     if (user) {
@@ -142,6 +147,55 @@ export default function CarrierDashboard() {
     }
   }, [user]);
 
+  // Returning from Stripe's hosted onboarding -- re-check status against
+  // Stripe directly (not a cached flag) and clean up the query param.
+  useEffect(() => {
+    if (!user) return;
+    const connectParam = searchParams.get('connect');
+    if (connectParam !== 'return' && connectParam !== 'refresh') return;
+
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('check-connect-status');
+        if (error) throw error;
+        if (data?.onboarded) {
+          toast.success('Payout account connected — you can now accept paid shipments.');
+        } else if (connectParam === 'return') {
+          toast('Payout setup isn\'t complete yet — you can finish it any time from the dashboard.');
+        }
+      } catch (err) {
+        console.error('Error checking connect status:', err);
+      } finally {
+        searchParams.delete('connect');
+        setSearchParams(searchParams, { replace: true });
+        fetchData();
+      }
+    })();
+  }, [user, searchParams]);
+
+  const handleConnectPayouts = async () => {
+    if (!user) return;
+    setConnectingPayouts(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-connect-account', {
+        body: {
+          returnUrl: `${window.location.origin}/dashboard/carrier?connect=return`,
+          refreshUrl: `${window.location.origin}/dashboard/carrier?connect=refresh`,
+        },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No onboarding URL returned');
+      }
+    } catch (err) {
+      console.error('Error starting payout connection:', err);
+      toast.error('Could not start payout setup. Please try again.');
+      setConnectingPayouts(false);
+    }
+  };
+
   const fetchData = async () => {
     if (!user) return;
 
@@ -149,10 +203,10 @@ export default function CarrierDashboard() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, company_name, verification_status')
+        .select('full_name, company_name, verification_status, stripe_connect_account_id, stripe_connect_onboarded')
         .eq('id', user.id)
         .maybeSingle();
-      
+
       setProfile(profileData as Profile | null);
 
       // Fetch insurance
@@ -534,6 +588,35 @@ export default function CarrierDashboard() {
                     fetchData();
                   }} />
                 </div>
+              )}
+
+              {/* Payout Setup Banner */}
+              {profile && !profile.stripe_connect_onboarded && (
+                <Card className="mb-8 border-l-4 border-l-primary bg-primary/5">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/20">
+                          <Wallet className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">Connect your payout account</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Set up Stripe to receive payment for shipments. You can't be paid for a delivery until this is complete.
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="carrier" onClick={handleConnectPayouts} disabled={connectingPayouts}>
+                        {connectingPayouts ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Wallet className="h-4 w-4 mr-2" />
+                        )}
+                        Connect Payouts
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
 

@@ -610,6 +610,8 @@ export type Database = {
           registered_address: string | null
           route_flexibility_default: boolean
           shipment_frequency: string | null
+          stripe_connect_account_id: string | null
+          stripe_connect_onboarded: boolean
           terms_accepted_at: string | null
           terms_version: string | null
           updated_at: string
@@ -648,6 +650,8 @@ export type Database = {
           registered_address?: string | null
           route_flexibility_default?: boolean
           shipment_frequency?: string | null
+          stripe_connect_account_id?: string | null
+          stripe_connect_onboarded?: boolean
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string
@@ -686,6 +690,8 @@ export type Database = {
           registered_address?: string | null
           route_flexibility_default?: boolean
           shipment_frequency?: string | null
+          stripe_connect_account_id?: string | null
+          stripe_connect_onboarded?: boolean
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string

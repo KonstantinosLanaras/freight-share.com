@@ -1,14 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { PLATFORM_FEE_PERCENTAGE } from "../_shared/stripeConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// Platform fee percentage (2%)
-const PLATFORM_FEE_PERCENTAGE = 0.02;
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -87,28 +85,41 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Calculate platform fee and carrier payout
+    // Estimate first; replaced below with Stripe's own figures once the
+    // charge is available, so the two can never drift apart.
     const totalAmount = shipment.final_price;
-    const platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENTAGE * 100) / 100;
-    const carrierPayout = Math.round((totalAmount - platformFee) * 100) / 100;
+    let platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENTAGE * 100) / 100;
+    let carrierPayout = Math.round((totalAmount - platformFee) * 100) / 100;
 
-    logStep("Fee calculation", { 
-      totalAmount, 
-      platformFee, 
-      carrierPayout,
-      feePercentage: PLATFORM_FEE_PERCENTAGE * 100 + '%'
-    });
-
-    // Capture the payment (execute the conditional transfer)
+    // Capture the payment. Since the PaymentIntent was created as a
+    // destination charge (transfer_data.destination set at checkout), this
+    // single call both takes the shipper's held funds and automatically
+    // transfers the carrier's share to their connected Stripe account --
+    // no separate stripe.transfers.create() needed.
     if (shipment.payment_reference) {
       try {
-        await stripe.paymentIntents.capture(shipment.payment_reference);
+        const captured = await stripe.paymentIntents.capture(shipment.payment_reference, {
+          expand: ['latest_charge'],
+        });
         logStep("Payment captured successfully", { paymentIntent: shipment.payment_reference });
+
+        const charge = captured.latest_charge;
+        if (charge && typeof charge !== 'string' && charge.application_fee_amount != null) {
+          platformFee = charge.application_fee_amount / 100;
+          carrierPayout = Math.round((totalAmount - platformFee) * 100) / 100;
+        }
       } catch (captureError) {
         // Payment may already be captured or in a different state
         logStep("Payment capture note", { message: (captureError as Error).message });
       }
     }
+
+    logStep("Fee calculation", {
+      totalAmount,
+      platformFee,
+      carrierPayout,
+      feePercentage: PLATFORM_FEE_PERCENTAGE * 100 + '%'
+    });
 
     // Update shipment to completed with payment executed and fee details
     const { error: updateError } = await supabaseClient
