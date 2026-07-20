@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Package,
@@ -384,6 +385,19 @@ export default function FindLoads() {
                   </div>
                 )}
               </div>
+
+              {carrierRoute && carrierRoute.vehicle_type && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="showCompatibleOnly"
+                    checked={showCompatibleOnly}
+                    onCheckedChange={(checked) => setShowCompatibleOnly(checked === true)}
+                  />
+                  <label htmlFor="showCompatibleOnly" className="text-sm text-muted-foreground cursor-pointer">
+                    Only show loads my vehicle can carry
+                  </label>
+                </div>
+              )}
             </div>
 
           </CardContent>

@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -107,6 +108,7 @@ export function MessageThread({ shipmentId, shipment, onBack }: MessageThreadPro
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setSending(false);
     }
