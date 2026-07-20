@@ -1,20 +1,24 @@
-// Stripe webhook receiver — STUB for future activation.
+// Stripe webhook receiver.
 //
-// Currently the app relies on the post-redirect `verify-shipment-payment`
-// call to update shipment.payment_status. This endpoint is scaffolded so
-// that when Stripe live mode is enabled, the same status update happens
-// server-to-server (more reliable than depending on the user landing back
-// on the success URL).
+// Backs up the post-redirect `verify-shipment-payment` call by updating
+// shipment.payment_status server-to-server -- more reliable than depending
+// on the user landing back on the success URL.
 //
-// To activate:
+// Every request must carry a valid `stripe-signature` verified against
+// STRIPE_WEBHOOK_SECRET. There is no unverified fallback: without a
+// signing secret configured, this function refuses every request rather
+// than trusting an unsigned payload (anyone can POST an arbitrary JSON
+// body to a public endpoint, so an unverified path would let anyone mark
+// any shipment "paid" or "refunded" from outside Stripe entirely).
+//
+// Setup:
 // 1. In your Stripe dashboard, create a webhook endpoint pointing to:
 //      https://<project-ref>.supabase.co/functions/v1/stripe-webhook
 //    subscribed to at least: `checkout.session.completed`,
 //    `payment_intent.succeeded`, `payment_intent.payment_failed`,
 //    `charge.refunded`.
 // 2. Copy the signing secret and save it as STRIPE_WEBHOOK_SECRET
-//    via Lovable's add_secret flow.
-// 3. Uncomment the signature-verification block below.
+//    via Lovable's add_secret flow (or the Supabase dashboard).
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
@@ -38,26 +42,19 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
+    if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET not set -- refusing to process unsigned webhook events");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const rawBody = await req.text();
     const signature = req.headers.get("stripe-signature");
+    if (!signature) throw new Error("Missing stripe-signature header -- refusing to process unsigned webhook events");
 
-    let event: Stripe.Event;
-    if (webhookSecret && signature) {
-      // Verified path — recommended for live mode.
-      event = await stripe.webhooks.constructEventAsync(
-        rawBody,
-        signature,
-        webhookSecret,
-      );
-      log("Verified event", { type: event.type, id: event.id });
-    } else {
-      // Unverified fallback (stub mode). SAFE ONLY IN TEST MODE.
-      // Do NOT rely on this path in production — set STRIPE_WEBHOOK_SECRET.
-      event = JSON.parse(rawBody) as Stripe.Event;
-      log("Unverified event (stub mode)", { type: event.type });
-    }
+    const event = await stripe.webhooks.constructEventAsync(
+      rawBody,
+      signature,
+      webhookSecret,
+    );
+    log("Verified event", { type: event.type, id: event.id });
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
