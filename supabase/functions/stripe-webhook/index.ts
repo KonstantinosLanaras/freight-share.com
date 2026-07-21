@@ -98,7 +98,31 @@ serve(async (req) => {
             .from("shipments")
             .update({ payment_status: "refunded", updated_at: new Date().toISOString() })
             .eq("id", shipmentId);
-          log("Shipment refunded", { shipmentId });
+          log("Shipment refunded (matched via charge metadata)", { shipmentId });
+        } else {
+          // Charges don't always carry the PaymentIntent's metadata -- e.g.
+          // a refund issued in the Stripe dashboard against an older charge
+          // can silently have no metadata at all. verify-shipment-payment
+          // already stores the real PaymentIntent id in
+          // shipments.payment_reference once a payment is confirmed, so
+          // fall back to matching on that instead of giving up.
+          const paymentIntentId = typeof charge.payment_intent === "string"
+            ? charge.payment_intent
+            : charge.payment_intent?.id;
+          if (paymentIntentId) {
+            const { data: updated } = await supabase
+              .from("shipments")
+              .update({ payment_status: "refunded", updated_at: new Date().toISOString() })
+              .eq("payment_reference", paymentIntentId)
+              .select("id");
+            if (updated && updated.length > 0) {
+              log("Shipment refunded (matched via payment_reference fallback)", { paymentIntentId, shipmentId: updated[0].id });
+            } else {
+              log("charge.refunded: no shipment matched charge metadata or payment_reference", { chargeId: charge.id, paymentIntentId });
+            }
+          } else {
+            log("charge.refunded: no shipment_id in metadata and no payment_intent on charge", { chargeId: charge.id });
+          }
         }
         break;
       }
