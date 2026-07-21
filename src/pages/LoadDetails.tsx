@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
+import { deductRoutePallets } from '@/lib/routeCapacity';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
@@ -400,6 +401,10 @@ export default function LoadDetails() {
         .update({ status: 'accepted' })
         .eq('id', load.id);
       if (loadError) throw loadError;
+
+      // 2b. Free up the pallets this booking now occupies on the carrier's
+      // route (no-ops if this offer wasn't tied to one of their routes)
+      await deductRoutePallets(selectedOffer.route_id, load.pallets);
 
       // 3. Create shipment
       const { data: shipment, error: shipmentError } = await supabase
