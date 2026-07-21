@@ -21,7 +21,9 @@ import {
   User,
   Loader2,
   Plus,
-  MessageSquare
+  MessageSquare,
+  Send,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -516,6 +518,28 @@ export default function RouteDetails() {
               </Card>
             </Link>
 
+            {/* Make an Offer - non-owners only */}
+            {!isOwner && (
+              <Card>
+                <CardContent className="pt-6">
+                  {user ? (
+                    <Button className="w-full" variant="carrier" asChild>
+                      <Link to={`/routes/${route.id}/offer`}>
+                        <Send className="h-4 w-4 mr-2" />
+                        Make an Offer
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button className="w-full" variant="outline" asChild>
+                      <Link to="/auth">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Sign in to Make an Offer
+                      </Link>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Quick Actions - Owner only */}
             {isOwner && (
