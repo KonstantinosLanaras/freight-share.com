@@ -370,12 +370,12 @@ export default function RouteOfferPage() {
                   <div>
                     <Label htmlFor="d-pallets">Pallets</Label>
                     <Input
-                      id="d-pallets" type="number" min="1" max={route.available_pallets}
+                      id="d-pallets" type="number" min="1" max={maxPallets}
                       value={direct.pallets}
                       onChange={(e) => setDirect({ ...direct, pallets: e.target.value })}
                       disabled={submitting}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Max {route.available_pallets} available</p>
+                    <p className="text-xs text-muted-foreground mt-1">Route has {capLabel}</p>
                   </div>
                 </div>
                 <div>
