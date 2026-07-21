@@ -19,6 +19,22 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { z } from 'zod';
 import { notifyOfferReceived } from '@/lib/notify';
+import { epeToLdm, formatCapacity } from '@/lib/capacityUtils';
+
+// Returns { ok, capLabel } — capLabel is the human-readable available capacity
+function checkPalletsAgainstRoute(pallets: number, route: any): { ok: boolean } {
+  if (route?.space_ldm && route.space_ldm > 0) {
+    return { ok: epeToLdm(pallets) <= route.space_ldm };
+  }
+  return { ok: pallets <= (route?.available_pallets ?? 0) };
+}
+
+function routeCapacityLabel(route: any): string {
+  if (route?.space_type && route?.space_value != null) {
+    return `${formatCapacity(route.space_type, route.space_value)} available`;
+  }
+  return `${route?.available_pallets ?? 0} pallets available`;
+}
 
 const directSchema = z.object({
   price: z.coerce.number().positive('Bid price must be greater than 0'),
@@ -93,8 +109,8 @@ export default function RouteOfferPage() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
-    if (parsed.data.pallets > route.available_pallets) {
-      toast.error(`Only ${route.available_pallets} pallets available on this route`);
+    if (!checkPalletsAgainstRoute(parsed.data.pallets, route).ok) {
+      toast.error(`Only ${routeCapacityLabel(route)} on this route`);
       return;
     }
     setSubmitting(true);
@@ -142,8 +158,8 @@ export default function RouteOfferPage() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
-    if (parsed.data.pallets > route.available_pallets) {
-      toast.error(`Only ${route.available_pallets} pallets available on this route`);
+    if (!checkPalletsAgainstRoute(parsed.data.pallets, route).ok) {
+      toast.error(`Only ${routeCapacityLabel(route)} on this route`);
       return;
     }
     setSubmitting(true);
@@ -210,6 +226,10 @@ export default function RouteOfferPage() {
   }
 
   const flexible = !!route.open_to_extra_stops;
+  const maxPallets = route.space_ldm && route.space_ldm > 0
+    ? Math.max(1, Math.floor(route.space_ldm / 0.4))
+    : (route.available_pallets ?? 0);
+  const capLabel = routeCapacityLabel(route);
 
   if (confirmation) {
     return (
@@ -282,7 +302,7 @@ export default function RouteOfferPage() {
               )}
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Package className="h-4 w-4" /> {route.available_pallets} pallets available</span>
+              <span className="flex items-center gap-1"><Package className="h-4 w-4" /> {routeCapacityLabel(route)}</span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {format(new Date(route.departure_date_from), 'MMM d')}
@@ -350,12 +370,12 @@ export default function RouteOfferPage() {
                   <div>
                     <Label htmlFor="d-pallets">Pallets</Label>
                     <Input
-                      id="d-pallets" type="number" min="1" max={route.available_pallets}
+                      id="d-pallets" type="number" min="1" max={maxPallets}
                       value={direct.pallets}
                       onChange={(e) => setDirect({ ...direct, pallets: e.target.value })}
                       disabled={submitting}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Max {route.available_pallets} available</p>
+                    <p className="text-xs text-muted-foreground mt-1">Route has {capLabel}</p>
                   </div>
                 </div>
                 <div>
@@ -446,7 +466,7 @@ export default function RouteOfferPage() {
                     <div>
                       <Label htmlFor="a-pallets">Pallets</Label>
                       <Input
-                        id="a-pallets" type="number" min="1" max={route.available_pallets}
+                        id="a-pallets" type="number" min="1" max={maxPallets}
                         value={alt.pallets}
                         onChange={(e) => setAlt({ ...alt, pallets: e.target.value })}
                         disabled={submitting}
