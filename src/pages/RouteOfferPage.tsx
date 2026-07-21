@@ -109,8 +109,8 @@ export default function RouteOfferPage() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
-    if (parsed.data.pallets > route.available_pallets) {
-      toast.error(`Only ${route.available_pallets} pallets available on this route`);
+    if (!checkPalletsAgainstRoute(parsed.data.pallets, route).ok) {
+      toast.error(`Only ${routeCapacityLabel(route)} on this route`);
       return;
     }
     setSubmitting(true);
