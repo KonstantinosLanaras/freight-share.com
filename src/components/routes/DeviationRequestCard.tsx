@@ -24,8 +24,10 @@ import {
   User
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
 
 interface DeviationRequest {
   id: string;
@@ -63,6 +65,7 @@ const statusConfig = {
 };
 
 export function DeviationRequestCard({ request, isCarrier, onUpdate }: DeviationRequestCardProps) {
+  const navigate = useNavigate();
   const [counterOfferOpen, setCounterOfferOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [counterOffer, setCounterOffer] = useState({
@@ -76,6 +79,12 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
   const handleAccept = async () => {
     setIsSubmitting(true);
     try {
+      if (!(await hasValidCarrierInsurance(request.carrier_id))) {
+        toast.error('You need valid (non-expired) insurance on file before accepting requests.');
+        navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+
       // Update request status
       const { error: requestError } = await supabase
         .from('deviation_requests')
