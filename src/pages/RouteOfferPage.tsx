@@ -226,6 +226,10 @@ export default function RouteOfferPage() {
   }
 
   const flexible = !!route.open_to_extra_stops;
+  const maxPallets = route.space_ldm && route.space_ldm > 0
+    ? Math.max(1, Math.floor(route.space_ldm / 0.4))
+    : (route.available_pallets ?? 0);
+  const capLabel = routeCapacityLabel(route);
 
   if (confirmation) {
     return (
