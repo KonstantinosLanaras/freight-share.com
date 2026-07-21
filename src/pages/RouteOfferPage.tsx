@@ -466,7 +466,7 @@ export default function RouteOfferPage() {
                     <div>
                       <Label htmlFor="a-pallets">Pallets</Label>
                       <Input
-                        id="a-pallets" type="number" min="1" max={route.available_pallets}
+                        id="a-pallets" type="number" min="1" max={maxPallets}
                         value={alt.pallets}
                         onChange={(e) => setAlt({ ...alt, pallets: e.target.value })}
                         disabled={submitting}
