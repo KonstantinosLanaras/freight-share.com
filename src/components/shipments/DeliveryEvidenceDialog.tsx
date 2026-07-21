@@ -94,7 +94,7 @@ export function DeliveryEvidenceDialog({ open, onOpenChange, shipmentId, kind, o
         signatureUrl = supabase.storage.from('shipment-evidence').getPublicUrl(signaturePath).data.publicUrl;
       }
 
-      const { error: insertError } = await supabase.from('shipment_evidence').insert({
+      const { error: insertError } = await (supabase as any).from('shipment_evidence').insert({
         shipment_id: shipmentId,
         kind,
         photo_url: photoUrlData.publicUrl,

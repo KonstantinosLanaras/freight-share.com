@@ -610,8 +610,6 @@ export type Database = {
           registered_address: string | null
           route_flexibility_default: boolean
           shipment_frequency: string | null
-          stripe_connect_account_id: string | null
-          stripe_connect_onboarded: boolean
           terms_accepted_at: string | null
           terms_version: string | null
           updated_at: string
@@ -650,8 +648,6 @@ export type Database = {
           registered_address?: string | null
           route_flexibility_default?: boolean
           shipment_frequency?: string | null
-          stripe_connect_account_id?: string | null
-          stripe_connect_onboarded?: boolean
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string
@@ -690,8 +686,6 @@ export type Database = {
           registered_address?: string | null
           route_flexibility_default?: boolean
           shipment_frequency?: string | null
-          stripe_connect_account_id?: string | null
-          stripe_connect_onboarded?: boolean
           terms_accepted_at?: string | null
           terms_version?: string | null
           updated_at?: string
@@ -1190,59 +1184,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "shipment_timestamps_shipment_id_fkey"
-            columns: ["shipment_id"]
-            isOneToOne: false
-            referencedRelation: "shipments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      shipment_evidence: {
-        Row: {
-          captured_by: string
-          condition: string
-          condition_notes: string | null
-          created_at: string
-          id: string
-          kind: string
-          lat: number | null
-          lng: number | null
-          photo_url: string | null
-          shipment_id: string
-          signature_url: string | null
-          signer_name: string | null
-        }
-        Insert: {
-          captured_by: string
-          condition?: string
-          condition_notes?: string | null
-          created_at?: string
-          id?: string
-          kind: string
-          lat?: number | null
-          lng?: number | null
-          photo_url?: string | null
-          shipment_id: string
-          signature_url?: string | null
-          signer_name?: string | null
-        }
-        Update: {
-          captured_by?: string
-          condition?: string
-          condition_notes?: string | null
-          created_at?: string
-          id?: string
-          kind?: string
-          lat?: number | null
-          lng?: number | null
-          photo_url?: string | null
-          shipment_id?: string
-          signature_url?: string | null
-          signer_name?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shipment_evidence_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"

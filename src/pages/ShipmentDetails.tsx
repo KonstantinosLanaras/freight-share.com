@@ -146,14 +146,14 @@ export default function ShipmentDetails() {
         supabase.from('shipment_timestamps').select('status, created_at').eq('shipment_id', id!).order('created_at', { ascending: true }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rater_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rated_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
-        supabase.from('shipment_evidence').select('kind, photo_url, signature_url, signer_name, condition, condition_notes, created_at').eq('shipment_id', id!),
+        (supabase as any).from('shipment_evidence').select('kind, photo_url, signature_url, signer_name, condition, condition_notes, created_at').eq('shipment_id', id!),
       ]);
 
       setLoad(loadRes.data);
       setShipperProfile(shipperRes.data);
       setCarrierProfile(carrierRes.data);
       setTimestamps(tsRes.data || []);
-      setEvidence((evidenceRes.data as EvidenceRecord[]) || []);
+      setEvidence(((evidenceRes.data as unknown) as EvidenceRecord[]) || []);
       setExistingRating(myRatingRes.data);
       setOtherPartyRating(theirRatingRes.data);
     } catch (error) {
