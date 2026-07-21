@@ -298,7 +298,7 @@ export default function RouteOfferPage() {
               )}
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Package className="h-4 w-4" /> {route.available_pallets} pallets available</span>
+              <span className="flex items-center gap-1"><Package className="h-4 w-4" /> {routeCapacityLabel(route)}</span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {format(new Date(route.departure_date_from), 'MMM d')}
