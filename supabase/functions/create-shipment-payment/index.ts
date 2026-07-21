@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { PLATFORM_FEE_PERCENTAGE } from "../_shared/stripeConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,11 +43,30 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { shipmentId, amount, description, loadId, carrierId } = await req.json();
-    
+
     if (!shipmentId || !amount) {
       throw new Error("Missing required fields: shipmentId and amount");
     }
-    logStep("Request data received", { shipmentId, amount, loadId });
+    if (!carrierId) {
+      throw new Error("Missing required field: carrierId");
+    }
+    logStep("Request data received", { shipmentId, amount, loadId, carrierId });
+
+    // The carrier must have a Stripe Express account with charges and
+    // payouts enabled before the shipper can pay -- otherwise capture would
+    // succeed but there'd be nowhere for the money to go.
+    const { data: carrierProfile, error: carrierProfileError } = await supabaseClient
+      .from('profiles')
+      .select('stripe_connect_account_id, stripe_connect_onboarded')
+      .eq('id', carrierId)
+      .maybeSingle();
+    if (carrierProfileError) throw new Error(`Failed to look up carrier: ${carrierProfileError.message}`);
+
+    const carrierAccountId = carrierProfile?.stripe_connect_account_id as string | null;
+    if (!carrierAccountId || !carrierProfile?.stripe_connect_onboarded) {
+      throw new Error("This carrier hasn't finished payout setup yet. Ask them to complete Stripe onboarding before paying for this shipment.");
+    }
+    logStep("Carrier payout account verified", { carrierAccountId });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -84,6 +104,13 @@ serve(async (req) => {
       mode: "payment",
       payment_intent_data: {
         capture_method: 'manual', // Delayed capture - authorised now, captured on delivery
+        // Destination charge: this share of the amount stays with the
+        // platform, the remainder transfers to the carrier's connected
+        // account automatically the moment the payment is captured.
+        application_fee_amount: Math.round(amount * PLATFORM_FEE_PERCENTAGE * 100),
+        transfer_data: {
+          destination: carrierAccountId,
+        },
         metadata: {
           shipment_id: shipmentId,
           shipper_id: user.id,

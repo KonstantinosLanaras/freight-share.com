@@ -3,6 +3,10 @@ project_id = "yiwpooztihgmhncxwgsd"
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
+  [functions.check-connect-status]
+    verify_jwt = false
+  [functions.create-connect-account]
+    verify_jwt = false
   [functions.create-shipment-payment]
     verify_jwt = false
   [functions.handle-email-suppression]
