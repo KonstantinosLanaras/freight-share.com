@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
+import { deductRoutePallets } from '@/lib/routeCapacity';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -111,7 +112,7 @@ export default function OffersShipper() {
       // Offers Received = offers on my loads
       const { data: myLoads } = await supabase
         .from('loads')
-        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to')
+        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to, pallets')
         .eq('shipper_id', user!.id);
 
       const loadIds = (myLoads || []).map((l: any) => l.id);
@@ -157,6 +158,7 @@ export default function OffersShipper() {
     const offer = received.find((o) => o.id === offerId);
     const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
     if (error) return toast.error('Failed to accept offer');
+    await deductRoutePallets(offer?.route_id, offer?.load?.pallets);
     if (offer?.carrier_id) {
       const load = offer.load;
       notifyOfferAccepted({
@@ -185,6 +187,7 @@ export default function OffersShipper() {
     const req = made.find((r) => r.id === reqId);
     const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
     if (error) return toast.error('Failed to accept counter');
+    await deductRoutePallets(req?.route_id, req?.pallets_requested ?? req?.pallets);
     if (req?.carrier_id) {
       notifyOfferAccepted({
         recipientUserId: req.carrier_id,
