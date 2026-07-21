@@ -1191,6 +1191,59 @@ export type Database = {
           },
         ]
       }
+      shipment_evidence: {
+        Row: {
+          captured_by: string
+          condition: string
+          condition_notes: string | null
+          created_at: string
+          id: string
+          kind: string
+          lat: number | null
+          lng: number | null
+          photo_url: string | null
+          shipment_id: string
+          signature_url: string | null
+          signer_name: string | null
+        }
+        Insert: {
+          captured_by: string
+          condition?: string
+          condition_notes?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          lat?: number | null
+          lng?: number | null
+          photo_url?: string | null
+          shipment_id: string
+          signature_url?: string | null
+          signer_name?: string | null
+        }
+        Update: {
+          captured_by?: string
+          condition?: string
+          condition_notes?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          lat?: number | null
+          lng?: number | null
+          photo_url?: string | null
+          shipment_id?: string
+          signature_url?: string | null
+          signer_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_evidence_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           carrier_id: string
