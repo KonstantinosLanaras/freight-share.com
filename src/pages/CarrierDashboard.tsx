@@ -736,14 +736,14 @@ export default function CarrierDashboard() {
                             <Link
                               key={load.id}
                               to={`/load/${load.id}`}
-                              className="relative shrink-0 snap-start w-72 block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                              className="relative shrink-0 snap-start min-w-[340px] block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
                             >
                               <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
-                              <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
-                                <span>{load.origin_city}</span>
+                              <div className="font-medium text-foreground mb-2 flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                <span className="truncate">{load.origin_city}, {load.origin_country}</span>
                                 <ProximityBadge distanceKm={load.originKm} tier={load.originTier} label="Distance from your route's origin" />
-                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span>{load.destination_city}</span>
+                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <span className="truncate">{load.destination_city}, {load.destination_country}</span>
                                 <ProximityBadge distanceKm={load.destKm} tier={load.destTier} label="Distance from your route's destination" />
                               </div>
                               <div className="text-sm text-muted-foreground mb-3">
