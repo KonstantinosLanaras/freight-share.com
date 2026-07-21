@@ -227,7 +227,7 @@ export default function RouteRequestStatus() {
 
           {/* Right — Conversation */}
           <div className="lg:col-span-2">
-            <Card className="h-[600px] flex flex-col">
+            <Card className="h-[450px] flex flex-col">
               <CardHeader className="border-b border-border pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <MessageSquare className="h-4 w-4 text-primary" />
