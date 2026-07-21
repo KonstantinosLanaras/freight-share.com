@@ -207,7 +207,7 @@ export default function CarrierDashboard() {
         .eq('id', user.id)
         .maybeSingle();
 
-      setProfile(profileData as Profile | null);
+      setProfile((profileData as unknown) as Profile | null);
 
       // Fetch insurance
       const { data: insuranceData } = await supabase
