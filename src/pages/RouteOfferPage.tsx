@@ -19,6 +19,22 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { z } from 'zod';
 import { notifyOfferReceived } from '@/lib/notify';
+import { epeToLdm, formatCapacity } from '@/lib/capacityUtils';
+
+// Returns { ok, capLabel } — capLabel is the human-readable available capacity
+function checkPalletsAgainstRoute(pallets: number, route: any): { ok: boolean } {
+  if (route?.space_ldm && route.space_ldm > 0) {
+    return { ok: epeToLdm(pallets) <= route.space_ldm };
+  }
+  return { ok: pallets <= (route?.available_pallets ?? 0) };
+}
+
+function routeCapacityLabel(route: any): string {
+  if (route?.space_type && route?.space_value != null) {
+    return `${formatCapacity(route.space_type, route.space_value)} available`;
+  }
+  return `${route?.available_pallets ?? 0} pallets available`;
+}
 
 const directSchema = z.object({
   price: z.coerce.number().positive('Bid price must be greater than 0'),
