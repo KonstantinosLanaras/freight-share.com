@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
 import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
+import { CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
@@ -44,6 +45,7 @@ export default function CarrierRequestDetails() {
   const [showAcceptForm, setShowAcceptForm] = useState(false);
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
+  const [carrierVerified, setCarrierVerified] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Accept form state
@@ -101,11 +103,12 @@ export default function CarrierRequestDetails() {
         setRequest({ ...req, status: 'viewed' });
       }
 
-      const [routeRes, profileRes, msgsRes, insuranceRes] = await Promise.all([
+      const [routeRes, profileRes, msgsRes, insuranceRes, ownProfileRes] = await Promise.all([
         supabase.from('routes').select('*').eq('id', req.route_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', req.shipper_id).single(),
         supabase.from('route_request_messages').select('*').eq('request_id', requestId).order('created_at', { ascending: true }),
         supabase.from('carrier_insurance').select('*').eq('carrier_id', user!.id).maybeSingle(),
+        supabase.from('profiles').select('verification_status').eq('id', user!.id).maybeSingle(),
       ]);
 
       const r = routeRes.data;
@@ -113,6 +116,7 @@ export default function CarrierRequestDetails() {
       setShipperProfile(profileRes.data);
       setMessages(msgsRes.data || []);
       setCarrierInsurance(insuranceRes.data || null);
+      setCarrierVerified(ownProfileRes.data?.verification_status === 'verified');
       // Pre-fill accept form
       if (r) {
         setRemainingPallets(Math.max(0, r.available_pallets - req.pallets));
@@ -493,28 +497,68 @@ export default function CarrierRequestDetails() {
               <Card>
                 <CardHeader><CardTitle className="text-base">Decision</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  {!carrierInsurance || new Date(carrierInsurance.expiration_date) < new Date() ? (
-                    <>
-                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
-                        <p className="text-sm text-warning font-medium flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4" />
-                          {carrierInsurance ? 'Insurance expired — renew to accept' : 'Insurance required to accept'}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {carrierInsurance
-                            ? 'Your insurance details have expired. Update them before accepting load requests.'
-                            : 'You must provide insurance details before accepting load requests.'}
-                        </p>
-                      </div>
-                      <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
-                        <ShieldCheck className="h-4 w-4 mr-2" /> {carrierInsurance ? 'Update Insurance Details' : 'Add Insurance Details'}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
-                      <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
-                    </Button>
-                  )}
+                  {(() => {
+                    const insuranceExpired = !!carrierInsurance && new Date(carrierInsurance.expiration_date) < new Date();
+                    const requiredCoverage = request?.weight_kg ? request.weight_kg * CMR_LIABILITY_EUR_PER_KG : null;
+                    const insuranceInsufficient = !!carrierInsurance && !insuranceExpired && requiredCoverage != null && carrierInsurance.coverage_limit_eur < requiredCoverage;
+                    const insuranceBlocked = !carrierInsurance || insuranceExpired || insuranceInsufficient;
+                    const verificationBlocked = !carrierVerified;
+
+                    if (!insuranceBlocked && !verificationBlocked) {
+                      return (
+                        <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
+                          <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
+                        </Button>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {insuranceBlocked && (
+                          <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
+                            <p className="text-sm text-warning font-medium flex items-center gap-2">
+                              <ShieldCheck className="h-4 w-4" />
+                              {insuranceExpired
+                                ? 'Insurance expired — renew to accept'
+                                : insuranceInsufficient
+                                  ? 'Insurance coverage too low for this shipment'
+                                  : 'Insurance required to accept'}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {insuranceExpired
+                                ? 'Your insurance details have expired. Update them before accepting load requests.'
+                                : insuranceInsufficient
+                                  ? `This shipment (${request.weight_kg} kg) needs at least €${requiredCoverage!.toLocaleString()} of coverage. Increase your policy limit before accepting.`
+                                  : 'You must provide insurance details before accepting load requests.'}
+                            </p>
+                          </div>
+                        )}
+                        {verificationBlocked && (
+                          <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
+                            <p className="text-sm text-warning font-medium flex items-center gap-2">
+                              <ShieldCheck className="h-4 w-4" />
+                              Business verification required to accept
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Complete business verification before accepting load requests.
+                            </p>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2">
+                          {insuranceBlocked && (
+                            <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
+                              <ShieldCheck className="h-4 w-4 mr-2" /> {carrierInsurance ? 'Update Insurance Details' : 'Add Insurance Details'}
+                            </Button>
+                          )}
+                          {verificationBlocked && (
+                            <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/carrier?verify=1')}>
+                              <ShieldCheck className="h-4 w-4 mr-2" /> Verify My Business
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                   <Button variant="destructive" className="w-full" onClick={handleReject}>
                     <XCircle className="h-4 w-4 mr-2" /> Reject Request
                   </Button>

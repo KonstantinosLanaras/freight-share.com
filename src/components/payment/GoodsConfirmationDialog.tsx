@@ -10,6 +10,7 @@ import {
   ShieldAlert, Info, Euro, Shield, ChevronDown, ChevronUp, FlaskConical
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 
 interface CarrierInsuranceInfo {
   provider_name: string;
@@ -40,8 +41,6 @@ export interface InsuranceDecision {
   coverageGap: number | null;
 }
 
-// CMR liability: ~8.33 SDR/kg ≈ €10/kg (simplified for MVP)
-const CMR_LIABILITY_EUR_PER_KG = 10;
 // Flat premium rate for MVP
 const INSURANCE_PREMIUM_RATE = 0.015; // 1.5% of declared cargo value
 const MIN_PREMIUM = 25; // Minimum premium €25

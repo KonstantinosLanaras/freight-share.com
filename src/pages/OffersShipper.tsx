@@ -18,7 +18,8 @@ import { toast } from 'sonner';
 import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { deductRoutePallets } from '@/lib/routeCapacity';
-import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
+import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
+import { isProfileVerified } from '@/lib/verificationUtils';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -113,7 +114,7 @@ export default function OffersShipper() {
       // Offers Received = offers on my loads
       const { data: myLoads } = await supabase
         .from('loads')
-        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to, pallets')
+        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to, pallets, weight_kg')
         .eq('shipper_id', user!.id);
 
       const loadIds = (myLoads || []).map((l: any) => l.id);
@@ -157,8 +158,13 @@ export default function OffersShipper() {
 
   const acceptOfferReceived = async (offerId: string) => {
     const offer = received.find((o) => o.id === offerId);
-    if (!(await hasValidCarrierInsurance(offer?.carrier_id))) {
-      return toast.error('This carrier has no valid insurance on file — they must add or renew it before this offer can be accepted.');
+    if (!(await isProfileVerified(user?.id))) {
+      return toast.error('Complete your business verification before accepting offers.');
+    }
+    const requiredCoverage = offer?.load?.weight_kg ? offer.load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
+    const insuranceCheck = await checkCarrierInsurance(offer?.carrier_id, requiredCoverage);
+    if (!insuranceCheck.ok) {
+      return toast.error(insuranceCheckMessage(insuranceCheck));
     }
     const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
     if (error) return toast.error('Failed to accept offer');
@@ -189,8 +195,13 @@ export default function OffersShipper() {
 
   const acceptCounter = async (reqId: string) => {
     const req = made.find((r) => r.id === reqId);
-    if (!(await hasValidCarrierInsurance(req?.carrier_id))) {
-      return toast.error('This carrier has no valid insurance on file — they must add or renew it before this counter-offer can be accepted.');
+    if (!(await isProfileVerified(user?.id))) {
+      return toast.error('Complete your business verification before accepting counter-offers.');
+    }
+    const requiredCoverage = req?.weight_kg ? req.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
+    const insuranceCheck = await checkCarrierInsurance(req?.carrier_id, requiredCoverage);
+    if (!insuranceCheck.ok) {
+      return toast.error(insuranceCheckMessage(insuranceCheck));
     }
     const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
     if (error) return toast.error('Failed to accept counter');

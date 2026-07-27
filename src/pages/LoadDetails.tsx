@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { deductRoutePallets } from '@/lib/routeCapacity';
+import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
@@ -211,7 +212,7 @@ export default function LoadDetails() {
 
   // ── Flow control ─────────────────────────────────────────
 
-  const startAction = (action: PendingAction) => {
+  const startAction = async (action: PendingAction) => {
     if (!user) {
       navigate(`/auth?mode=login&returnTo=${encodeURIComponent(`/load/${id}`)}`);
       return;
@@ -219,22 +220,22 @@ export default function LoadDetails() {
 
     setPendingAction(action);
 
-    // In demo mode, bypass verification entirely
-    if (isDemoMode) {
-      if (verificationStatus !== 'verified') {
-        toast.info('Verification required in live environment', {
-          description: 'In beta, this step is bypassed.',
-          duration: 3000,
-        });
-      }
-      executeAction(action);
-      return;
-    }
-
-    // Production: check verification
     if (!checkVerification(verificationStatus)) {
       setFlowState('verification_gate');
       return;
+    }
+
+    // Finalizing a booking (not just proposing/countering a price) requires
+    // the carrier to have valid, adequate insurance on file -- same check
+    // enforced on every other acceptance path across the app.
+    if (action.type === 'accept_offer') {
+      const requiredCoverage = load?.weight_kg ? load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
+      const insuranceCheck = await checkCarrierInsurance(action.offer.carrier_id, requiredCoverage);
+      if (!insuranceCheck.ok) {
+        toast.error(insuranceCheckMessage(insuranceCheck));
+        setPendingAction(null);
+        return;
+      }
     }
 
     executeAction(action);
