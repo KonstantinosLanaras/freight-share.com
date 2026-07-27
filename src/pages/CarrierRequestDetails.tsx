@@ -13,6 +13,8 @@ import {
   Scale, Upload, Link as LinkIcon, Image, ShieldCheck, User
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { complianceGatesEnforced } from '@/lib/complianceGating';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -35,6 +37,7 @@ export default function CarrierRequestDetails() {
   const { requestId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [request, setRequest] = useState<any>(null);
   const [route, setRoute] = useState<any>(null);
   const [shipperProfile, setShipperProfile] = useState<any>(null);
@@ -503,6 +506,7 @@ export default function CarrierRequestDetails() {
                     const insuranceInsufficient = !!carrierInsurance && !insuranceExpired && requiredCoverage != null && carrierInsurance.coverage_limit_eur < requiredCoverage;
                     const insuranceBlocked = !carrierInsurance || insuranceExpired || insuranceInsufficient;
                     const verificationBlocked = !carrierVerified;
+                    const enforced = complianceGatesEnforced(isDemoMode);
 
                     if (!insuranceBlocked && !verificationBlocked) {
                       return (
@@ -544,18 +548,27 @@ export default function CarrierRequestDetails() {
                             </p>
                           </div>
                         )}
-                        <div className="flex flex-col gap-2">
-                          {insuranceBlocked && (
-                            <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
-                              <ShieldCheck className="h-4 w-4 mr-2" /> {carrierInsurance ? 'Update Insurance Details' : 'Add Insurance Details'}
+                        {enforced ? (
+                          <div className="flex flex-col gap-2">
+                            {insuranceBlocked && (
+                              <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
+                                <ShieldCheck className="h-4 w-4 mr-2" /> {carrierInsurance ? 'Update Insurance Details' : 'Add Insurance Details'}
+                              </Button>
+                            )}
+                            {verificationBlocked && (
+                              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/carrier?verify=1')}>
+                                <ShieldCheck className="h-4 w-4 mr-2" /> Verify My Business
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-muted-foreground mb-2">Beta: the above would normally block acceptance — bypassed for testing.</p>
+                            <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
+                              <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
                             </Button>
-                          )}
-                          {verificationBlocked && (
-                            <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/carrier?verify=1')}>
-                              <ShieldCheck className="h-4 w-4 mr-2" /> Verify My Business
-                            </Button>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </>
                     );
                   })()}

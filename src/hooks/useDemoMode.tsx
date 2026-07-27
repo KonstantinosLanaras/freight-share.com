@@ -13,6 +13,9 @@ const DemoModeContext = createContext<DemoModeContextType | undefined>(undefined
 
 export function DemoModeProvider({ children }: { children: React.ReactNode }) {
   // Platform runs in demo mode by default at all times — no live mode for now.
+  // Do not flip this to false without checking LAUNCH_CHECKLIST.md first --
+  // it also controls whether compliance gates (see complianceGating.ts)
+  // actually block an action, not just payment simulation.
   const [isDemoMode] = useState(true);
 
   const toggleDemoMode = useCallback(() => {

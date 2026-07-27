@@ -20,6 +20,7 @@ import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
+import { complianceGatesEnforced } from '@/lib/complianceGating';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import {
@@ -221,8 +222,11 @@ export default function LoadDetails() {
     setPendingAction(action);
 
     if (!checkVerification(verificationStatus)) {
-      setFlowState('verification_gate');
-      return;
+      if (complianceGatesEnforced(isDemoMode)) {
+        setFlowState('verification_gate');
+        return;
+      }
+      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
     }
 
     // Finalizing a booking (not just proposing/countering a price) requires
@@ -232,9 +236,12 @@ export default function LoadDetails() {
       const requiredCoverage = load?.weight_kg ? load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
       const insuranceCheck = await checkCarrierInsurance(action.offer.carrier_id, requiredCoverage);
       if (!insuranceCheck.ok) {
-        toast.error(insuranceCheckMessage(insuranceCheck));
-        setPendingAction(null);
-        return;
+        if (complianceGatesEnforced(isDemoMode)) {
+          toast.error(insuranceCheckMessage(insuranceCheck));
+          setPendingAction(null);
+          return;
+        }
+        toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
       }
     }
 
