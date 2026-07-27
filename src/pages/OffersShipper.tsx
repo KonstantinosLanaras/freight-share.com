@@ -117,7 +117,7 @@ export default function OffersShipper() {
       // Offers Received = offers on my loads
       const { data: myLoads } = await supabase
         .from('loads')
-        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to, pallets, weight_kg')
+        .select('id, origin_city, origin_country, destination_city, destination_country, pickup_date_from, pickup_date_to, pallets, weight_kg, cargo_type')
         .eq('shipper_id', user!.id);
 
       const loadIds = (myLoads || []).map((l: any) => l.id);
@@ -182,6 +182,10 @@ export default function OffersShipper() {
         fromName: 'The shipper',
         route: load ? `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}` : undefined,
         price: offer.price,
+        pallets: load?.pallets,
+        cargoType: load?.cargo_type,
+        weightKg: load?.weight_kg,
+        pickupDate: load?.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
         actionUrl: `${window.location.origin}/dashboard/carrier`,
         idempotencyKey: `offer-accept-${offerId}`,
       });
@@ -222,6 +226,9 @@ export default function OffersShipper() {
         route: req.route ? `${req.route.origin_city}, ${req.route.origin_country} → ${req.route.destination_city}, ${req.route.destination_country}` : undefined,
         price: req.offer_price,
         pallets: req.pallets_requested,
+        cargoType: req.goods_type,
+        weightKg: req.weight_kg,
+        pickupDate: req.shipment_date ? format(new Date(req.shipment_date), 'MMM d, yyyy') : undefined,
         actionUrl: `${window.location.origin}/dashboard/carrier/requests/${reqId}`,
         idempotencyKey: `counter-accept-${reqId}`,
       });

@@ -241,7 +241,7 @@ export default function ResolutionCase() {
     if (error) { toast.error(error.message); return; }
     await supabase.from('resolution_messages').insert({
       case_id: caseData.id, sender_id: user.id, sender_role: 'system',
-      body: 'Case escalated to ReRoute Support for review.',
+      body: 'Case escalated to FreightShare Support for review.',
     });
     toast.success('Escalated to support');
   };
@@ -249,7 +249,7 @@ export default function ResolutionCase() {
   const downloadSummary = () => {
     if (!caseData) return;
     const lines: string[] = [];
-    lines.push(`ReRoute Resolution Case Summary`);
+    lines.push(`FreightShare Resolution Case Summary`);
     lines.push(`Case ID: ${caseData.id}`);
     lines.push(`Subject: ${caseData.subject}`);
     lines.push(`Issue: ${issueLabels[caseData.issue_type]}`);
@@ -263,7 +263,7 @@ export default function ResolutionCase() {
     timeline.forEach((t) => lines.push(`${format(new Date(t.at), 'PPpp')} — ${t.label}`));
     lines.push(`\n--- Messages ---`);
     messages.forEach((m) => {
-      const who = m.sender_role === 'shipper' ? shipperName : m.sender_role === 'carrier' ? carrierName : m.sender_role === 'support' ? 'ReRoute Support' : 'System';
+      const who = m.sender_role === 'shipper' ? shipperName : m.sender_role === 'carrier' ? carrierName : m.sender_role === 'support' ? 'FreightShare Support' : 'System';
       lines.push(`[${format(new Date(m.created_at), 'PPpp')}] ${who}: ${m.body}`);
     });
     lines.push(`\n--- Evidence ---`);
@@ -284,7 +284,7 @@ export default function ResolutionCase() {
   const senderName = (m: Message) =>
     m.sender_role === 'shipper' ? shipperName :
     m.sender_role === 'carrier' ? carrierName :
-    m.sender_role === 'support' ? 'ReRoute Support' : 'System';
+    m.sender_role === 'support' ? 'FreightShare Support' : 'System';
 
   const senderBadge = (r: SenderRole) =>
     r === 'support' ? <Badge className="bg-primary text-primary-foreground gap-1"><Headphones className="h-3 w-3" />Support</Badge>

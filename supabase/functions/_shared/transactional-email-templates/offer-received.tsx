@@ -28,7 +28,7 @@ const Email = ({
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>{fromName} sent you a new {label} on ReRoute</Preview>
+      <Preview>{fromName} sent you a new {label} on FreightShare</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>New {label} received</Heading>
@@ -36,7 +36,7 @@ const Email = ({
             {recipientName ? `Hi ${recipientName},` : 'Hi there,'}
           </Text>
           <Text style={text}>
-            <strong>{fromName}</strong> just sent you a new {label} on ReRoute.
+            <strong>{fromName}</strong> just sent you a new {label} on FreightShare.
           </Text>
           {route && (
             <Section style={card}>
@@ -61,7 +61,7 @@ const Email = ({
           </Section>
           <Hr style={hr} />
           <Text style={footer}>
-            You're receiving this because you have an active ReRoute account.
+            You're receiving this because you have an active FreightShare account.
           </Text>
         </Container>
       </Body>
