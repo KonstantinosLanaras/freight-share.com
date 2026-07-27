@@ -135,7 +135,7 @@ export function generateCmrDocument(data: ShipmentDocumentData): void {
   doc.setFontSize(8);
   doc.setTextColor(120);
   const disclaimer = doc.splitTextToSize(
-    'Generated from FreightShare platform records, including signatures captured at pickup/delivery. FreightShare is a technology facilitator, not a party to the contract of carriage, and does not verify the accuracy of the details above. Review all fields before relying on this as your CMR consignment note.',
+    "This document is rendered directly from the details the Sender and Carrier entered on FreightShare, plus the signatures captured at pickup/delivery -- FreightShare does not infer, complete, or verify any of the content. It is provided as information, not legal advice, and is not a determination that it satisfies e-CMR or any other regulatory requirement for this movement. Both parties should review every field for accuracy and, for jurisdiction-specific questions, verify with qualified counsel.",
     180
   );
   doc.text(disclaimer, marginX, y);
