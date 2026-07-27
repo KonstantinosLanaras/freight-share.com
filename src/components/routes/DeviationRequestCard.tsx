@@ -29,6 +29,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
 import { isProfileVerified } from '@/lib/verificationUtils';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { complianceGatesEnforced } from '@/lib/complianceGating';
 
 interface DeviationRequest {
   id: string;
@@ -67,6 +69,7 @@ const statusConfig = {
 
 export function DeviationRequestCard({ request, isCarrier, onUpdate }: DeviationRequestCardProps) {
   const navigate = useNavigate();
+  const { isDemoMode } = useDemoMode();
   const [counterOfferOpen, setCounterOfferOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [counterOffer, setCounterOffer] = useState({
@@ -80,16 +83,24 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
   const handleAccept = async () => {
     setIsSubmitting(true);
     try {
+      const enforced = complianceGatesEnforced(isDemoMode);
+
       if (!(await isProfileVerified(request.carrier_id))) {
-        toast.error('Complete your business verification before accepting requests.');
-        navigate('/dashboard/carrier?verify=1');
-        return;
+        if (enforced) {
+          toast.error('Complete your business verification before accepting requests.');
+          navigate('/dashboard/carrier?verify=1');
+          return;
+        }
+        toast.info('Beta: business verification would normally be required here — bypassed for testing.');
       }
 
       if (!(await hasValidCarrierInsurance(request.carrier_id))) {
-        toast.error('You need valid (non-expired) insurance on file before accepting requests.');
-        navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
-        return;
+        if (enforced) {
+          toast.error('You need valid (non-expired) insurance on file before accepting requests.');
+          navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
+          return;
+        }
+        toast.info('Beta: insurance would normally be required here — bypassed for testing.');
       }
 
       // Update request status

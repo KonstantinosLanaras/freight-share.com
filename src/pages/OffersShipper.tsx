@@ -12,6 +12,7 @@ import {
   Shuffle, Handshake, ArrowRight, Inbox, Send,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -20,6 +21,7 @@ import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { isProfileVerified } from '@/lib/verificationUtils';
+import { complianceGatesEnforced } from '@/lib/complianceGating';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -53,6 +55,7 @@ function mapOfferStatus(is_accepted: boolean, declined?: boolean): StatusKey {
 
 export default function OffersShipper() {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -158,13 +161,16 @@ export default function OffersShipper() {
 
   const acceptOfferReceived = async (offerId: string) => {
     const offer = received.find((o) => o.id === offerId);
+    const enforced = complianceGatesEnforced(isDemoMode);
     if (!(await isProfileVerified(user?.id))) {
-      return toast.error('Complete your business verification before accepting offers.');
+      if (enforced) return toast.error('Complete your business verification before accepting offers.');
+      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
     }
     const requiredCoverage = offer?.load?.weight_kg ? offer.load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
     const insuranceCheck = await checkCarrierInsurance(offer?.carrier_id, requiredCoverage);
     if (!insuranceCheck.ok) {
-      return toast.error(insuranceCheckMessage(insuranceCheck));
+      if (enforced) return toast.error(insuranceCheckMessage(insuranceCheck));
+      toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
     }
     const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
     if (error) return toast.error('Failed to accept offer');
@@ -195,13 +201,16 @@ export default function OffersShipper() {
 
   const acceptCounter = async (reqId: string) => {
     const req = made.find((r) => r.id === reqId);
+    const enforced = complianceGatesEnforced(isDemoMode);
     if (!(await isProfileVerified(user?.id))) {
-      return toast.error('Complete your business verification before accepting counter-offers.');
+      if (enforced) return toast.error('Complete your business verification before accepting counter-offers.');
+      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
     }
     const requiredCoverage = req?.weight_kg ? req.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
     const insuranceCheck = await checkCarrierInsurance(req?.carrier_id, requiredCoverage);
     if (!insuranceCheck.ok) {
-      return toast.error(insuranceCheckMessage(insuranceCheck));
+      if (enforced) return toast.error(insuranceCheckMessage(insuranceCheck));
+      toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
     }
     const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
     if (error) return toast.error('Failed to accept counter');
