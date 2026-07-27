@@ -493,19 +493,21 @@ export default function CarrierRequestDetails() {
               <Card>
                 <CardHeader><CardTitle className="text-base">Decision</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  {!carrierInsurance ? (
+                  {!carrierInsurance || new Date(carrierInsurance.expiration_date) < new Date() ? (
                     <>
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-2">
                         <p className="text-sm text-warning font-medium flex items-center gap-2">
                           <ShieldCheck className="h-4 w-4" />
-                          Insurance required to accept
+                          {carrierInsurance ? 'Insurance expired — renew to accept' : 'Insurance required to accept'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          You must provide insurance details before accepting load requests.
+                          {carrierInsurance
+                            ? 'Your insurance details have expired. Update them before accepting load requests.'
+                            : 'You must provide insurance details before accepting load requests.'}
                         </p>
                       </div>
                       <Button className="w-full" onClick={() => navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(`/dashboard/carrier/requests/${requestId}`)}`)}>
-                        <ShieldCheck className="h-4 w-4 mr-2" /> Add Insurance Details
+                        <ShieldCheck className="h-4 w-4 mr-2" /> {carrierInsurance ? 'Update Insurance Details' : 'Add Insurance Details'}
                       </Button>
                     </>
                   ) : (

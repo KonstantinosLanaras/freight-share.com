@@ -267,13 +267,11 @@ export function GoodsConfirmationDialog({
                               </span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                              All-risk coverage up to €{parseFloat(declaredCargoValue).toLocaleString()} declared value. Covers loss, damage, and extraordinary events.
+                              Illustrative all-risk coverage up to €{parseFloat(declaredCargoValue).toLocaleString()} declared value, covering loss, damage, and extraordinary events.
                             </p>
-                            {isDemoMode && (
-                              <p className="text-xs text-warning mt-1">
-                                Beta: No real underwriting — selection recorded for demonstration.
-                              </p>
-                            )}
+                            <p className="text-xs text-warning mt-1">
+                              Not a binding insurance policy — no licensed insurer currently underwrites this cover, and no premium is charged for it. FreightShare cannot pay a claim against it. For real coverage above the carrier's liability limit, arrange cargo insurance directly with a licensed insurer.
+                            </p>
                           </div>
                         </div>
                       </button>
@@ -345,16 +343,16 @@ export function GoodsConfirmationDialog({
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Transport cost</span>
+                  <span>Transport cost (charged)</span>
                   <span>€{price}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Cargo protection premium</span>
+                  <span>Cargo protection premium (illustrative, not charged)</span>
                   <span>€{insuranceCalc.estimatedPremium.toLocaleString()}</span>
                 </div>
                 <div className="border-t border-primary/20 pt-1.5 flex justify-between font-bold text-foreground">
-                  <span>Total</span>
-                  <span>€{(price + insuranceCalc.estimatedPremium).toLocaleString()}</span>
+                  <span>You'll be charged</span>
+                  <span>€{price.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -426,16 +424,12 @@ export function GoodsConfirmationDialog({
               <>
                 <FlaskConical className="h-4 w-4 mr-2" />
                 Simulate Payment
-                {addInsurance && insuranceCalc && (
-                  <span className="ml-1">· €{(price + insuranceCalc.estimatedPremium).toLocaleString()}</span>
-                )}
+                <span className="ml-1">· €{price.toLocaleString()}</span>
               </>
             ) : (
               <>
                 Proceed to Payment
-                {addInsurance && insuranceCalc && (
-                  <span className="ml-1">· €{(price + insuranceCalc.estimatedPremium).toLocaleString()}</span>
-                )}
+                <span className="ml-1">· €{price.toLocaleString()}</span>
               </>
             )}
           </Button>
