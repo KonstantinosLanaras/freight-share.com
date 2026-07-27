@@ -219,14 +219,10 @@ export default function FindLoads() {
       }
     }
 
-    // Hide loads that are geocoded but fall outside this carrier's stated
-    // deviation/radius tolerance on either leg. Loads without coordinates yet
-    // (posted before this feature) are never hidden by this check.
-    const proximity = getLoadProximity(load);
-    if (proximity && (!proximity.originTier || !proximity.destTier)) {
-      return false;
-    }
-
+    // Proximity to the carrier's own route is shown as an informational
+    // badge (see getLoadProximity below) but must never hide a load here --
+    // this is the exhaustive "browse everything, then filter" page. Route-
+    // proximity suggestions belong only in the CarrierDashboard widget.
     return matchesOrigin && matchesDestination && matchesCargo && matchesArriveBy;
   }).sort((a, b) => {
     switch (sortBy) {

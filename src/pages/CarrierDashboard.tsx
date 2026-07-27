@@ -715,16 +715,19 @@ export default function CarrierDashboard() {
                   </Card>
                 )}
 
-                {/* Available Loads - Primary */}
+                {/* Suggested Loads (route-proximity matched) - Primary */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-primary" />
-                      Available Loads
-                    </CardTitle>
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-primary" />
+                        Suggested Loads
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">Based on your active routes</p>
+                    </div>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/dashboard/carrier/find-loads">
-                        Browse All
+                        Browse All Loads
                         <ArrowRight className="h-4 w-4 ml-1" />
                       </Link>
                     </Button>
@@ -736,7 +739,13 @@ export default function CarrierDashboard() {
                         <p className="text-muted-foreground mb-3">
                           {routes.length === 0 ? 'No loads available right now' : 'No loads match your active routes right now'}
                         </p>
-                        <p className="text-sm text-muted-foreground">Check back soon for new opportunities</p>
+                        <p className="text-sm text-muted-foreground mb-3">Check back soon, or browse every posted load instead.</p>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/dashboard/carrier/find-loads">
+                            Browse All Loads
+                            <ArrowRight className="h-4 w-4 ml-1" />
+                          </Link>
+                        </Button>
                       </div>
                     ) : (
                       <>
