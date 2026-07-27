@@ -54,7 +54,7 @@ export default function Unsubscribe() {
           {state === 'valid' && (
             <>
               <p className="text-muted-foreground">
-                Click below to stop receiving notification emails from ReRoute.
+                Click below to stop receiving notification emails from FreightShare.
               </p>
               <Button onClick={confirm} className="w-full">Confirm unsubscribe</Button>
             </>

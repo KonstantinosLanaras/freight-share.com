@@ -339,7 +339,7 @@ export default function Resolution() {
         {open.length === 0 && !loading && (
           <div className="mt-6 p-4 rounded-md border border-border bg-muted/30 text-sm text-muted-foreground flex gap-2">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <span>ReRoute is a technical facilitator. Cases are reviewed by our team within 24 hours and resolved according to platform terms.</span>
+            <span>FreightShare is a technical facilitator. Cases are reviewed by our team within 24 hours and resolved according to platform terms.</span>
           </div>
         )}
       </div>

@@ -11,6 +11,9 @@ interface Props {
   route?: string
   price?: string | number
   pallets?: string | number
+  cargoType?: string
+  weightKg?: string | number
+  pickupDate?: string
   actionUrl?: string
 }
 
@@ -20,11 +23,14 @@ const Email = ({
   route = '',
   price,
   pallets,
+  cargoType,
+  weightKg,
+  pickupDate,
   actionUrl = 'https://freight-share.com',
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your offer was accepted on ReRoute</Preview>
+    <Preview>Your offer was accepted on FreightShare</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>🎉 Offer accepted</Heading>
@@ -32,8 +38,9 @@ const Email = ({
           {recipientName ? `Hi ${recipientName},` : 'Hi there,'}
         </Text>
         <Text style={text}>
-          Good news — <strong>{fromName}</strong> accepted your offer. You can
-          now coordinate the shipment through ReRoute.
+          Good news — <strong>{fromName}</strong> accepted your offer. Here
+          are the shipment details, and you can coordinate the rest through
+          FreightShare.
         </Text>
         {route && (
           <Section style={card}>
@@ -51,14 +58,37 @@ const Email = ({
                 <Text style={cardValue}>{pallets}</Text>
               </>
             )}
+            {cargoType && (
+              <>
+                <Text style={cardLabel}>Cargo type</Text>
+                <Text style={cardValue}>{cargoType}</Text>
+              </>
+            )}
+            {weightKg != null && (
+              <>
+                <Text style={cardLabel}>Weight</Text>
+                <Text style={cardValue}>{weightKg} kg</Text>
+              </>
+            )}
+            {pickupDate && (
+              <>
+                <Text style={cardLabel}>Pickup date</Text>
+                <Text style={cardValue}>{pickupDate}</Text>
+              </>
+            )}
           </Section>
         )}
         <Section style={{ textAlign: 'center', margin: '32px 0' }}>
           <Button href={actionUrl} style={button}>Open shipment</Button>
         </Section>
+        <Text style={text}>
+          Your CMR consignment note and invoice are generated from this
+          shipment's details and become available to download from the
+          shipment page above once pickup/delivery are recorded.
+        </Text>
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you have an active ReRoute account.
+          You're receiving this because you have an active FreightShare account.
         </Text>
       </Container>
     </Body>
@@ -75,6 +105,9 @@ export const template = {
     route: 'Amsterdam, NL → Berlin, DE',
     price: 1250,
     pallets: 8,
+    cargoType: 'general',
+    weightKg: 4200,
+    pickupDate: 'Aug 4, 2026',
     actionUrl: 'https://freight-share.com/dashboard/carrier',
   },
 } satisfies TemplateEntry

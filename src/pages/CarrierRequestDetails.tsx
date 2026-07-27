@@ -224,6 +224,9 @@ export default function CarrierRequestDetails() {
             ? `${request.pickup_address} → ${request.delivery_address}` : undefined,
           price: request.offer_price,
           pallets: request.pallets_requested ?? request.pallets,
+          cargoType: request.goods_type,
+          weightKg: request.weight_kg,
+          pickupDate: request.shipment_date ? format(new Date(request.shipment_date), 'MMM d, yyyy') : undefined,
           actionUrl: `${window.location.origin}/dashboard/shipper/offers`,
           idempotencyKey: `req-accept-${requestId}`,
         });
