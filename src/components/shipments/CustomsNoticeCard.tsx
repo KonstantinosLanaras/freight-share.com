@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
+import { crossesCustomsBorder } from '@/lib/customsUnion';
 
 interface CustomsNoticeCardProps {
   originCountry: string | null | undefined;
@@ -34,20 +35,22 @@ const ADR_CHECKLIST: ChecklistItem = {
 
 /**
  * An unfiltered reference list, not a determination of what this specific
- * shipment requires. FreightShare doesn't compute which of these apply --
- * that would mean owning the consequences of getting it wrong. The trigger
- * for showing this card is deliberately a plain fact already entered by the
- * parties (origin/destination differ, or cargo is marked hazardous), not a
- * legal judgment about customs-union membership or ADR classification.
+ * shipment requires -- the wording never asserts "this shipment needs X,"
+ * only "X generally applies when...". Visibility, however, IS gated on a
+ * computed EU-customs-union check (see customsUnion.ts) rather than a
+ * plain fact like origin != destination -- a deliberate choice to avoid
+ * showing an irrelevant notice on pure intra-EU routes (e.g. Greece to
+ * Belgium), accepting the risk that an inaccurate/outdated membership
+ * list could fail to show the card when it should have.
  */
 export function CustomsNoticeCard({ originCountry, destinationCountry, cargoType }: CustomsNoticeCardProps) {
-  const isInternational = !!originCountry && !!destinationCountry && originCountry !== destinationCountry;
+  const isCustomsMove = crossesCustomsBorder(originCountry, destinationCountry);
   const isHazardous = cargoType === 'hazardous';
 
-  if (!isInternational && !isHazardous) return null;
+  if (!isCustomsMove && !isHazardous) return null;
 
   const items = [
-    ...(isInternational ? CUSTOMS_CHECKLIST : []),
+    ...(isCustomsMove ? CUSTOMS_CHECKLIST : []),
     ...(isHazardous ? [ADR_CHECKLIST] : []),
   ];
 
