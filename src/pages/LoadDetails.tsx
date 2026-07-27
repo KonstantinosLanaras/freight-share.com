@@ -22,6 +22,7 @@ import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
+import { CustomsNoticeCard } from '@/components/shipments/CustomsNoticeCard';
 import {
   Dialog,
   DialogContent,
@@ -419,7 +420,10 @@ export default function LoadDetails() {
           status: shouldSimulatePayment() ? 'paid' : 'accepted',
           payment_status: shouldSimulatePayment() ? 'paid' : 'pending',
           terms_version: '1.0',
-        })
+          // Not yet in generated Supabase types -- added via migration
+          // 20260727150000_shipment_declared_cargo_value.sql.
+          declared_cargo_value_eur: insuranceDecision?.declaredCargoValue ?? null,
+        } as any)
         .select('id')
         .single();
       if (shipmentError) throw shipmentError;
@@ -522,6 +526,13 @@ export default function LoadDetails() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <CustomsNoticeCard
+            originCountry={load.origin_country}
+            destinationCountry={load.destination_country}
+            cargoType={load.cargo_type}
+          />
+        </div>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left: Load info */}
           <div className="lg:col-span-2 space-y-6">
