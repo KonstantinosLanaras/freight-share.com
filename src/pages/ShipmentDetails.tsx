@@ -3,10 +3,10 @@ import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   ArrowLeft, Package, Truck, MapPin, Calendar, Euro, MessageSquare,
   CheckCircle, Clock, FileText, Star, User, HelpCircle, Navigation,
-  AlertTriangle, Loader2, FlaskConical
+  AlertTriangle, Loader2, FlaskConical, Download
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { DeliveryEvidenceDialog } from '@/components/shipments/DeliveryEvidenceDialog';
+import { CustomsNoticeCard } from '@/components/shipments/CustomsNoticeCard';
+import { generateCmrDocument, generateInvoiceDocument, PartyDetails } from '@/lib/shipmentDocuments';
 
 interface EvidenceRecord {
   kind: 'pickup' | 'delivery';
@@ -44,6 +46,11 @@ interface ShipmentData {
   dispute_status: string | null;
   dispute_reason: string | null;
   delivery_marked_at: string | null;
+  platform_fee_amount: number | null;
+  carrier_payout_amount: number | null;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260727150000_shipment_declared_cargo_value.sql.
+  declared_cargo_value_eur?: number | null;
 }
 
 interface LoadData {
@@ -94,6 +101,11 @@ export default function ShipmentDetails() {
   const [timestamps, setTimestamps] = useState<{ status: string; created_at: string }[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRecord[]>([]);
   const [evidenceDialog, setEvidenceDialog] = useState<{ open: boolean; kind: 'pickup' | 'delivery' }>({ open: false, kind: 'pickup' });
+  // Best-effort: registered_address/vat_number are on profiles, not the
+  // public_profiles view, so RLS may return these as null for a
+  // counterparty -- the document generators degrade gracefully either way.
+  const [shipperParty, setShipperParty] = useState<PartyDetails | null>(null);
+  const [carrierParty, setCarrierParty] = useState<PartyDetails | null>(null);
 
   const backPath = role === 'carrier' ? '/dashboard/carrier/shipments' : '/dashboard/shipper/shipments';
 
@@ -139,7 +151,7 @@ export default function ShipmentDetails() {
       setShipment(shipmentData);
 
       // Fetch load, profiles, timestamps in parallel
-      const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes, evidenceRes] = await Promise.all([
+      const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes, evidenceRes, extendedRes] = await Promise.all([
         supabase.from('loads').select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from').eq('id', shipmentData.load_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
@@ -147,6 +159,11 @@ export default function ShipmentDetails() {
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rater_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
         user ? supabase.from('detailed_ratings').select('*').eq('shipment_id', id!).eq('rated_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
         (supabase as any).from('shipment_evidence').select('kind, photo_url, signature_url, signer_name, condition, condition_notes, created_at').eq('shipment_id', id!),
+        // registered_address/vat_number aren't on public_profiles -- RLS
+        // may return these null for a counterparty, handled gracefully
+        // by the CMR/invoice generators.
+        supabase.from('profiles').select('id, full_name, company_name, legal_company_name, registered_address, vat_number')
+          .in('id', [shipmentData.shipper_id, shipmentData.carrier_id]),
       ]);
 
       setLoad(loadRes.data);
@@ -156,6 +173,16 @@ export default function ShipmentDetails() {
       setEvidence(((evidenceRes.data as unknown) as EvidenceRecord[]) || []);
       setExistingRating(myRatingRes.data);
       setOtherPartyRating(theirRatingRes.data);
+
+      const extended = extendedRes.data || [];
+      const toParty = (p: typeof extended[number] | undefined, fallback: ProfileData | null): PartyDetails => ({
+        name: p?.full_name || fallback?.full_name || 'Unknown',
+        company: p?.legal_company_name || p?.company_name || fallback?.company_name || null,
+        address: p?.registered_address || null,
+        vatNumber: p?.vat_number || null,
+      });
+      setShipperParty(toParty(extended.find((p) => p.id === shipmentData.shipper_id), shipperRes.data));
+      setCarrierParty(toParty(extended.find((p) => p.id === shipmentData.carrier_id), carrierRes.data));
     } catch (error) {
       console.error('Error fetching shipment:', error);
       toast.error('Failed to load shipment details');
@@ -199,6 +226,47 @@ export default function ShipmentDetails() {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const buildDocumentData = () => {
+    if (!shipment || !load || !shipperParty || !carrierParty) return null;
+    const pickup = evidence.find((e) => e.kind === 'pickup');
+    const delivery = evidence.find((e) => e.kind === 'delivery');
+    return {
+      shipmentId: shipment.id,
+      createdAt: shipment.created_at,
+      finalPrice: shipment.final_price,
+      platformFeeAmount: shipment.platform_fee_amount,
+      carrierPayoutAmount: shipment.carrier_payout_amount,
+      declaredCargoValueEur: shipment.declared_cargo_value_eur ?? null,
+      load: {
+        originCity: load.origin_city,
+        originCountry: load.origin_country,
+        destinationCity: load.destination_city,
+        destinationCountry: load.destination_country,
+        cargoType: load.cargo_type,
+        weightKg: load.weight_kg,
+        pallets: load.pallets,
+        pickupDateFrom: load.pickup_date_from,
+        deliveryDateFrom: load.delivery_date_from,
+      },
+      shipper: shipperParty,
+      carrier: carrierParty,
+      pickupEvidence: pickup ? { signerName: pickup.signer_name, condition: pickup.condition, conditionNotes: pickup.condition_notes, createdAt: pickup.created_at } : null,
+      deliveryEvidence: delivery ? { signerName: delivery.signer_name, condition: delivery.condition, conditionNotes: delivery.condition_notes, createdAt: delivery.created_at } : null,
+    };
+  };
+
+  const handleDownloadCmr = () => {
+    const data = buildDocumentData();
+    if (!data) return toast.error('Shipment details are still loading — try again in a moment.');
+    generateCmrDocument(data);
+  };
+
+  const handleDownloadInvoice = () => {
+    const data = buildDocumentData();
+    if (!data) return toast.error('Shipment details are still loading — try again in a moment.');
+    generateInvoiceDocument(data);
   };
 
   if (loading) {
@@ -301,6 +369,13 @@ export default function ShipmentDetails() {
             <Button variant="ghost" size="sm" onClick={dismissPaymentBanner}>Dismiss</Button>
           </div>
         )}
+        <div className="mb-6">
+          <CustomsNoticeCard
+            originCountry={load.origin_country}
+            destinationCountry={load.destination_country}
+            cargoType={load.cargo_type}
+          />
+        </div>
         <div className="grid lg:grid-cols-3 gap-6">
 
           {/* Left Column - Details */}
@@ -484,6 +559,29 @@ export default function ShipmentDetails() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Documents */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Documents
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={handleDownloadCmr}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download CMR Document
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={handleDownloadInvoice}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Invoice
+                </Button>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Generated from platform records — review before relying on these for customs, tax, or a dispute.
+                </p>
               </CardContent>
             </Card>
 
