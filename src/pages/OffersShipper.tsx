@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { deductRoutePallets } from '@/lib/routeCapacity';
+import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -156,6 +157,9 @@ export default function OffersShipper() {
 
   const acceptOfferReceived = async (offerId: string) => {
     const offer = received.find((o) => o.id === offerId);
+    if (!(await hasValidCarrierInsurance(offer?.carrier_id))) {
+      return toast.error('This carrier has no valid insurance on file — they must add or renew it before this offer can be accepted.');
+    }
     const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
     if (error) return toast.error('Failed to accept offer');
     await deductRoutePallets(offer?.route_id, offer?.load?.pallets);
@@ -185,6 +189,9 @@ export default function OffersShipper() {
 
   const acceptCounter = async (reqId: string) => {
     const req = made.find((r) => r.id === reqId);
+    if (!(await hasValidCarrierInsurance(req?.carrier_id))) {
+      return toast.error('This carrier has no valid insurance on file — they must add or renew it before this counter-offer can be accepted.');
+    }
     const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
     if (error) return toast.error('Failed to accept counter');
     await deductRoutePallets(req?.route_id, req?.pallets_requested ?? req?.pallets);
