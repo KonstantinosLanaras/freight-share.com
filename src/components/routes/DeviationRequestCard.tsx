@@ -31,6 +31,7 @@ import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
 import { isProfileVerified } from '@/lib/verificationUtils';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
+import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 
 interface DeviationRequest {
   id: string;
@@ -70,6 +71,7 @@ const statusConfig = {
 export function DeviationRequestCard({ request, isCarrier, onUpdate }: DeviationRequestCardProps) {
   const navigate = useNavigate();
   const { isDemoMode } = useDemoMode();
+  const { confirmBypass, dialog: betaBypassDialog } = useBetaBypassConfirm();
   const [counterOfferOpen, setCounterOfferOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [counterOffer, setCounterOffer] = useState({
@@ -81,63 +83,72 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
   const StatusIcon = statusInfo.icon;
 
   const handleAccept = async () => {
-    setIsSubmitting(true);
-    try {
-      const enforced = complianceGatesEnforced(isDemoMode);
+    const enforced = complianceGatesEnforced(isDemoMode);
+    const bypassReasons: string[] = [];
 
-      if (!(await isProfileVerified(request.carrier_id))) {
-        if (enforced) {
-          toast.error('Complete your business verification before accepting requests.');
-          navigate('/dashboard/carrier?verify=1');
-          return;
-        }
-        toast.info('Beta: business verification would normally be required here — bypassed for testing.');
+    if (!(await isProfileVerified(request.carrier_id))) {
+      if (enforced) {
+        toast.error('Complete your business verification before accepting requests.');
+        navigate('/dashboard/carrier?verify=1');
+        return;
       }
-
-      if (!(await hasValidCarrierInsurance(request.carrier_id))) {
-        if (enforced) {
-          toast.error('You need valid (non-expired) insurance on file before accepting requests.');
-          navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
-          return;
-        }
-        toast.info('Beta: insurance would normally be required here — bypassed for testing.');
-      }
-
-      // Update request status
-      const { error: requestError } = await supabase
-        .from('deviation_requests')
-        .update({ 
-          status: 'accepted',
-          carrier_response: 'Request accepted'
-        })
-        .eq('id', request.id);
-
-      if (requestError) throw requestError;
-
-      // Reduce available pallets on the route
-      const { data: route, error: routeError } = await supabase
-        .from('routes')
-        .select('available_pallets')
-        .eq('id', request.route_id)
-        .single();
-
-      if (routeError) throw routeError;
-
-      const newPallets = Math.max(0, (route?.available_pallets || 0) - request.pallets_required);
-      
-      await supabase
-        .from('routes')
-        .update({ available_pallets: newPallets })
-        .eq('id', request.route_id);
-
-      toast.success('Request accepted! Available capacity updated.');
-      onUpdate?.();
-    } catch (error: any) {
-      console.error('Error accepting request:', error);
-      toast.error(error.message || 'Failed to accept request');
-    } finally {
-      setIsSubmitting(false);
+      bypassReasons.push('Business verification would normally be required before accepting.');
     }
+
+    if (!(await hasValidCarrierInsurance(request.carrier_id))) {
+      if (enforced) {
+        toast.error('You need valid (non-expired) insurance on file before accepting requests.');
+        navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      bypassReasons.push('Valid (non-expired) insurance on file would normally be required before accepting.');
+    }
+
+    const finalize = async () => {
+      setIsSubmitting(true);
+      try {
+        // Update request status
+        const { error: requestError } = await supabase
+          .from('deviation_requests')
+          .update({
+            status: 'accepted',
+            carrier_response: 'Request accepted'
+          })
+          .eq('id', request.id);
+
+        if (requestError) throw requestError;
+
+        // Reduce available pallets on the route
+        const { data: route, error: routeError } = await supabase
+          .from('routes')
+          .select('available_pallets')
+          .eq('id', request.route_id)
+          .single();
+
+        if (routeError) throw routeError;
+
+        const newPallets = Math.max(0, (route?.available_pallets || 0) - request.pallets_required);
+
+        await supabase
+          .from('routes')
+          .update({ available_pallets: newPallets })
+          .eq('id', request.route_id);
+
+        toast.success('Request accepted! Available capacity updated.');
+        onUpdate?.();
+      } catch (error: any) {
+        console.error('Error accepting request:', error);
+        toast.error(error.message || 'Failed to accept request');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    if (bypassReasons.length > 0) {
+      confirmBypass(bypassReasons, finalize);
+      return;
+    }
+    await finalize();
   };
 
   const handleReject = async () => {
@@ -193,6 +204,7 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
 
   return (
     <>
+      {betaBypassDialog}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">

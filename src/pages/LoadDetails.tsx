@@ -21,6 +21,7 @@ import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
+import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import { CustomsNoticeCard } from '@/components/shipments/CustomsNoticeCard';
@@ -104,6 +105,7 @@ export default function LoadDetails() {
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { isDemoMode, checkVerification, shouldSimulatePayment } = useDemoMode();
+  const { confirmBypass, dialog: betaBypassDialog } = useBetaBypassConfirm();
 
   // Data
   const [load, setLoad] = useState<LoadData | null>(null);
@@ -221,13 +223,15 @@ export default function LoadDetails() {
     }
 
     setPendingAction(action);
+    const enforced = complianceGatesEnforced(isDemoMode);
+    const bypassReasons: string[] = [];
 
     if (!checkVerification(verificationStatus)) {
-      if (complianceGatesEnforced(isDemoMode)) {
+      if (enforced) {
         setFlowState('verification_gate');
         return;
       }
-      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
+      bypassReasons.push('Business verification would normally be required before this action.');
     }
 
     // Finalizing a booking (not just proposing/countering a price) requires
@@ -237,13 +241,18 @@ export default function LoadDetails() {
       const requiredCoverage = load?.weight_kg ? load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
       const insuranceCheck = await checkCarrierInsurance(action.offer.carrier_id, requiredCoverage);
       if (!insuranceCheck.ok) {
-        if (complianceGatesEnforced(isDemoMode)) {
+        if (enforced) {
           toast.error(insuranceCheckMessage(insuranceCheck));
           setPendingAction(null);
           return;
         }
-        toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
+        bypassReasons.push(insuranceCheckMessage(insuranceCheck));
       }
+    }
+
+    if (bypassReasons.length > 0) {
+      confirmBypass(bypassReasons, () => executeAction(action));
+      return;
     }
 
     executeAction(action);
@@ -940,6 +949,8 @@ export default function LoadDetails() {
       )}
 
       {/* ── FLOW DIALOGS ── */}
+
+      {betaBypassDialog}
 
       {/* 1. Verification Gate */}
       <VerificationGateDialog
