@@ -8,6 +8,9 @@ interface OfferContext {
   route?: string;
   price?: string | number;
   pallets?: string | number;
+  cargoType?: string;
+  weightKg?: string | number;
+  pickupDate?: string;
   actionUrl?: string;
   kind?: OfferKind;
   idempotencyKey?: string;
@@ -25,6 +28,9 @@ async function invokeNotify(templateName: string, ctx: OfferContext) {
           route: ctx.route,
           price: ctx.price,
           pallets: ctx.pallets,
+          cargoType: ctx.cargoType,
+          weightKg: ctx.weightKg,
+          pickupDate: ctx.pickupDate,
           actionUrl: ctx.actionUrl,
           kind: ctx.kind,
         },

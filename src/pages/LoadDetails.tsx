@@ -444,6 +444,22 @@ export default function LoadDetails() {
         .single();
       if (shipmentError) throw shipmentError;
 
+      // 3b. Notify the carrier -- this was the only acceptance path that
+      // never sent this notification (OffersShipper.tsx and
+      // CarrierRequestDetails.tsx both already do).
+      notifyOfferAccepted({
+        recipientUserId: selectedOffer.carrier_id,
+        fromName: 'The shipper',
+        route: `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}`,
+        price: selectedOffer.price,
+        pallets: load.pallets,
+        cargoType: load.cargo_type,
+        weightKg: load.weight_kg,
+        pickupDate: load.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
+        actionUrl: `${window.location.origin}/shipment/${shipment.id}`,
+        idempotencyKey: `offer-accept-${selectedOffer.id}`,
+      });
+
       // 4. Beta mode: simulate payment success
       if (shouldSimulatePayment()) {
         toast.success('Beta: Payment simulated successfully!', {
