@@ -30,8 +30,11 @@ export function VerificationGateDialog({
   const isPending = verificationStatus === 'pending';
   const isRejected = verificationStatus === 'rejected';
 
+  // Carrier business verification (company registration/VAT/document review)
+  // is a distinct flow from carrier_insurance -- adding insurance details
+  // never sets verification_status, so this must not point there.
   const verifyPath = role === 'carrier'
-    ? `/dashboard/carrier/insurance`
+    ? `/dashboard/carrier?verify=1`
     : `/dashboard/shipper/verify?returnTo=${encodeURIComponent(returnPath)}`;
 
   const handleVerify = () => {

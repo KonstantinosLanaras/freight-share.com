@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 interface DemoModeContextType {
   isDemoMode: boolean;
   toggleDemoMode: () => void;
-  /** Returns true if action should proceed (verified or demo mode). Shows toast in demo mode. */
+  /** Returns true only if the business is actually verified -- payment simulation is a separate concern from KYC. */
   checkVerification: (verificationStatus: string | null) => boolean;
   /** Simulates payment in demo mode. Returns true if simulated. */
   shouldSimulatePayment: () => boolean;
@@ -20,12 +20,8 @@ export function DemoModeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const checkVerification = useCallback(
-    (verificationStatus: string | null): boolean => {
-      if (verificationStatus === 'verified') return true;
-      if (isDemoMode) return true; // bypass in demo
-      return false;
-    },
-    [isDemoMode]
+    (verificationStatus: string | null): boolean => verificationStatus === 'verified',
+    []
   );
 
   const shouldSimulatePayment = useCallback(() => isDemoMode, [isDemoMode]);

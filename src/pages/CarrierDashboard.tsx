@@ -173,6 +173,15 @@ export default function CarrierDashboard() {
     })();
   }, [user, searchParams]);
 
+  // Deep-link from VerificationGateDialog elsewhere in the app -- opens the
+  // business verification form directly instead of requiring a manual click.
+  useEffect(() => {
+    if (searchParams.get('verify') !== '1') return;
+    setShowVerificationForm(true);
+    searchParams.delete('verify');
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams]);
+
   const handleConnectPayouts = async () => {
     if (!user) return;
     setConnectingPayouts(true);

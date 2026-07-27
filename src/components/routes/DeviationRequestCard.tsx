@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { hasValidCarrierInsurance } from '@/lib/insuranceUtils';
+import { isProfileVerified } from '@/lib/verificationUtils';
 
 interface DeviationRequest {
   id: string;
@@ -79,6 +80,12 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
   const handleAccept = async () => {
     setIsSubmitting(true);
     try {
+      if (!(await isProfileVerified(request.carrier_id))) {
+        toast.error('Complete your business verification before accepting requests.');
+        navigate('/dashboard/carrier?verify=1');
+        return;
+      }
+
       if (!(await hasValidCarrierInsurance(request.carrier_id))) {
         toast.error('You need valid (non-expired) insurance on file before accepting requests.');
         navigate(`/dashboard/carrier/insurance?returnTo=${encodeURIComponent(window.location.pathname)}`);
