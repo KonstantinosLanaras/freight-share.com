@@ -210,6 +210,7 @@ export type Database = {
       }
       deviation_requests: {
         Row: {
+          cargo_type: string | null
           carrier_id: string
           carrier_response: string | null
           counter_offer_conditions: string | null
@@ -222,12 +223,15 @@ export type Database = {
           pickup_address: string
           preferred_time_from: string
           preferred_time_to: string
+          proposed_price: number | null
           route_id: string
           shipper_id: string
           status: string
           updated_at: string
+          weight_kg: number | null
         }
         Insert: {
+          cargo_type?: string | null
           carrier_id: string
           carrier_response?: string | null
           counter_offer_conditions?: string | null
@@ -240,12 +244,15 @@ export type Database = {
           pickup_address: string
           preferred_time_from: string
           preferred_time_to: string
+          proposed_price?: number | null
           route_id: string
           shipper_id: string
           status?: string
           updated_at?: string
+          weight_kg?: number | null
         }
         Update: {
+          cargo_type?: string | null
           carrier_id?: string
           carrier_response?: string | null
           counter_offer_conditions?: string | null
@@ -258,10 +265,12 @@ export type Database = {
           pickup_address?: string
           preferred_time_from?: string
           preferred_time_to?: string
+          proposed_price?: number | null
           route_id?: string
           shipper_id?: string
           status?: string
           updated_at?: string
+          weight_kg?: number | null
         }
         Relationships: [
           {
@@ -1203,17 +1212,19 @@ export type Database = {
           carrier_payout_amount: number | null
           created_at: string
           delivery_marked_at: string | null
+          deviation_request_id: string | null
           dispute_raised_at: string | null
           dispute_reason: string | null
           dispute_resolved_at: string | null
           dispute_status: string | null
           final_price: number
           id: string
-          load_id: string
-          offer_id: string
+          load_id: string | null
+          offer_id: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           platform_fee_amount: number | null
+          route_request_id: string | null
           shipper_id: string
           status: Database["public"]["Enums"]["shipment_status"]
           terms_version: string | null
@@ -1224,17 +1235,19 @@ export type Database = {
           carrier_payout_amount?: number | null
           created_at?: string
           delivery_marked_at?: string | null
+          deviation_request_id?: string | null
           dispute_raised_at?: string | null
           dispute_reason?: string | null
           dispute_resolved_at?: string | null
           dispute_status?: string | null
           final_price: number
           id?: string
-          load_id: string
-          offer_id: string
+          load_id?: string | null
+          offer_id?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           platform_fee_amount?: number | null
+          route_request_id?: string | null
           shipper_id: string
           status?: Database["public"]["Enums"]["shipment_status"]
           terms_version?: string | null
@@ -1245,23 +1258,32 @@ export type Database = {
           carrier_payout_amount?: number | null
           created_at?: string
           delivery_marked_at?: string | null
+          deviation_request_id?: string | null
           dispute_raised_at?: string | null
           dispute_reason?: string | null
           dispute_resolved_at?: string | null
           dispute_status?: string | null
           final_price?: number
           id?: string
-          load_id?: string
-          offer_id?: string
+          load_id?: string | null
+          offer_id?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           platform_fee_amount?: number | null
+          route_request_id?: string | null
           shipper_id?: string
           status?: Database["public"]["Enums"]["shipment_status"]
           terms_version?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "shipments_deviation_request_id_fkey"
+            columns: ["deviation_request_id"]
+            isOneToOne: false
+            referencedRelation: "deviation_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipments_load_id_fkey"
             columns: ["load_id"]
@@ -1274,6 +1296,13 @@ export type Database = {
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_route_request_id_fkey"
+            columns: ["route_request_id"]
+            isOneToOne: false
+            referencedRelation: "route_requests"
             referencedColumns: ["id"]
           },
         ]
