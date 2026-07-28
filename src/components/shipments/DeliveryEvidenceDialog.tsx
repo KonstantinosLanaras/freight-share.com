@@ -76,29 +76,31 @@ export function DeliveryEvidenceDialog({ open, onOpenChange, shipmentId, kind, o
 
       const position = await getCurrentPosition();
 
+      // shipment-evidence is a private bucket (delivery photos/signatures
+      // can show a person's face and signature) -- storing the raw path
+      // rather than a public URL, since a signed URL is only generated
+      // at display time, scoped to whoever is actually viewing it.
       const photoPath = `${shipmentId}/${kind}-photo-${Date.now()}.${photo.name.split('.').pop() || 'jpg'}`;
       const { error: photoUploadError } = await supabase.storage
         .from('shipment-evidence')
         .upload(photoPath, photo);
       if (photoUploadError) throw photoUploadError;
-      const { data: photoUrlData } = supabase.storage.from('shipment-evidence').getPublicUrl(photoPath);
 
-      let signatureUrl: string | null = null;
+      let signaturePath: string | null = null;
       if (signatureDataUrl) {
         const blob = await dataUrlToBlob(signatureDataUrl);
-        const signaturePath = `${shipmentId}/${kind}-signature-${Date.now()}.png`;
+        signaturePath = `${shipmentId}/${kind}-signature-${Date.now()}.png`;
         const { error: sigUploadError } = await supabase.storage
           .from('shipment-evidence')
           .upload(signaturePath, blob, { contentType: 'image/png' });
         if (sigUploadError) throw sigUploadError;
-        signatureUrl = supabase.storage.from('shipment-evidence').getPublicUrl(signaturePath).data.publicUrl;
       }
 
       const { error: insertError } = await (supabase as any).from('shipment_evidence').insert({
         shipment_id: shipmentId,
         kind,
-        photo_url: photoUrlData.publicUrl,
-        signature_url: signatureUrl,
+        photo_url: photoPath,
+        signature_url: signaturePath,
         signer_name: isDelivery ? signerName.trim() : null,
         condition,
         condition_notes: notes.trim() || null,

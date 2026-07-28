@@ -19,6 +19,7 @@ import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { DeliveryEvidenceDialog } from '@/components/shipments/DeliveryEvidenceDialog';
 import { CustomsNoticeCard } from '@/components/shipments/CustomsNoticeCard';
 import { generateCmrDocument, generateInvoiceDocument, PartyDetails } from '@/lib/shipmentDocuments';
+import { resolveEvidenceUrl } from '@/lib/evidenceUrls';
 
 interface EvidenceRecord {
   kind: 'pickup' | 'delivery';
@@ -263,7 +264,19 @@ export default function ShipmentDetails() {
       setShipperProfile(shipperRes.data);
       setCarrierProfile(carrierRes.data);
       setTimestamps(tsRes.data || []);
-      setEvidence(((evidenceRes.data as unknown) as EvidenceRecord[]) || []);
+
+      // shipment-evidence is a private bucket -- the stored path can't be
+      // used directly as an <img src>, it needs a short-lived signed URL
+      // resolved for whoever's actually viewing this page.
+      const rawEvidence = ((evidenceRes.data as unknown) as EvidenceRecord[]) || [];
+      const resolvedEvidence = await Promise.all(
+        rawEvidence.map(async (ev) => ({
+          ...ev,
+          photo_url: await resolveEvidenceUrl(ev.photo_url),
+          signature_url: await resolveEvidenceUrl(ev.signature_url),
+        }))
+      );
+      setEvidence(resolvedEvidence);
       setExistingRating(myRatingRes.data);
       setOtherPartyRating(theirRatingRes.data);
 
