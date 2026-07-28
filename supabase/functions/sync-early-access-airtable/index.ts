@@ -14,7 +14,7 @@ interface Payload {
   companyName: string;
   role: 'carrier' | 'shipper';
   email: string;
-  phone: string;
+  phone?: string;
   challenge?: string;
   source?: string;
 }
