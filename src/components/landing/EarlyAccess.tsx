@@ -17,9 +17,9 @@ const schema = z.object({
   phone: z
     .string()
     .trim()
-    .min(6, 'Please enter a valid phone number')
     .max(30)
-    .regex(/^[+0-9\s()-]+$/, 'Phone number can only contain digits, spaces and + ( ) -'),
+    .regex(/^[+0-9\s()-]*$/, 'Phone number can only contain digits, spaces and + ( ) -')
+    .optional(),
   challenge: z.string().trim().max(500).optional(),
 });
 
@@ -189,7 +189,7 @@ export const EarlyAccess = () => {
                   <Label htmlFor="ea-phone">
                     Phone Number{' '}
                     <span className="text-muted-foreground font-normal">
-                      (with country code)
+                      (optional)
                     </span>
                   </Label>
                   <Input
@@ -200,12 +200,11 @@ export const EarlyAccess = () => {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     maxLength={30}
-                    required
                     className="mt-1"
                     aria-describedby="ea-phone-help"
                   />
                   <p id="ea-phone-help" className="mt-1 text-xs text-muted-foreground">
-                    Include your country code, e.g. <span className="font-medium text-foreground">+30 69 12345678</span> for Greece or <span className="font-medium text-foreground">+39 340 1234567</span> for Italy.
+                    If provided, include your country code, e.g. <span className="font-medium text-foreground">+30 69 12345678</span> for Greece or <span className="font-medium text-foreground">+39 340 1234567</span> for Italy.
                   </p>
                 </div>
               </div>
