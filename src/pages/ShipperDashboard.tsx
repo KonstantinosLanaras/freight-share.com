@@ -102,6 +102,9 @@ interface PickupRequest {
   deviation_description: string;
   status: 'pending' | 'accepted' | 'rejected' | 'counter_offer';
   counter_offer_price: number | null;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260728130000_deviation_request_price.sql.
+  proposed_price?: number | null;
   counter_offer_conditions: string | null;
   created_at: string;
   // Not yet in generated Supabase types -- added via migration
@@ -303,8 +306,15 @@ export default function ShipperDashboard() {
     navigate('/');
   };
 
+  // A carrier's counter-offer supersedes the shipper's originally
+  // proposed price if one was made; otherwise the request's own
+  // proposed_price (added via migration 20260728130000_deviation_request_price.sql)
+  // is what a direct accept (no counter) charges.
+  const effectivePickupPrice = (request: PickupRequest): number | null =>
+    request.counter_offer_price ?? request.proposed_price ?? null;
+
   const startPickupPayment = (request: PickupRequest) => {
-    if (request.counter_offer_price == null) {
+    if (effectivePickupPrice(request) == null) {
       toast.error('No price has been agreed for this pickup yet — negotiate a price with the carrier before proceeding to payment.');
       return;
     }
@@ -313,14 +323,15 @@ export default function ShipperDashboard() {
 
   const handleProceedToPickupPayment = async (insuranceDecision?: InsuranceDecision) => {
     const request = payingPickupRequest;
-    if (!request || !user || request.counter_offer_price == null) return;
+    const price = request ? effectivePickupPrice(request) : null;
+    if (!request || !user || price == null) return;
     setPickupPaymentLoading(true);
     try {
       const shipmentId = await createShipmentRecord({
         source: { kind: 'deviation_request', deviationRequestId: request.id },
         shipperId: user.id,
         carrierId: request.carrier_id,
-        finalPrice: request.counter_offer_price,
+        finalPrice: price,
         insuranceDecision,
         shouldSimulatePayment: isDemoMode,
       });
@@ -329,7 +340,7 @@ export default function ShipperDashboard() {
         recipientUserId: request.carrier_id,
         fromName: 'The shipper',
         route: request.route ? `${request.route.origin_city}, ${request.route.origin_country} → ${request.route.destination_city}, ${request.route.destination_country}` : undefined,
-        price: request.counter_offer_price,
+        price,
         pallets: request.pallets_required,
         cargoType: request.cargo_type ?? undefined,
         weightKg: request.weight_kg ?? undefined,
@@ -349,7 +360,7 @@ export default function ShipperDashboard() {
 
       const paymentUrl = await triggerShipmentPayment({
         shipmentId,
-        amount: request.counter_offer_price,
+        amount: price,
         description: request.route ? `${request.route.origin_city} → ${request.route.destination_city} · ${request.pallets_required} pallets pickup add-on` : `Pickup request ${request.id}`,
         carrierId: request.carrier_id,
       });
@@ -763,6 +774,7 @@ export default function ShipperDashboard() {
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {request.pallets_required} pallets · {request.pickup_address.slice(0, 50)}...
+                                {request.proposed_price != null && ` · €${request.proposed_price} offered`}
                               </div>
                               {request.status === 'counter_offer' && request.counter_offer_price && (
                                 <div className="mt-2 text-sm">
@@ -878,7 +890,7 @@ export default function ShipperDashboard() {
           onConfirm={handleProceedToPickupPayment}
           isLoading={pickupPaymentLoading}
           cargoType={payingPickupRequest.cargo_type || 'general'}
-          price={payingPickupRequest.counter_offer_price ?? 0}
+          price={effectivePickupPrice(payingPickupRequest) ?? 0}
           weightKg={payingPickupRequest.weight_kg ?? 0}
           isDemoMode={isDemoMode}
         />
