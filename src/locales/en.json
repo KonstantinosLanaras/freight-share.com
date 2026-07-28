@@ -151,24 +151,24 @@
     "subtitle": "Design choices that create social and environmental value.",
     "stats": {
       "emptyMiles": {
-        "value": "20–30%",
-        "label": "of truck capacity in Europe runs empty or underutilised",
-        "source": "Source: European Commission, IRU"
+        "value": "~21%",
+        "label": "of road freight kilometres in the EU are driven empty",
+        "source": "Eurostat, Road freight transport by journey characteristics (2024 data)"
       },
-      "smePremium": {
-        "value": "~30%",
-        "label": "more per unit — what SMEs pay for transport vs large shippers",
-        "source": "Source: EU SME Logistics Studies"
+      "smeShare": {
+        "value": "99.8%",
+        "label": "of all EU businesses are small or medium-sized enterprises",
+        "source": "European Commission, Annual Report on European SMEs 2023/2024"
       },
-      "intermediaryMargin": {
-        "value": "10–25%",
-        "label": "of logistics value captured by intermediaries as margin",
-        "source": "Source: Freight Forwarding Reports"
+      "fragmentation": {
+        "value": "80%",
+        "label": "of EU road haulage firms have fewer than 10 employees",
+        "source": "European Commission, Report on the State of the EU Road Haulage Market (2014)"
       },
       "co2Emissions": {
-        "value": "Major",
-        "label": "Road freight is one of the largest transport-related CO₂ contributors",
-        "source": "Source: European Commission, Eurostat"
+        "value": "6%",
+        "label": "of total EU greenhouse gas emissions come from heavy-duty trucks",
+        "source": "European Environment Agency, Reducing GHG Emissions from Heavy-Duty Vehicles in Europe"
       }
     },
     "social": {

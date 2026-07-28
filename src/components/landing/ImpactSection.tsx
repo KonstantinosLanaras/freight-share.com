@@ -5,30 +5,37 @@ import { Users, Leaf, ArrowRight, TrendingDown, Percent, BarChart3, CloudCog } f
 export const ImpactSection = () => {
   const { t } = useTranslation();
 
+  // Source URLs live here, not in the translated JSON -- a citation's
+  // URL doesn't change per locale, so it shouldn't be duplicated (and
+  // risk drifting out of sync) across en/fr/el.
   const stats = [
     {
       icon: TrendingDown,
       valueKey: 'impact.stats.emptyMiles.value',
       labelKey: 'impact.stats.emptyMiles.label',
       sourceKey: 'impact.stats.emptyMiles.source',
+      sourceUrl: 'https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Road_freight_transport_by_journey_characteristics',
     },
     {
       icon: Percent,
-      valueKey: 'impact.stats.smePremium.value',
-      labelKey: 'impact.stats.smePremium.label',
-      sourceKey: 'impact.stats.smePremium.source',
+      valueKey: 'impact.stats.smeShare.value',
+      labelKey: 'impact.stats.smeShare.label',
+      sourceKey: 'impact.stats.smeShare.source',
+      sourceUrl: 'https://publications.jrc.ec.europa.eu/repository/handle/JRC138678',
     },
     {
       icon: BarChart3,
-      valueKey: 'impact.stats.intermediaryMargin.value',
-      labelKey: 'impact.stats.intermediaryMargin.label',
-      sourceKey: 'impact.stats.intermediaryMargin.source',
+      valueKey: 'impact.stats.fragmentation.value',
+      labelKey: 'impact.stats.fragmentation.label',
+      sourceKey: 'impact.stats.fragmentation.source',
+      sourceUrl: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:52014DC0222',
     },
     {
       icon: CloudCog,
       valueKey: 'impact.stats.co2Emissions.value',
       labelKey: 'impact.stats.co2Emissions.label',
       sourceKey: 'impact.stats.co2Emissions.source',
+      sourceUrl: 'https://www.eea.europa.eu/publications/co2-emissions-of-new-heavy/reducing-greenhouse-gas-emissions-from',
     },
   ];
 
@@ -63,7 +70,14 @@ export const ImpactSection = () => {
               <stat.icon className="h-5 w-5 text-primary mx-auto mb-2" />
               <p className="text-2xl font-bold text-foreground">{t(stat.valueKey)}</p>
               <p className="text-xs text-muted-foreground mt-1">{t(stat.labelKey)}</p>
-              <p className="text-[10px] text-muted-foreground/70 mt-2 italic">{t(stat.sourceKey)}</p>
+              <a
+                href={stat.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-[10px] text-primary/80 hover:text-primary underline mt-2"
+              >
+                {t(stat.sourceKey)}
+              </a>
             </div>
           ))}
         </div>

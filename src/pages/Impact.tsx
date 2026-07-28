@@ -32,13 +32,16 @@ const Impact = () => {
               
               <div className="space-y-5 text-muted-foreground leading-relaxed">
                 <p>
-                  Small and medium enterprises account for over <strong className="text-foreground">99%</strong> of non-financial businesses in the European Union and form the backbone of the European economy. The COVID-19 pandemic and its aftermath exposed the vulnerability of this segment: many small and self-employed businesses were forced to close, while surviving firms often faced revenue declines of <strong className="text-foreground">20–40%</strong> during peak disruption. These shocks reduced the ability of SMEs to compete, invest, and access markets on equal terms.
+                  Small and medium enterprises account for <strong className="text-foreground">99.8%</strong> of non-financial businesses in the European Union and form the backbone of the European economy (
+                  <a href="https://publications.jrc.ec.europa.eu/repository/handle/JRC138678" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">European Commission, Annual Report on European SMEs 2023/2024</a>
+                  ). The COVID-19 pandemic exposed the vulnerability of this segment: across the surveys tracked in the OECD's COVID-19 SME policy monitoring, many affected firms reported revenue declines in the region of <strong className="text-foreground">30–50%</strong> during peak disruption (
+                  <a href="https://www.oecd.org/content/dam/oecd/en/publications/reports/2021/04/one-year-of-sme-and-entrepreneurship-policy-responses-to-covid-19-lessons-learned-to-build-back-better_ea2f606a/9a230220-en.pdf" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OECD, One Year of SME and Entrepreneurship Policy Responses to COVID-19, 2021</a>
+                  ). These shocks reduced the ability of SMEs to compete, invest, and access markets on equal terms.
                 </p>
                 <p>
-                  At the same time, households across the Eurozone experienced rising living costs. Prices for food and essential goods increased by <strong className="text-foreground">20–30%</strong> in parts of Europe between 2019 and 2023, while real household purchasing power declined in several member states as inflation outpaced income growth. These pressures were felt most acutely by lower-income households, which allocate a larger share of spending to essentials. Improving competition and reducing structural inefficiencies in supply chains are among the mechanisms that can help support price discipline and economic resilience, without guaranteeing specific outcomes.
-                </p>
-                <p className="text-sm italic">
-                  Sources: European Commission, Eurostat, European Central Bank, Financial Times
+                  At the same time, households across the Eurozone experienced rising living costs, with food and energy prices a significant driver of headline inflation in several member states between 2021 and 2023 (
+                  <a href="https://ec.europa.eu/eurostat/web/hicp" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Eurostat, Harmonised Index of Consumer Prices</a>
+                  ). These pressures were felt most acutely by lower-income households, which allocate a larger share of spending to essentials. Improving competition and reducing structural inefficiencies in supply chains are among the mechanisms that can help support price discipline and economic resilience, without guaranteeing specific outcomes.
                 </p>
               </div>
             </section>
@@ -52,13 +55,17 @@ const Impact = () => {
               
               <div className="space-y-5 text-muted-foreground leading-relaxed">
                 <p>
-                  European road freight is highly fragmented. Over <strong className="text-foreground">90%</strong> of road haulage firms in the EU operate fewer than ten vehicles, resulting in a dispersed supply base with limited visibility into available capacity. This fragmentation makes it difficult for smaller shippers to identify suitable carriers and benchmark prices effectively.
+                  European road freight is highly fragmented. <strong className="text-foreground">80%</strong> of EU road haulage firms employ fewer than ten people (
+                  <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:52014DC0222" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">European Commission, Report on the State of the EU Road Haulage Market, 2014</a>
+                  ), resulting in a dispersed supply base with limited visibility into available capacity. This fragmentation makes it difficult for smaller shippers to identify suitable carriers and benchmark prices effectively.
                 </p>
                 <p>
-                  Industry estimates suggest that <strong className="text-foreground">20–30%</strong> of truck-kilometres in Europe are driven empty or with partial loads. This represents a structural mismatch between available capacity and demand, increasing costs per shipment and leading to unnecessary fuel consumption.
+                  Around <strong className="text-foreground">21%</strong> of road freight kilometres in the EU are driven empty (
+                  <a href="https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Road_freight_transport_by_journey_characteristics" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Eurostat, Road freight transport by journey characteristics, 2024 data</a>
+                  ). This represents a structural mismatch between available capacity and demand, increasing costs per shipment and leading to unnecessary fuel consumption.
                 </p>
                 <p>
-                  Small and medium enterprises typically pay <strong className="text-foreground">15–30%</strong> more for equivalent logistics services than larger shippers. This premium reflects reduced bargaining power, limited access to spot capacity, and reliance on intermediaries to source transport. Pricing in road freight remains largely opaque, with rates often negotiated bilaterally. Intermediary margins of <strong className="text-foreground">10–25%</strong> are common in brokered transactions, adding cost without adding transport capacity.
+                  Pricing in road freight also remains largely opaque, with rates typically negotiated bilaterally rather than benchmarked against a visible market rate. Because smaller shippers have less bargaining power and no direct access to spot capacity, they typically rely on intermediaries to source transport — intermediaries who add a margin without adding transport capacity. This structural disadvantage, rather than a single precise cost figure, is the mechanism that direct, visible-pricing matching is designed to reduce.
                 </p>
               </div>
             </section>
@@ -129,7 +136,9 @@ const Impact = () => {
               
               <div className="space-y-5 text-muted-foreground leading-relaxed">
                 <p>
-                  Road freight accounts for approximately <strong className="text-foreground">6%</strong> of total EU greenhouse gas emissions and around <strong className="text-foreground">27%</strong> of transport-related CO₂ emissions. Efficiency gains in this sector therefore have direct environmental relevance.
+                  Heavy-duty trucks account for approximately <strong className="text-foreground">6%</strong> of total EU greenhouse gas emissions and just over <strong className="text-foreground">27%</strong> of road transport emissions specifically (
+                  <a href="https://www.eea.europa.eu/publications/co2-emissions-of-new-heavy/reducing-greenhouse-gas-emissions-from" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">European Environment Agency, Reducing Greenhouse Gas Emissions from Heavy-Duty Vehicles in Europe</a>
+                  ). Efficiency gains in this sector therefore have direct environmental relevance.
                 </p>
                 <p>
                   Matching loads to existing routes improves vehicle utilisation. Higher load factors mean fewer vehicle-kilometres are required to move the same volume of goods. Route-based matching also reduces empty running by enabling carriers to identify backhaul opportunities after deliveries.
