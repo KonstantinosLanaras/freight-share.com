@@ -22,6 +22,7 @@ import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCar
 import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
 import { CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
+import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-primary/10 text-primary' },
@@ -38,6 +39,7 @@ export default function CarrierRequestDetails() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { confirmBypass, dialog: betaBypassDialog } = useBetaBypassConfirm();
   const [request, setRequest] = useState<any>(null);
   const [route, setRoute] = useState<any>(null);
   const [shipperProfile, setShipperProfile] = useState<any>(null);
@@ -432,6 +434,7 @@ export default function CarrierRequestDetails() {
 
   return (
     <div className="min-h-screen bg-background">
+      {betaBypassDialog}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -566,8 +569,25 @@ export default function CarrierRequestDetails() {
                           </div>
                         ) : (
                           <>
-                            <p className="text-xs text-muted-foreground mb-2">Beta: the above would normally block acceptance — bypassed for testing.</p>
-                            <Button className="w-full" onClick={() => setShowAcceptForm(true)}>
+                            <Button
+                              className="w-full"
+                              onClick={() => {
+                                const reasons: string[] = [];
+                                if (insuranceBlocked) {
+                                  reasons.push(
+                                    insuranceExpired
+                                      ? "Your insurance has expired — it would normally need to be renewed before accepting."
+                                      : insuranceInsufficient
+                                        ? 'Your insurance coverage is below what this shipment requires.'
+                                        : 'Insurance would normally be required before accepting.'
+                                  );
+                                }
+                                if (verificationBlocked) {
+                                  reasons.push('Business verification would normally be required before accepting.');
+                                }
+                                confirmBypass(reasons, () => setShowAcceptForm(true));
+                              }}
+                            >
                               <CheckCircle className="h-4 w-4 mr-2" /> Accept Request
                             </Button>
                           </>

@@ -17,9 +17,9 @@ const schema = z.object({
   phone: z
     .string()
     .trim()
-    .min(6, 'Please enter a valid phone number')
+    .min(7, 'Please enter your phone number with country code')
     .max(30)
-    .regex(/^[+0-9\s()-]+$/, 'Phone number can only contain digits, spaces and + ( ) -'),
+    .regex(/^[+0-9\s()-]*$/, 'Phone number can only contain digits, spaces and + ( ) -'),
   challenge: z.string().trim().max(500).optional(),
 });
 
@@ -186,12 +186,7 @@ export const EarlyAccess = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="ea-phone">
-                    Phone Number{' '}
-                    <span className="text-muted-foreground font-normal">
-                      (with country code)
-                    </span>
-                  </Label>
+                  <Label htmlFor="ea-phone">Phone number (with country code)</Label>
                   <Input
                     id="ea-phone"
                     type="tel"
@@ -205,7 +200,7 @@ export const EarlyAccess = () => {
                     aria-describedby="ea-phone-help"
                   />
                   <p id="ea-phone-help" className="mt-1 text-xs text-muted-foreground">
-                    Include your country code, e.g. <span className="font-medium text-foreground">+30 69 12345678</span> for Greece or <span className="font-medium text-foreground">+39 340 1234567</span> for Italy.
+                    We personally contact every early-access business to understand its shipping needs. No automated sales calls. Include your country code, e.g. <span className="font-medium text-foreground">+30 69 12345678</span> for Greece or <span className="font-medium text-foreground">+39 340 1234567</span> for Italy.
                   </p>
                 </div>
               </div>
@@ -224,6 +219,10 @@ export const EarlyAccess = () => {
                   className="mt-1"
                 />
               </div>
+
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                By requesting early access, you agree that FreightShare may contact you about your application. We will not share your contact details or use them for unrelated marketing.
+              </p>
 
               <Button type="submit" variant="accent" size="lg" className="w-full" disabled={submitting}>
                 {submitting ? (

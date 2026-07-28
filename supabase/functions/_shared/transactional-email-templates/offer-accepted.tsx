@@ -86,6 +86,9 @@ const Email = ({
           shipment's details and become available to download from the
           shipment page above once pickup/delivery are recorded.
         </Text>
+        <Text style={text}>
+          You can follow updates on your shipment at any time through your FreightShare portal.
+        </Text>
         <Hr style={hr} />
         <Text style={footer}>
           You're receiving this because you have an active FreightShare account.

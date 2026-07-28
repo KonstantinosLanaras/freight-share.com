@@ -22,6 +22,7 @@ import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { isProfileVerified } from '@/lib/verificationUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
+import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
 
@@ -56,6 +57,7 @@ function mapOfferStatus(is_accepted: boolean, declined?: boolean): StatusKey {
 export default function OffersShipper() {
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { confirmBypass, dialog: betaBypassDialog } = useBetaBypassConfirm();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -162,37 +164,47 @@ export default function OffersShipper() {
   const acceptOfferReceived = async (offerId: string) => {
     const offer = received.find((o) => o.id === offerId);
     const enforced = complianceGatesEnforced(isDemoMode);
+    const bypassReasons: string[] = [];
+
     if (!(await isProfileVerified(user?.id))) {
       if (enforced) return toast.error('Complete your business verification before accepting offers.');
-      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
+      bypassReasons.push('Your business verification would normally be required before accepting offers.');
     }
     const requiredCoverage = offer?.load?.weight_kg ? offer.load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
     const insuranceCheck = await checkCarrierInsurance(offer?.carrier_id, requiredCoverage);
     if (!insuranceCheck.ok) {
       if (enforced) return toast.error(insuranceCheckMessage(insuranceCheck));
-      toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
+      bypassReasons.push(insuranceCheckMessage(insuranceCheck));
     }
-    const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
-    if (error) return toast.error('Failed to accept offer');
-    await deductRoutePallets(offer?.route_id, offer?.load?.pallets);
-    if (offer?.carrier_id) {
-      const load = offer.load;
-      notifyOfferAccepted({
-        recipientUserId: offer.carrier_id,
-        fromName: 'The shipper',
-        route: load ? `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}` : undefined,
-        price: offer.price,
-        pallets: load?.pallets,
-        cargoType: load?.cargo_type,
-        weightKg: load?.weight_kg,
-        pickupDate: load?.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
-        actionUrl: `${window.location.origin}/dashboard/carrier`,
-        idempotencyKey: `offer-accept-${offerId}`,
-      });
+    const finalize = async () => {
+      const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
+      if (error) return toast.error('Failed to accept offer');
+      await deductRoutePallets(offer?.route_id, offer?.load?.pallets);
+      if (offer?.carrier_id) {
+        const load = offer.load;
+        notifyOfferAccepted({
+          recipientUserId: offer.carrier_id,
+          fromName: 'The shipper',
+          route: load ? `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}` : undefined,
+          price: offer.price,
+          pallets: load?.pallets,
+          cargoType: load?.cargo_type,
+          weightKg: load?.weight_kg,
+          pickupDate: load?.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
+          actionUrl: `${window.location.origin}/dashboard/carrier`,
+          idempotencyKey: `offer-accept-${offerId}`,
+        });
+      }
+      toast.success('Offer accepted');
+      setSelected(null);
+      fetchData();
+    };
+
+    if (bypassReasons.length > 0) {
+      confirmBypass(bypassReasons, finalize);
+      return;
     }
-    toast.success('Offer accepted');
-    setSelected(null);
-    fetchData();
+    await finalize();
   };
 
   const declineOfferReceived = async (offerId: string) => {
@@ -206,36 +218,46 @@ export default function OffersShipper() {
   const acceptCounter = async (reqId: string) => {
     const req = made.find((r) => r.id === reqId);
     const enforced = complianceGatesEnforced(isDemoMode);
+    const bypassReasons: string[] = [];
+
     if (!(await isProfileVerified(user?.id))) {
       if (enforced) return toast.error('Complete your business verification before accepting counter-offers.');
-      toast.info('Beta: business verification would normally be required here — bypassed for testing.');
+      bypassReasons.push('Your business verification would normally be required before accepting counter-offers.');
     }
     const requiredCoverage = req?.weight_kg ? req.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
     const insuranceCheck = await checkCarrierInsurance(req?.carrier_id, requiredCoverage);
     if (!insuranceCheck.ok) {
       if (enforced) return toast.error(insuranceCheckMessage(insuranceCheck));
-      toast.info('Beta: this carrier\'s insurance would normally block acceptance — bypassed for testing.');
+      bypassReasons.push(insuranceCheckMessage(insuranceCheck));
     }
-    const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
-    if (error) return toast.error('Failed to accept counter');
-    await deductRoutePallets(req?.route_id, req?.pallets_requested ?? req?.pallets);
-    if (req?.carrier_id) {
-      notifyOfferAccepted({
-        recipientUserId: req.carrier_id,
-        fromName: 'The shipper',
-        route: req.route ? `${req.route.origin_city}, ${req.route.origin_country} → ${req.route.destination_city}, ${req.route.destination_country}` : undefined,
-        price: req.offer_price,
-        pallets: req.pallets_requested,
-        cargoType: req.goods_type,
-        weightKg: req.weight_kg,
-        pickupDate: req.shipment_date ? format(new Date(req.shipment_date), 'MMM d, yyyy') : undefined,
-        actionUrl: `${window.location.origin}/dashboard/carrier/requests/${reqId}`,
-        idempotencyKey: `counter-accept-${reqId}`,
-      });
+    const finalize = async () => {
+      const { error } = await supabase.from('route_requests').update({ status: 'accepted' }).eq('id', reqId);
+      if (error) return toast.error('Failed to accept counter');
+      await deductRoutePallets(req?.route_id, req?.pallets_requested ?? req?.pallets);
+      if (req?.carrier_id) {
+        notifyOfferAccepted({
+          recipientUserId: req.carrier_id,
+          fromName: 'The shipper',
+          route: req.route ? `${req.route.origin_city}, ${req.route.origin_country} → ${req.route.destination_city}, ${req.route.destination_country}` : undefined,
+          price: req.offer_price,
+          pallets: req.pallets_requested,
+          cargoType: req.goods_type,
+          weightKg: req.weight_kg,
+          pickupDate: req.shipment_date ? format(new Date(req.shipment_date), 'MMM d, yyyy') : undefined,
+          actionUrl: `${window.location.origin}/dashboard/carrier/requests/${reqId}`,
+          idempotencyKey: `counter-accept-${reqId}`,
+        });
+      }
+      toast.success('Counter accepted');
+      setSelected(null);
+      fetchData();
+    };
+
+    if (bypassReasons.length > 0) {
+      confirmBypass(bypassReasons, finalize);
+      return;
     }
-    toast.success('Counter accepted');
-    setSelected(null);
-    fetchData();
+    await finalize();
   };
 
   const declineRequest = async (reqId: string) => {
@@ -248,6 +270,7 @@ export default function OffersShipper() {
 
   return (
     <div className="min-h-screen bg-background">
+      {betaBypassDialog}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/shipper')}>
