@@ -13,15 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  MapPin, 
-  Package, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  MapPin,
+  Package,
+  Clock,
+  CheckCircle,
+  XCircle,
   MessageSquare,
   Loader2,
-  User
+  User,
+  Euro
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -49,6 +50,9 @@ interface DeviationRequest {
   counter_offer_price: number | null;
   counter_offer_conditions: string | null;
   created_at: string;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260728130000_deviation_request_price.sql.
+  proposed_price?: number | null;
   shipper?: {
     full_name: string | null;
     company_name: string | null;
@@ -232,6 +236,13 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
               <Package className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">{request.pallets_required} pallets</span>
             </div>
+
+            {request.proposed_price != null && (
+              <div className="flex items-center gap-2">
+                <Euro className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">€{request.proposed_price.toLocaleString()} offered</span>
+              </div>
+            )}
 
             <div className="flex items-start gap-2">
               <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />

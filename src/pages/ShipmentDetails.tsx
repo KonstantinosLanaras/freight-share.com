@@ -32,8 +32,8 @@ interface EvidenceRecord {
 
 interface ShipmentData {
   id: string;
-  load_id: string;
-  offer_id: string;
+  load_id: string | null;
+  offer_id: string | null;
   shipper_id: string;
   carrier_id: string;
   status: string;
@@ -51,6 +51,11 @@ interface ShipmentData {
   // Not yet in generated Supabase types -- added via migration
   // 20260727150000_shipment_declared_cargo_value.sql.
   declared_cargo_value_eur?: number | null;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260728100000_shipments_generalize_source.sql. Exactly one of
+  // load_id/route_request_id/deviation_request_id is set.
+  route_request_id?: string | null;
+  deviation_request_id?: string | null;
 }
 
 interface LoadData {
@@ -68,6 +73,87 @@ interface LoadData {
 interface ProfileData {
   full_name: string | null;
   company_name: string | null;
+}
+
+/**
+ * Normalizes the three possible shipment sources into the LoadData shape
+ * the rest of this page and the CMR/invoice generator already expect.
+ * route_requests/deviation_requests don't carry the same structured
+ * fields a load does (no origin_country/destination_country columns,
+ * a deviation's pickup is a free-text address, not a city/country pair)
+ * -- this fills those gaps with the linked route's own origin/destination
+ * as the closest available approximation, not an exact match.
+ */
+async function buildLoadData(shipment: ShipmentData): Promise<{ data: LoadData | null }> {
+  if (shipment.load_id) {
+    return supabase
+      .from('loads')
+      .select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from')
+      .eq('id', shipment.load_id)
+      .single();
+  }
+
+  if (shipment.route_request_id) {
+    const { data: req, error } = await supabase
+      .from('route_requests')
+      .select('route_id, offer_type, pallets, pallets_requested, goods_type, weight_kg, shipment_date, proposed_pickup_city, proposed_pickup_country, proposed_dropoff_city, proposed_dropoff_country')
+      .eq('id', shipment.route_request_id)
+      .single();
+    if (error || !req) return { data: null };
+    const { data: route } = await supabase
+      .from('routes')
+      .select('origin_city, origin_country, destination_city, destination_country')
+      .eq('id', req.route_id)
+      .maybeSingle();
+    const isAlternative = req.offer_type === 'alternative' && req.proposed_pickup_city;
+    return {
+      data: {
+        origin_city: isAlternative ? req.proposed_pickup_city! : (route?.origin_city ?? 'Unknown'),
+        origin_country: isAlternative ? (req.proposed_pickup_country ?? '') : (route?.origin_country ?? ''),
+        destination_city: isAlternative ? (req.proposed_dropoff_city ?? route?.destination_city ?? 'Unknown') : (route?.destination_city ?? 'Unknown'),
+        destination_country: isAlternative ? (req.proposed_dropoff_country ?? route?.destination_country ?? '') : (route?.destination_country ?? ''),
+        pallets: req.pallets_requested ?? req.pallets,
+        cargo_type: req.goods_type,
+        weight_kg: req.weight_kg,
+        pickup_date_from: req.shipment_date,
+        delivery_date_from: req.shipment_date,
+      },
+    };
+  }
+
+  if (shipment.deviation_request_id) {
+    const { data: req, error } = await supabase
+      .from('deviation_requests')
+      .select('route_id, pickup_address, pallets_required, preferred_time_from')
+      .eq('id', shipment.deviation_request_id)
+      .single();
+    if (error || !req) return { data: null };
+    const extended = req as typeof req & { cargo_type?: string | null; weight_kg?: number | null };
+    const { data: route } = await supabase
+      .from('routes')
+      .select('origin_country, destination_city, destination_country')
+      .eq('id', req.route_id)
+      .maybeSingle();
+    return {
+      data: {
+        // No structured city/country for a deviation pickup -- the request
+        // only captures a free-text address. Approximating the country
+        // as the route's own origin country (usually correct for a
+        // mid-route add-on stop).
+        origin_city: req.pickup_address,
+        origin_country: route?.origin_country ?? '',
+        destination_city: route?.destination_city ?? 'Unknown',
+        destination_country: route?.destination_country ?? '',
+        pallets: req.pallets_required,
+        cargo_type: extended.cargo_type || 'general',
+        weight_kg: extended.weight_kg || 0,
+        pickup_date_from: req.preferred_time_from,
+        delivery_date_from: req.preferred_time_from,
+      },
+    };
+  }
+
+  return { data: null };
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -150,9 +236,16 @@ export default function ShipmentDetails() {
       if (shipmentError) throw shipmentError;
       setShipment(shipmentData);
 
+      // Shipments can be sourced from a load+offer, a direct route
+      // request, or a mid-route deviation request (see migration
+      // 20260728100000_shipments_generalize_source.sql) -- exactly one
+      // of these three fields is set. Not yet in generated Supabase
+      // types, hence the cast.
+      const loadPromise: Promise<{ data: LoadData | null }> = buildLoadData(shipmentData as any);
+
       // Fetch load, profiles, timestamps in parallel
       const [loadRes, shipperRes, carrierRes, tsRes, myRatingRes, theirRatingRes, evidenceRes, extendedRes] = await Promise.all([
-        supabase.from('loads').select('origin_city, origin_country, destination_city, destination_country, pallets, cargo_type, weight_kg, pickup_date_from, delivery_date_from').eq('id', shipmentData.load_id).single(),
+        loadPromise,
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.shipper_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', shipmentData.carrier_id).single(),
         supabase.from('shipment_timestamps').select('status, created_at').eq('shipment_id', id!).order('created_at', { ascending: true }),

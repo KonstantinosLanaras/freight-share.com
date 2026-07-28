@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, MapPin, Package, Clock, FileText } from 'lucide-react';
+import { Loader2, MapPin, Package, Clock, FileText, Euro } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -38,6 +38,7 @@ export function DeviationRequestForm({
   const [formData, setFormData] = useState({
     pickupAddress: '',
     palletsRequired: '',
+    proposedPrice: '',
     preferredTimeFrom: '',
     preferredTimeTo: '',
     deviationDescription: '',
@@ -46,15 +47,21 @@ export function DeviationRequestForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const pallets = parseInt(formData.palletsRequired);
     if (!pallets || pallets < 1) {
       toast.error('Please enter a valid number of pallets');
       return;
     }
-    
+
     if (pallets > maxPallets) {
       toast.error(`Maximum ${maxPallets} pallets available on this route`);
+      return;
+    }
+
+    const price = parseFloat(formData.proposedPrice);
+    if (!price || price <= 0) {
+      toast.error('Please enter a price for this pickup');
       return;
     }
 
@@ -71,7 +78,7 @@ export function DeviationRequestForm({
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('deviation_requests')
         .insert({
           route_id: routeId,
@@ -79,6 +86,7 @@ export function DeviationRequestForm({
           shipper_id: shipperId,
           pickup_address: formData.pickupAddress.trim(),
           pallets_required: pallets,
+          proposed_price: price,
           preferred_time_from: formData.preferredTimeFrom || new Date().toISOString(),
           preferred_time_to: formData.preferredTimeTo || new Date().toISOString(),
           deviation_description: formData.deviationDescription.trim(),
@@ -93,6 +101,7 @@ export function DeviationRequestForm({
       setFormData({
         pickupAddress: '',
         palletsRequired: '',
+        proposedPrice: '',
         preferredTimeFrom: '',
         preferredTimeTo: '',
         deviationDescription: '',
@@ -156,6 +165,28 @@ export function DeviationRequestForm({
             />
             <p className="text-xs text-muted-foreground mt-1">
               Maximum {maxPallets} pallets available on this route
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="proposedPrice" className="flex items-center gap-2">
+              <Euro className="h-4 w-4" />
+              Your Offered Price (€) <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="proposedPrice"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="e.g. 150"
+              className="mt-1"
+              value={formData.proposedPrice}
+              onChange={(e) => setFormData({ ...formData, proposedPrice: e.target.value })}
+              disabled={isSubmitting}
+              required
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              The carrier can accept this price directly, or counter with a different one.
             </p>
           </div>
 

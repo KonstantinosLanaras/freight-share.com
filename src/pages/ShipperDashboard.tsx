@@ -39,6 +39,10 @@ import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { notifyOfferAccepted } from '@/lib/notify';
+import { createShipmentRecord, triggerShipmentPayment } from '@/lib/createShipment';
+import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 
 interface Load {
   id: string;
@@ -90,6 +94,7 @@ interface Profile {
 interface PickupRequest {
   id: string;
   route_id: string;
+  carrier_id: string;
   pickup_address: string;
   pallets_required: number;
   preferred_time_from: string;
@@ -97,8 +102,15 @@ interface PickupRequest {
   deviation_description: string;
   status: 'pending' | 'accepted' | 'rejected' | 'counter_offer';
   counter_offer_price: number | null;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260728130000_deviation_request_price.sql.
+  proposed_price?: number | null;
   counter_offer_conditions: string | null;
   created_at: string;
+  // Not yet in generated Supabase types -- added via migration
+  // 20260728100000_shipments_generalize_source.sql.
+  cargo_type?: string | null;
+  weight_kg?: number | null;
   route?: {
     origin_city: string;
     origin_country: string;
@@ -120,6 +132,9 @@ export default function ShipperDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loads, setLoads] = useState<Load[]>([]);
   const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
+  const [pickupShipmentIds, setPickupShipmentIds] = useState<Record<string, string>>({});
+  const [payingPickupRequest, setPayingPickupRequest] = useState<PickupRequest | null>(null);
+  const [pickupPaymentLoading, setPickupPaymentLoading] = useState(false);
   const [matchingRoutes, setMatchingRoutes] = useState<MatchingRoute[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -205,6 +220,20 @@ export default function ShipperDashboard() {
 
       setPickupRequests(requestsWithRoutes as PickupRequest[]);
 
+      // Check which accepted pickup requests already have a shipment
+      // (route_request_id isn't in generated Supabase types yet -- added
+      // via migration 20260728100000_shipments_generalize_source.sql).
+      const acceptedIds = (requestsData || []).filter(r => r.status === 'accepted').map(r => r.id);
+      if (acceptedIds.length > 0) {
+        const { data: shipmentsData } = await (supabase as any)
+          .from('shipments')
+          .select('id, deviation_request_id')
+          .in('deviation_request_id', acceptedIds);
+        const map: Record<string, string> = {};
+        (shipmentsData || []).forEach((s: any) => { map[s.deviation_request_id] = s.id; });
+        setPickupShipmentIds(map);
+      }
+
       // Fetch active routes and match them against this shipper's own loads
       // by real distance (same Haversine + tolerance logic as BrowseRoutes),
       // not just "any active route" and not exact city-name equality.
@@ -275,6 +304,73 @@ export default function ShipperDashboard() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  // A carrier's counter-offer supersedes the shipper's originally
+  // proposed price if one was made; otherwise the request's own
+  // proposed_price (added via migration 20260728130000_deviation_request_price.sql)
+  // is what a direct accept (no counter) charges.
+  const effectivePickupPrice = (request: PickupRequest): number | null =>
+    request.counter_offer_price ?? request.proposed_price ?? null;
+
+  const startPickupPayment = (request: PickupRequest) => {
+    if (effectivePickupPrice(request) == null) {
+      toast.error('No price has been agreed for this pickup yet — negotiate a price with the carrier before proceeding to payment.');
+      return;
+    }
+    setPayingPickupRequest(request);
+  };
+
+  const handleProceedToPickupPayment = async (insuranceDecision?: InsuranceDecision) => {
+    const request = payingPickupRequest;
+    const price = request ? effectivePickupPrice(request) : null;
+    if (!request || !user || price == null) return;
+    setPickupPaymentLoading(true);
+    try {
+      const shipmentId = await createShipmentRecord({
+        source: { kind: 'deviation_request', deviationRequestId: request.id },
+        shipperId: user.id,
+        carrierId: request.carrier_id,
+        finalPrice: price,
+        insuranceDecision,
+        shouldSimulatePayment: isDemoMode,
+      });
+
+      notifyOfferAccepted({
+        recipientUserId: request.carrier_id,
+        fromName: 'The shipper',
+        route: request.route ? `${request.route.origin_city}, ${request.route.origin_country} → ${request.route.destination_city}, ${request.route.destination_country}` : undefined,
+        price,
+        pallets: request.pallets_required,
+        cargoType: request.cargo_type ?? undefined,
+        weightKg: request.weight_kg ?? undefined,
+        actionUrl: `${window.location.origin}/shipment/${shipmentId}`,
+        idempotencyKey: `deviation-request-payment-${request.id}`,
+      });
+
+      if (isDemoMode) {
+        toast.success('Beta: Payment simulated successfully!', {
+          description: 'In production, you would be redirected to Stripe checkout.',
+          duration: 5000,
+        });
+        setPayingPickupRequest(null);
+        navigate(`/shipment/${shipmentId}`);
+        return;
+      }
+
+      const paymentUrl = await triggerShipmentPayment({
+        shipmentId,
+        amount: price,
+        description: request.route ? `${request.route.origin_city} → ${request.route.destination_city} · ${request.pallets_required} pallets pickup add-on` : `Pickup request ${request.id}`,
+        carrierId: request.carrier_id,
+      });
+      window.location.href = paymentUrl;
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));
+    } finally {
+      setPickupPaymentLoading(false);
+    }
   };
 
   const formatDateRange = (from: string, to: string) => {
@@ -678,12 +774,26 @@ export default function ShipperDashboard() {
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {request.pallets_required} pallets · {request.pickup_address.slice(0, 50)}...
+                                {request.proposed_price != null && ` · €${request.proposed_price} offered`}
                               </div>
                               {request.status === 'counter_offer' && request.counter_offer_price && (
                                 <div className="mt-2 text-sm">
                                   <span className="font-medium text-primary">Counter offer: €{request.counter_offer_price}</span>
                                   {request.counter_offer_conditions && (
                                     <span className="text-muted-foreground"> - {request.counter_offer_conditions}</span>
+                                  )}
+                                </div>
+                              )}
+                              {request.status === 'accepted' && (
+                                <div className="mt-3">
+                                  {pickupShipmentIds[request.id] ? (
+                                    <Button size="sm" asChild>
+                                      <Link to={`/shipment/${pickupShipmentIds[request.id]}`}>View Shipment</Link>
+                                    </Button>
+                                  ) : (
+                                    <Button size="sm" onClick={() => startPickupPayment(request)}>
+                                      Proceed to Payment
+                                    </Button>
                                   )}
                                 </div>
                               )}
@@ -772,6 +882,19 @@ export default function ShipperDashboard() {
           )}
         </div>
       </main>
+
+      {payingPickupRequest && (
+        <GoodsConfirmationDialog
+          open={!!payingPickupRequest}
+          onOpenChange={(open) => !open && setPayingPickupRequest(null)}
+          onConfirm={handleProceedToPickupPayment}
+          isLoading={pickupPaymentLoading}
+          cargoType={payingPickupRequest.cargo_type || 'general'}
+          price={effectivePickupPrice(payingPickupRequest) ?? 0}
+          weightKg={payingPickupRequest.weight_kg ?? 0}
+          isDemoMode={isDemoMode}
+        />
+      )}
     </div>
   );
 }
