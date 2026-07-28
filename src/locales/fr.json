@@ -149,24 +149,24 @@
     "subtitle": "Des choix de conception qui créent de la valeur sociale et environnementale.",
     "stats": {
       "emptyMiles": {
-        "value": "20–30%",
-        "label": "de la capacité des camions en Europe roule à vide ou sous-utilisée",
-        "source": "Source : Commission européenne, IRU"
+        "value": "~21%",
+        "label": "des kilomètres de fret routier dans l'UE sont parcourus à vide",
+        "source": "Eurostat, Road freight transport by journey characteristics (données 2024)"
       },
-      "smePremium": {
-        "value": "~30%",
-        "label": "de plus par unité — ce que paient les PME pour le transport",
-        "source": "Source : Études logistiques PME UE"
+      "smeShare": {
+        "value": "99,8%",
+        "label": "des entreprises de l'UE sont des petites ou moyennes entreprises",
+        "source": "Commission européenne, Annual Report on European SMEs 2023/2024"
       },
-      "intermediaryMargin": {
-        "value": "10–25%",
-        "label": "de la valeur logistique captée par les intermédiaires",
-        "source": "Source : Rapports de transitaires"
+      "fragmentation": {
+        "value": "80%",
+        "label": "des entreprises de transport routier de l'UE comptent moins de 10 salariés",
+        "source": "Commission européenne, Report on the State of the EU Road Haulage Market (2014)"
       },
       "co2Emissions": {
-        "value": "Majeur",
-        "label": "Le fret routier est l'un des plus grands contributeurs aux émissions de CO₂",
-        "source": "Source : Commission européenne, Eurostat"
+        "value": "6%",
+        "label": "des émissions totales de gaz à effet de serre de l'UE proviennent des poids lourds",
+        "source": "Agence européenne pour l'environnement, Reducing GHG Emissions from Heavy-Duty Vehicles in Europe"
       }
     },
     "social": {
