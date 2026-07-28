@@ -21,6 +21,7 @@ import { notifyOfferReceived, notifyOfferAccepted } from '@/lib/notify';
 import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
+import { createShipmentRecord, triggerShipmentPayment } from '@/lib/createShipment';
 import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 import { VerificationGateDialog } from '@/components/verification/VerificationGateDialog';
 import { CustomsNoticeCard } from '@/components/shipments/CustomsNoticeCard';
@@ -416,24 +417,14 @@ export default function LoadDetails() {
       await deductRoutePallets(selectedOffer.route_id, load.pallets);
 
       // 3. Create shipment
-      const { data: shipment, error: shipmentError } = await supabase
-        .from('shipments')
-        .insert({
-          load_id: load.id,
-          offer_id: selectedOffer.id,
-          shipper_id: user.id,
-          carrier_id: selectedOffer.carrier_id,
-          final_price: selectedOffer.price,
-          status: shouldSimulatePayment() ? 'paid' : 'accepted',
-          payment_status: shouldSimulatePayment() ? 'paid' : 'pending',
-          terms_version: '1.0',
-          // Not yet in generated Supabase types -- added via migration
-          // 20260727150000_shipment_declared_cargo_value.sql.
-          declared_cargo_value_eur: insuranceDecision?.declaredCargoValue ?? null,
-        } as any)
-        .select('id')
-        .single();
-      if (shipmentError) throw shipmentError;
+      const shipmentId = await createShipmentRecord({
+        source: { kind: 'load', loadId: load.id, offerId: selectedOffer.id },
+        shipperId: user.id,
+        carrierId: selectedOffer.carrier_id,
+        finalPrice: selectedOffer.price,
+        insuranceDecision,
+        shouldSimulatePayment: shouldSimulatePayment(),
+      });
 
       // 3b. Notify the carrier -- this was the only acceptance path that
       // never sent this notification (OffersShipper.tsx and
@@ -447,7 +438,7 @@ export default function LoadDetails() {
         cargoType: load.cargo_type,
         weightKg: load.weight_kg,
         pickupDate: load.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
-        actionUrl: `${window.location.origin}/shipment/${shipment.id}`,
+        actionUrl: `${window.location.origin}/shipment/${shipmentId}`,
         idempotencyKey: `offer-accept-${selectedOffer.id}`,
       });
 
@@ -457,31 +448,19 @@ export default function LoadDetails() {
           description: 'In production, you would be redirected to Stripe checkout.',
           duration: 5000,
         });
-        navigate(`/shipment/${shipment.id}`);
+        navigate(`/shipment/${shipmentId}`);
         return;
       }
 
       // 5. Production: real payment
-      const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
-        'create-shipment-payment',
-        {
-          body: {
-            shipmentId: shipment.id,
-            amount: selectedOffer.price,
-            description: `${load.origin_city} → ${load.destination_city} · ${load.pallets} pallets · ${load.cargo_type}`,
-            loadId: load.id,
-            carrierId: selectedOffer.carrier_id,
-          },
-        }
-      );
-
-      if (paymentError) throw paymentError;
-
-      if (paymentData?.url) {
-        window.location.href = paymentData.url;
-      } else {
-        throw new Error('No payment URL returned');
-      }
+      const paymentUrl = await triggerShipmentPayment({
+        shipmentId,
+        amount: selectedOffer.price,
+        description: `${load.origin_city} → ${load.destination_city} · ${load.pallets} pallets · ${load.cargo_type}`,
+        loadId: load.id,
+        carrierId: selectedOffer.carrier_id,
+      });
+      window.location.href = paymentUrl;
     } catch (error: any) {
       console.error('Payment error:', error);
       toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));

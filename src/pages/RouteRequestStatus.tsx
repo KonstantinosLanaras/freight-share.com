@@ -9,9 +9,14 @@ import {
   MessageSquare, Clock, CheckCircle, XCircle, Eye, AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { getSafeErrorMessage } from '@/lib/errorUtils';
+import { notifyOfferAccepted } from '@/lib/notify';
+import { createShipmentRecord, triggerShipmentPayment } from '@/lib/createShipment';
+import { GoodsConfirmationDialog, InsuranceDecision } from '@/components/payment/GoodsConfirmationDialog';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   sent: { label: 'Sent', icon: Send, color: 'bg-primary/10 text-primary' },
@@ -27,13 +32,18 @@ export default function RouteRequestStatus() {
   const { requestId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { shouldSimulatePayment } = useDemoMode();
   const [request, setRequest] = useState<any>(null);
   const [route, setRoute] = useState<any>(null);
   const [carrierProfile, setCarrierProfile] = useState<any>(null);
+  const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
+  const [existingShipmentId, setExistingShipmentId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showGoodsDialog, setShowGoodsDialog] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,15 +80,21 @@ export default function RouteRequestStatus() {
       if (error) throw error;
       setRequest(req);
 
-      const [routeRes, profileRes, msgsRes] = await Promise.all([
+      const [routeRes, profileRes, msgsRes, insuranceRes, shipmentRes] = await Promise.all([
         supabase.from('routes').select('*').eq('id', req.route_id).single(),
         supabase.from('public_profiles').select('full_name, company_name').eq('id', req.carrier_id).single(),
         supabase.from('route_request_messages').select('*').eq('request_id', requestId).order('created_at', { ascending: true }),
+        supabase.from('carrier_insurance').select('provider_name, coverage_type, coverage_limit_eur, expiration_date, status, policy_number').eq('carrier_id', req.carrier_id).maybeSingle(),
+        // route_request_id isn't in generated Supabase types yet -- added
+        // via migration 20260728100000_shipments_generalize_source.sql.
+        (supabase as any).from('shipments').select('id').eq('route_request_id', requestId).maybeSingle(),
       ]);
 
       setRoute(routeRes.data);
       setCarrierProfile(profileRes.data);
       setMessages(msgsRes.data || []);
+      setCarrierInsurance(insuranceRes.data || null);
+      setExistingShipmentId(shipmentRes.data?.id || null);
     } catch {
       toast.error('Failed to load request');
     } finally {
@@ -102,6 +118,57 @@ export default function RouteRequestStatus() {
       toast.error('Failed to send message');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleProceedToPayment = async (insuranceDecision?: InsuranceDecision) => {
+    if (!request || !user) return;
+    setPaymentLoading(true);
+    try {
+      const shipmentId = await createShipmentRecord({
+        source: { kind: 'route_request', routeRequestId: request.id },
+        shipperId: user.id,
+        carrierId: request.carrier_id,
+        finalPrice: request.offer_price ?? request.counter_offer_price ?? 0,
+        insuranceDecision,
+        shouldSimulatePayment: shouldSimulatePayment(),
+      });
+
+      notifyOfferAccepted({
+        recipientUserId: request.carrier_id,
+        fromName: 'The shipper',
+        route: route ? `${route.origin_city}, ${route.origin_country} → ${route.destination_city}, ${route.destination_country}` : undefined,
+        price: request.offer_price ?? request.counter_offer_price,
+        pallets: request.pallets,
+        cargoType: request.goods_type,
+        weightKg: request.weight_kg,
+        pickupDate: request.shipment_date ? format(new Date(request.shipment_date), 'MMM d, yyyy') : undefined,
+        actionUrl: `${window.location.origin}/shipment/${shipmentId}`,
+        idempotencyKey: `route-request-payment-${request.id}`,
+      });
+
+      if (shouldSimulatePayment()) {
+        toast.success('Beta: Payment simulated successfully!', {
+          description: 'In production, you would be redirected to Stripe checkout.',
+          duration: 5000,
+        });
+        navigate(`/shipment/${shipmentId}`);
+        return;
+      }
+
+      const paymentUrl = await triggerShipmentPayment({
+        shipmentId,
+        amount: request.offer_price ?? request.counter_offer_price ?? 0,
+        description: route ? `${route.origin_city} → ${route.destination_city} · ${request.pallets} pallets · ${request.goods_type}` : `Route request ${request.id}`,
+        carrierId: request.carrier_id,
+      });
+      window.location.href = paymentUrl;
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error(getSafeErrorMessage(error, 'Failed to initiate payment. Please try again.'));
+    } finally {
+      setPaymentLoading(false);
+      setShowGoodsDialog(false);
     }
   };
 
@@ -219,7 +286,16 @@ export default function RouteRequestStatus() {
                 <CardContent className="p-4 text-center">
                   <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
                   <p className="font-medium text-success">Request Accepted!</p>
-                  <p className="text-sm text-muted-foreground mt-1">The carrier has accepted your load request.</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">The carrier has accepted your load request.</p>
+                  {existingShipmentId ? (
+                    <Button className="w-full" asChild>
+                      <Link to={`/shipment/${existingShipmentId}`}>View Shipment</Link>
+                    </Button>
+                  ) : (
+                    <Button className="w-full" onClick={() => setShowGoodsDialog(true)}>
+                      Proceed to Payment
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -277,6 +353,18 @@ export default function RouteRequestStatus() {
           </div>
         </div>
       </main>
+
+      <GoodsConfirmationDialog
+        open={showGoodsDialog}
+        onOpenChange={(open) => !open && setShowGoodsDialog(false)}
+        onConfirm={handleProceedToPayment}
+        isLoading={paymentLoading}
+        cargoType={request.goods_type}
+        price={request.offer_price ?? request.counter_offer_price ?? 0}
+        weightKg={request.weight_kg}
+        carrierInsurance={carrierInsurance || undefined}
+        isDemoMode={shouldSimulatePayment()}
+      />
     </div>
   );
 }
