@@ -12,11 +12,12 @@ interface DemoModeContextType {
 const DemoModeContext = createContext<DemoModeContextType | undefined>(undefined);
 
 export function DemoModeProvider({ children }: { children: React.ReactNode }) {
-  // Platform runs in demo mode by default at all times — no live mode for now.
-  // Do not flip this to false without checking LAUNCH_CHECKLIST.md first --
-  // it also controls whether compliance gates (see complianceGating.ts)
-  // actually block an action, not just payment simulation.
-  const [isDemoMode] = useState(true);
+  // Stripe is now wired up in test mode (STRIPE_MODE=test), so real payment
+  // flows should go through create-shipment-payment instead of being
+  // simulated client-side. Compliance gates (see complianceGating.ts) are
+  // still evaluated but not enforced during beta -- they read this flag too.
+  const [isDemoMode] = useState(false);
+
 
   const toggleDemoMode = useCallback(() => {
     // No-op: demo mode is locked on for the entire platform.
