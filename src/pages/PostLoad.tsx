@@ -102,7 +102,11 @@ export default function PostLoad() {
         notes: data.notes || '',
         cargoNotes: data.cargo_notes || '',
       });
-      setOpenToOffers(data.pricing_type === 'open_to_offers');
+      setPricingMode(
+        data.pricing_type === 'open_to_offers'
+          ? (data.price ? 'guided' : 'open')
+          : 'fixed'
+      );
       setSpaceType((data.space_type as SpaceType) || 'epe');
       setSpaceValue(data.space_value ? String(data.space_value) : '');
       setDimensions({
