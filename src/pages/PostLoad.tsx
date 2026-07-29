@@ -35,7 +35,7 @@ export default function PostLoad() {
   const { id: editId } = useParams();
   const isEditMode = !!editId;
   const [loadingExisting, setLoadingExisting] = useState(isEditMode);
-  const [openToOffers, setOpenToOffers] = useState(false);
+  const [pricingMode, setPricingMode] = useState<'fixed' | 'guided' | 'open'>('fixed');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
   const [spaceValue, setSpaceValue] = useState('');
