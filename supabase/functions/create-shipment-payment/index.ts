@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { PLATFORM_FEE_PERCENTAGE } from "../_shared/stripeConfig.ts";
+import { PLATFORM_FEE_PERCENTAGE, getStripeSecretKey } from "../_shared/stripeConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,8 +27,7 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    const stripeKey = getStripeSecretKey();
     logStep("Stripe key verified");
 
     const authHeader = req.headers.get("Authorization");
