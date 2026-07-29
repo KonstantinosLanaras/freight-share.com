@@ -35,7 +35,7 @@ export default function PostLoad() {
   const { id: editId } = useParams();
   const isEditMode = !!editId;
   const [loadingExisting, setLoadingExisting] = useState(isEditMode);
-  const [openToOffers, setOpenToOffers] = useState(false);
+  const [pricingMode, setPricingMode] = useState<'fixed' | 'guided' | 'open'>('fixed');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
   const [spaceValue, setSpaceValue] = useState('');
@@ -102,7 +102,11 @@ export default function PostLoad() {
         notes: data.notes || '',
         cargoNotes: data.cargo_notes || '',
       });
-      setOpenToOffers(data.pricing_type === 'open_to_offers');
+      setPricingMode(
+        data.pricing_type === 'open_to_offers'
+          ? (data.price ? 'guided' : 'open')
+          : 'fixed'
+      );
       setSpaceType((data.space_type as SpaceType) || 'epe');
       setSpaceValue(data.space_value ? String(data.space_value) : '');
       setDimensions({
@@ -175,8 +179,8 @@ export default function PostLoad() {
         delivery_date_to: formData.deliveryDateEnd,
         pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
         cargo_type: formData.cargoType as any,
-        pricing_type: openToOffers ? 'open_to_offers' : 'fixed' as any,
-        price: openToOffers ? null : parseFloat(formData.fixedPrice) || null,
+        pricing_type: (pricingMode === 'fixed' ? 'fixed' : 'open_to_offers') as any,
+        price: pricingMode === 'open' ? null : parseFloat(formData.fixedPrice) || null,
         notes: formData.notes || null,
         space_type: spaceType,
         space_value: parseFloat(spaceValue) || 0,
@@ -470,23 +474,46 @@ export default function PostLoad() {
               <CardDescription>Set your price or let carriers make offers</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div>
-                  <div className="font-medium text-foreground">Open to offers</div>
-                  <div className="text-sm text-muted-foreground">
-                    Let carriers propose their own prices
-                  </div>
-                </div>
-                <Switch
-                  checked={openToOffers}
-                  onCheckedChange={setOpenToOffers}
-                  disabled={isSubmitting}
-                />
+              <div className="grid gap-3">
+                {[
+                  {
+                    key: 'fixed' as const,
+                    title: 'Fixed price',
+                    desc: 'Set a firm price. Carriers accept as-is.',
+                  },
+                  {
+                    key: 'guided' as const,
+                    title: 'Target price, open to offers',
+                    desc: 'Suggest a price but let carriers propose their own.',
+                  },
+                  {
+                    key: 'open' as const,
+                    title: 'Open to offers',
+                    desc: 'No price shown — carriers propose their own.',
+                  },
+                ].map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => setPricingMode(opt.key)}
+                    disabled={isSubmitting}
+                    className={`text-left p-4 rounded-lg border transition-colors ${
+                      pricingMode === opt.key
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border bg-muted/30 hover:bg-muted/50'
+                    }`}
+                  >
+                    <div className="font-medium text-foreground">{opt.title}</div>
+                    <div className="text-sm text-muted-foreground">{opt.desc}</div>
+                  </button>
+                ))}
               </div>
 
-              {!openToOffers && (
+              {pricingMode !== 'open' && (
                 <div>
-                  <Label htmlFor="fixedPrice">Fixed Price (€)</Label>
+                  <Label htmlFor="fixedPrice">
+                    {pricingMode === 'fixed' ? 'Fixed Price (€)' : 'Target Price (€)'}
+                  </Label>
                   <Input
                     id="fixedPrice"
                     type="number"
@@ -498,6 +525,11 @@ export default function PostLoad() {
                     onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value })}
                     disabled={isSubmitting}
                   />
+                  {pricingMode === 'guided' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Carriers will see this as a guide price and can still submit offers.
+                    </p>
+                  )}
                 </div>
               )}
             </CardContent>
