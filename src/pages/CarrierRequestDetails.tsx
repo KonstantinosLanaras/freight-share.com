@@ -8,9 +8,17 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   ArrowLeft, MapPin, Package, Truck, Send, Loader2,
   MessageSquare, CheckCircle, XCircle, Eye, AlertTriangle,
-  Scale, Upload, Link as LinkIcon, Image, ShieldCheck, User
+  Scale, Upload, Link as LinkIcon, Image, ShieldCheck, User, Euro
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -49,6 +57,13 @@ export default function CarrierRequestDetails() {
   const [sending, setSending] = useState(false);
   const [showAcceptForm, setShowAcceptForm] = useState(false);
   const [acceptLoading, setAcceptLoading] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectLoading, setRejectLoading] = useState(false);
+  const [showCounterDialog, setShowCounterDialog] = useState(false);
+  const [counterPrice, setCounterPrice] = useState('');
+  const [counterConditions, setCounterConditions] = useState('');
+  const [counterLoading, setCounterLoading] = useState(false);
   const [carrierInsurance, setCarrierInsurance] = useState<any>(null);
   const [carrierVerified, setCarrierVerified] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -162,19 +177,61 @@ export default function CarrierRequestDetails() {
   };
 
   const handleReject = async () => {
-    if (!requestId || !user) return;
+    if (!requestId || !user || !rejectReason.trim()) return;
+    setRejectLoading(true);
     try {
       await supabase.from('route_requests').update({ status: 'rejected' }).eq('id', requestId);
       await supabase.from('route_request_messages').insert({
         request_id: requestId,
         sender_id: user.id,
-        content: 'Carrier rejected request',
+        content: `Carrier rejected request: ${rejectReason.trim()}`,
         is_system: true,
       });
       setRequest({ ...request, status: 'rejected' });
+      setShowRejectDialog(false);
+      setRejectReason('');
       toast.success('Request rejected');
     } catch {
       toast.error('Failed to reject');
+    } finally {
+      setRejectLoading(false);
+    }
+  };
+
+  const handleCounterOffer = async () => {
+    if (!requestId || !user) return;
+    const price = counterPrice ? parseFloat(counterPrice) : null;
+    if (!counterConditions.trim()) {
+      toast.error('Please describe your counter terms');
+      return;
+    }
+    setCounterLoading(true);
+    try {
+      // counter_offer_price/counter_offer_conditions aren't yet in generated
+      // Supabase types -- added via migration
+      // 20260731142843_route_request_counter_offer.sql.
+      await (supabase as any).from('route_requests').update({
+        status: 'in_discussion',
+        counter_offer_price: price,
+        counter_offer_conditions: counterConditions.trim(),
+      }).eq('id', requestId);
+      await supabase.from('route_request_messages').insert({
+        request_id: requestId,
+        sender_id: user.id,
+        content: price
+          ? `Carrier sent a counter offer: €${price} — ${counterConditions.trim()}`
+          : `Carrier sent a counter offer: ${counterConditions.trim()}`,
+        is_system: true,
+      });
+      setRequest({ ...request, status: 'in_discussion', counter_offer_price: price, counter_offer_conditions: counterConditions.trim() });
+      setShowCounterDialog(false);
+      setCounterPrice('');
+      setCounterConditions('');
+      toast.success('Counter offer sent');
+    } catch {
+      toast.error('Failed to send counter offer');
+    } finally {
+      setCounterLoading(false);
     }
   };
 
@@ -595,7 +652,10 @@ export default function CarrierRequestDetails() {
                       </>
                     );
                   })()}
-                  <Button variant="destructive" className="w-full" onClick={handleReject}>
+                  <Button variant="outline" className="w-full" onClick={() => setShowCounterDialog(true)}>
+                    <MessageSquare className="h-4 w-4 mr-2" /> Counter Offer
+                  </Button>
+                  <Button variant="destructive" className="w-full" onClick={() => setShowRejectDialog(true)}>
                     <XCircle className="h-4 w-4 mr-2" /> Reject Request
                   </Button>
                 </CardContent>
@@ -664,6 +724,90 @@ export default function CarrierRequestDetails() {
           </div>
         </div>
       </main>
+
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Request</DialogTitle>
+            <DialogDescription>
+              Let the shipper know why, e.g. "too far from my planned route" or a scheduling conflict.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label htmlFor="rejectReason">Reason <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="rejectReason"
+              placeholder="e.g., This pickup is too far from my planned route"
+              className="mt-1"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              disabled={rejectLoading}
+              required
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowRejectDialog(false)} disabled={rejectLoading}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleReject}
+              disabled={rejectLoading || !rejectReason.trim()}
+            >
+              {rejectLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCounterDialog} onOpenChange={setShowCounterDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Counter Offer</DialogTitle>
+            <DialogDescription>
+              Propose alternative terms for this request -- e.g. a different price, timing, or pickup point.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label htmlFor="counterPrice" className="flex items-center gap-2">
+              <Euro className="h-4 w-4" />
+              Counter Price (€)
+            </Label>
+            <Input
+              id="counterPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g., 150.00"
+              className="mt-1"
+              value={counterPrice}
+              onChange={(e) => setCounterPrice(e.target.value)}
+              disabled={counterLoading}
+            />
+          </div>
+          <div>
+            <Label htmlFor="counterConditions">Conditions / Modifications <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="counterConditions"
+              placeholder="Describe any changes to timing, pickup location, or other conditions"
+              className="mt-1"
+              value={counterConditions}
+              onChange={(e) => setCounterConditions(e.target.value)}
+              disabled={counterLoading}
+              required
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowCounterDialog(false)} disabled={counterLoading}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleCounterOffer} disabled={counterLoading}>
+              {counterLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Counter Offer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
