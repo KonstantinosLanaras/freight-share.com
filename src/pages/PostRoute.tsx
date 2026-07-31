@@ -57,6 +57,7 @@ export default function PostRoute() {
   const [routeLink, setRouteLink] = useState('');
   const [goodsAccepted, setGoodsAccepted] = useState('');
   const [itineraryFile, setItineraryFile] = useState<File | null>(null);
+  const [existingItineraryImageUrl, setExistingItineraryImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     originCity: '',
     originCountry: '',
@@ -133,6 +134,7 @@ export default function PostRoute() {
       setTripDescription(data.trip_description || '');
       setRouteLink(data.route_link || '');
       setGoodsAccepted(data.goods_accepted || '');
+      setExistingItineraryImageUrl(data.itinerary_image_url || null);
       const existingStops = (data.route_stops || [])
         .sort((a: any, b: any) => a.stop_order - b.stop_order)
         .map((s: any) => ({
@@ -225,6 +227,14 @@ export default function PostRoute() {
         toast.error('Please enter planned date/time for all stops');
         return;
       }
+    }
+
+    // A route open to extra stops needs a visual itinerary so shippers can
+    // judge whether their pickup is reasonably on the way -- not required
+    // for a fixed point-to-point route.
+    if (formData.openToExtraStops && !itineraryFile && !existingItineraryImageUrl) {
+      toast.error('Please upload a route/itinerary image -- required when open to extra stops');
+      return;
     }
 
 
@@ -738,8 +748,15 @@ export default function PostRoute() {
                 disabled={isSubmitting}
               />
               <div>
-                <Label>Route / Itinerary Image (optional)</Label>
-                <p className="text-xs text-muted-foreground mb-2">Take a screenshot from Google Maps or your preferred route planner and upload it here.</p>
+                <Label>
+                  Route / Itinerary Image{formData.openToExtraStops ? '' : ' (optional)'}
+                  {formData.openToExtraStops && <span className="text-destructive"> *</span>}
+                </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {formData.openToExtraStops
+                    ? 'Required when open to extra stops, so shippers can judge whether their pickup is reasonably on the way. Take a screenshot from Google Maps or your preferred route planner and upload it here.'
+                    : 'Take a screenshot from Google Maps or your preferred route planner and upload it here.'}
+                </p>
                 <Input
                   type="file"
                   accept="image/*"
