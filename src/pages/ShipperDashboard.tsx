@@ -37,6 +37,8 @@ import { BookmarkButton } from '@/components/BookmarkButton';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { isLoadExpired, isRouteExpired } from '@/lib/expiryUtils';
+import { PassedBadge } from '@/components/PassedBadge';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
@@ -74,6 +76,8 @@ interface MatchingRoute {
   destination_country: string;
   departure_date_from: string;
   departure_date_to: string;
+  arrival_date_from?: string | null;
+  arrival_date_to?: string | null;
   available_pallets: number;
   open_to_extra_stops: boolean;
   vehicle_type: string | null;
@@ -236,13 +240,13 @@ export default function ShipperDashboard() {
 
       // Fetch active routes and match them against this shipper's own loads
       // by real distance (same Haversine + tolerance logic as BrowseRoutes),
-      // not just "any active route" and not exact city-name equality.
-      const today = new Date().toISOString().split('T')[0];
+      // not just "any active route" and not exact city-name equality. Past-
+      // date routes stay in the result set (badged "Passed" at render time,
+      // see isRouteExpired) rather than being excluded here.
       const { data: activeRoutesData } = await supabase
         .from('routes')
-        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km, departure_date_from, departure_date_to, available_pallets, open_to_extra_stops, vehicle_type, max_payload_kg, space_ldm')
+        .select('id, origin_city, origin_country, origin_lat, origin_lng, destination_city, destination_country, destination_lat, destination_lng, max_deviation_km, max_destination_radius_km, departure_date_from, departure_date_to, arrival_date_from, arrival_date_to, available_pallets, open_to_extra_stops, vehicle_type, max_payload_kg, space_ldm')
         .in('status', ['planned', 'active'])
-        .gte('departure_date_to', today)
         .order('departure_date_from', { ascending: true })
         .limit(50);
 
@@ -681,11 +685,12 @@ export default function ShipperDashboard() {
                         const dateLabel = route.departure_date_from === route.departure_date_to
                           ? format(new Date(route.departure_date_from), 'MMM d')
                           : `${format(new Date(route.departure_date_from), 'MMM d')}–${format(new Date(route.departure_date_to), 'd')}`;
+                        const expired = isRouteExpired(route);
                         return (
                           <Link
                             key={route.id}
                             to={`/routes/${route.id}`}
-                            className="relative shrink-0 snap-start w-80 block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                            className={`relative shrink-0 snap-start w-80 block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors${expired ? ' opacity-70' : ''}`}
                           >
                             <BookmarkButton id={route.id} className="absolute top-2 right-2 z-10" />
                             <div className="font-medium text-foreground mb-1 flex items-center gap-2 flex-wrap">
@@ -700,6 +705,7 @@ export default function ShipperDashboard() {
                             </div>
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-1.5 ml-auto">
+                                {expired && <PassedBadge />}
                                 {route.open_to_extra_stops && (
                                   <Badge variant="outline" className="text-xs border-success/40 text-success">
                                     <Shuffle className="h-3 w-3 mr-1" />
@@ -838,20 +844,23 @@ export default function ShipperDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {loads.map((load) => (
+                      {loads.map((load) => {
+                        const expired = isLoadExpired(load.pickup_date_to);
+                        return (
                         <div key={load.id} className="relative">
                           <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
-                          <Link 
+                          <Link
                             to={`/load/${load.id}`}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                            className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 pr-12 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer${expired ? ' opacity-70' : ''}`}
                           >
                             <div className="flex items-start gap-4">
                               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                                 <Package className="h-5 w-5 text-primary" />
                               </div>
                               <div>
-                                <div className="font-medium text-foreground">
+                                <div className="font-medium text-foreground flex items-center gap-2 flex-wrap">
                                   {load.origin_city}, {load.origin_country} → {load.destination_city}, {load.destination_country}
+                                  {expired && <PassedBadge />}
                                 </div>
                                 <div className="text-sm text-muted-foreground">
                                   {load.pallets} pallets · Pickup: {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
@@ -873,7 +882,7 @@ export default function ShipperDashboard() {
                             </div>
                           </Link>
                         </div>
-                      ))}
+                      );})}
                     </div>
                   )}
                 </CardContent>

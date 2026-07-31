@@ -11,6 +11,8 @@ import { CityCombobox, type CityOption } from '@/components/CityCombobox';
 import { countryNameFromCode } from '@/lib/countryCodes';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { isRouteExpired } from '@/lib/expiryUtils';
+import { PassedBadge } from '@/components/PassedBadge';
 import { 
   MapPin, 
   Calendar,
@@ -94,11 +96,8 @@ export default function BrowseRoutes() {
 
   const fetchRoutes = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Fetch routes - visibility logic:
-      // If open_to_extra_stops is false: visible until departure_date_to
-      // If open_to_extra_stops is true: visible until arrival_date_to (or departure_date_to if no arrival)
+      // Fetch all planned/active routes -- past-date ones stay visible,
+      // just marked "Passed" (see isRouteExpired), rather than hidden.
       const { data: routesData, error: routesError } = await supabase
         .from('routes')
         .select(`*, route_stops (*)`)
@@ -107,17 +106,7 @@ export default function BrowseRoutes() {
 
       if (routesError) throw routesError;
 
-      // Filter routes based on visibility rules
-      const visibleRoutes = routesData?.filter(route => {
-        if (route.open_to_extra_stops) {
-          // Visible until arrival date
-          const arrivalDate = route.arrival_date_to || route.arrival_date_from || route.departure_date_to;
-          return arrivalDate >= today;
-        } else {
-          // Visible until departure date
-          return route.departure_date_to >= today;
-        }
-      }) || [];
+      const visibleRoutes = routesData || [];
 
       // Fetch carrier profiles separately
       const carrierIds = [...new Set(visibleRoutes.map(r => r.carrier_id))];
@@ -184,6 +173,12 @@ export default function BrowseRoutes() {
       if (!destTier) return false;
     }
     return true;
+  }).sort((a, b) => {
+    // Passed routes sink to the bottom rather than being hidden.
+    const aExpired = isRouteExpired(a);
+    const bExpired = isRouteExpired(b);
+    if (aExpired !== bExpired) return aExpired ? 1 : -1;
+    return 0;
   });
 
   const formatDateRange = (from: string, to: string) => {
@@ -371,8 +366,9 @@ export default function BrowseRoutes() {
 
             {filteredRoutes.map((route) => {
               const proximity = getRouteProximity(route);
+              const expired = isRouteExpired(route);
               return (
-              <Card key={route.id} className="hover:shadow-md transition-shadow">
+              <Card key={route.id} className={`hover:shadow-md transition-shadow${expired ? ' opacity-70' : ''}`}>
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                     <div className="flex-1">
@@ -401,12 +397,15 @@ export default function BrowseRoutes() {
                             </div>
                           )}
                         </div>
-                        {route.vehicle_constraints && (
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            <Truck className="h-3 w-3 mr-1" />
-                            {route.vehicle_constraints}
-                          </Badge>
-                        )}
+                        <div className="ml-auto flex items-center gap-2">
+                          {expired && <PassedBadge />}
+                          {route.vehicle_constraints && (
+                            <Badge variant="outline" className="text-xs">
+                              <Truck className="h-3 w-3 mr-1" />
+                              {route.vehicle_constraints}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
                       {/* Route Path */}
