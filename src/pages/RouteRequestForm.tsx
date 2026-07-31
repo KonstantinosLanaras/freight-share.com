@@ -16,6 +16,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { notifyOfferReceived } from '@/lib/notify';
+import { CityCombobox, type CityOption } from '@/components/CityCombobox';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 
 const cargoTypes = [
   'General Cargo', 'Palletized Goods', 'Fragile', 'Refrigerated',
@@ -42,6 +44,7 @@ export default function RouteRequestForm() {
     specialRequirements: '',
     message: '',
   });
+  const [pickupCity, setPickupCity] = useState<CityOption | null>(null);
 
   useEffect(() => {
     if (routeId) fetchRoute();
@@ -72,6 +75,19 @@ export default function RouteRequestForm() {
     }
   };
 
+  // Distance from the pickup city to the route's own origin, tiered against
+  // the carrier's stated max_deviation_km (falls back to 75km if unset).
+  // Informational only -- per product decision, an over-deviation pickup
+  // is warned about but never blocked; the carrier can still see it and
+  // reject or counter with a reason.
+  const getDeviationWarning = () => {
+    if (!route || !pickupCity || route.origin_lat == null || route.origin_lng == null) return null;
+    const distanceKm = haversineKm(pickupCity.lat, pickupCity.lng, route.origin_lat, route.origin_lng);
+    const tier = getProximityTier(distanceKm, route.max_deviation_km);
+    if (tier) return null;
+    return { distanceKm, maxDeviationKm: route.max_deviation_km as number | null };
+  };
+
   const getFitIndicator = () => {
     if (!route || !form.pallets) return null;
     const pallets = parseInt(form.pallets) || 0;
@@ -90,6 +106,11 @@ export default function RouteRequestForm() {
 
     if (!form.pickupAddress || !form.deliveryAddress || !form.goodsType || !form.pallets || !form.shipmentDate) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!pickupCity) {
+      toast.error('Please select your pickup city');
       return;
     }
 
@@ -157,6 +178,7 @@ export default function RouteRequestForm() {
   };
 
   const fit = getFitIndicator();
+  const deviationWarning = getDeviationWarning();
 
   if (loading) {
     return (
@@ -258,15 +280,18 @@ export default function RouteRequestForm() {
             <CardContent className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Pickup Address <span className="text-destructive">*</span></Label>
-                  <Input
-                    placeholder="e.g., Warehouse 5, Rotterdam Port"
+                  <Label>Pickup City <span className="text-destructive">*</span></Label>
+                  <CityCombobox
+                    value={pickupCity?.name || ''}
+                    countryCode={pickupCity?.country}
+                    onSelect={setPickupCity}
+                    placeholder="Search pickup city..."
                     className="mt-1"
-                    value={form.pickupAddress}
-                    onChange={e => setForm({ ...form, pickupAddress: e.target.value })}
-                    required
                     disabled={submitting}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Used to check how far this pickup is from the carrier's planned route.
+                  </p>
                 </div>
                 <div>
                   <Label>Delivery Address <span className="text-destructive">*</span></Label>
@@ -279,6 +304,18 @@ export default function RouteRequestForm() {
                     disabled={submitting}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label>Pickup Address <span className="text-destructive">*</span></Label>
+                <Input
+                  placeholder="e.g., Warehouse 5, Rotterdam Port"
+                  className="mt-1"
+                  value={form.pickupAddress}
+                  onChange={e => setForm({ ...form, pickupAddress: e.target.value })}
+                  required
+                  disabled={submitting}
+                />
               </div>
 
               <div>
@@ -365,6 +402,27 @@ export default function RouteRequestForm() {
                       {fit.level === 'good' && 'Your shipment fits within the available route capacity.'}
                       {fit.level === 'review' && 'Close to capacity limit. The carrier will review your request.'}
                       {fit.level === 'outside' && 'Exceeds available capacity. You can still submit, but the carrier may not accept.'}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Pickup distance warning -- informational, never blocks submission */}
+          {deviationWarning && (
+            <Card className="border-warning/30 bg-warning/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-warning" />
+                  <div>
+                    <div className="font-medium text-warning">Pickup is far from the planned route</div>
+                    <div className="text-sm text-muted-foreground">
+                      {deviationWarning.distanceKm.toFixed(0)} km from the route's origin
+                      {deviationWarning.maxDeviationKm
+                        ? ` — beyond the carrier's stated ${deviationWarning.maxDeviationKm} km deviation limit`
+                        : ' — beyond the typical deviation range'}.
+                      You can still send this request; the carrier may reject it or counter with different terms.
                     </div>
                   </div>
                 </div>

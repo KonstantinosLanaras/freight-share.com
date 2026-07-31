@@ -11,9 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, MapPin, Package, Clock, FileText, Euro } from 'lucide-react';
+import { Loader2, MapPin, Package, Clock, FileText, Euro, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { CityCombobox, type CityOption } from '@/components/CityCombobox';
+import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 
 interface DeviationRequestFormProps {
   open: boolean;
@@ -22,6 +24,9 @@ interface DeviationRequestFormProps {
   carrierId: string;
   shipperId: string;
   maxPallets: number;
+  routeOriginLat?: number | null;
+  routeOriginLng?: number | null;
+  maxDeviationKm?: number | null;
   onSuccess?: () => void;
 }
 
@@ -32,6 +37,9 @@ export function DeviationRequestForm({
   carrierId,
   shipperId,
   maxPallets,
+  routeOriginLat,
+  routeOriginLng,
+  maxDeviationKm,
   onSuccess,
 }: DeviationRequestFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +52,17 @@ export function DeviationRequestForm({
     deviationDescription: '',
     notes: '',
   });
+  const [pickupCity, setPickupCity] = useState<CityOption | null>(null);
+
+  // Informational only -- an over-deviation pickup is warned about but
+  // never blocked; the carrier still sees it and can reject or counter.
+  const deviationWarning = (() => {
+    if (!pickupCity || routeOriginLat == null || routeOriginLng == null) return null;
+    const distanceKm = haversineKm(pickupCity.lat, pickupCity.lng, routeOriginLat, routeOriginLng);
+    const tier = getProximityTier(distanceKm, maxDeviationKm);
+    if (tier) return null;
+    return { distanceKm, maxDeviationKm };
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +86,11 @@ export function DeviationRequestForm({
 
     if (!formData.pickupAddress.trim()) {
       toast.error('Please enter a pickup address');
+      return;
+    }
+
+    if (!pickupCity) {
+      toast.error('Please select your pickup city');
       return;
     }
 
@@ -107,6 +131,7 @@ export function DeviationRequestForm({
         deviationDescription: '',
         notes: '',
       });
+      setPickupCity(null);
       onSuccess?.();
     } catch (error: any) {
       console.error('Error submitting deviation request:', error);
@@ -131,6 +156,24 @@ export function DeviationRequestForm({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <Label className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Pickup City <span className="text-destructive">*</span>
+            </Label>
+            <CityCombobox
+              value={pickupCity?.name || ''}
+              countryCode={pickupCity?.country}
+              onSelect={setPickupCity}
+              placeholder="Search pickup city..."
+              className="mt-1"
+              disabled={isSubmitting}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Used to check how far this pickup is from the carrier's planned route.
+            </p>
+          </div>
+
+          <div>
             <Label htmlFor="pickupAddress" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Pickup Address <span className="text-destructive">*</span>
@@ -145,6 +188,22 @@ export function DeviationRequestForm({
               required
             />
           </div>
+
+          {deviationWarning && (
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-warning/30 bg-warning/5">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <div className="font-medium text-warning">Pickup is far from the planned route</div>
+                <div className="text-muted-foreground">
+                  {deviationWarning.distanceKm.toFixed(0)} km from the route's origin
+                  {deviationWarning.maxDeviationKm
+                    ? ` — beyond the carrier's stated ${deviationWarning.maxDeviationKm} km deviation limit`
+                    : ' — beyond the typical deviation range'}.
+                  You can still send this request; the carrier may reject it or counter with different terms.
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="palletsRequired" className="flex items-center gap-2">

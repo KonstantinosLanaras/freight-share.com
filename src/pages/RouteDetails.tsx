@@ -59,6 +59,8 @@ interface Route {
   id: string;
   origin_city: string;
   origin_country: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
   destination_city: string;
   destination_country: string;
   available_pallets: number;
@@ -623,6 +625,9 @@ export default function RouteDetails() {
           carrierId={route.carrier_id}
           shipperId={user.id}
           maxPallets={route.available_pallets}
+          routeOriginLat={route.origin_lat}
+          routeOriginLng={route.origin_lng}
+          maxDeviationKm={route.max_deviation_km}
           onSuccess={() => fetchRoute()}
         />
       )}
