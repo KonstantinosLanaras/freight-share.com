@@ -39,6 +39,8 @@ import { DeviationRequestCard } from '@/components/routes/DeviationRequestCard';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
+import { isLoadExpired, isRouteExpired } from '@/lib/expiryUtils';
+import { PassedBadge } from '@/components/PassedBadge';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
 
@@ -62,6 +64,9 @@ interface Route {
   space_ldm: number | null;
   departure_date_from: string;
   departure_date_to: string;
+  arrival_date_from?: string | null;
+  arrival_date_to?: string | null;
+  open_to_extra_stops?: boolean | null;
   status: RouteStatus;
 }
 
@@ -750,11 +755,13 @@ export default function CarrierDashboard() {
                     ) : (
                       <>
                         <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
-                          {availableLoads.slice(0, 8).map((load) => (
+                          {availableLoads.slice(0, 8).map((load) => {
+                            const expired = isLoadExpired(load.pickup_date_to);
+                            return (
                             <Link
                               key={load.id}
                               to={`/load/${load.id}`}
-                              className="relative shrink-0 snap-start min-w-[340px] block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors"
+                              className={`relative shrink-0 snap-start min-w-[340px] block p-4 pr-12 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/40 transition-colors${expired ? ' opacity-70' : ''}`}
                             >
                               <BookmarkButton id={load.id} className="absolute top-2 right-2 z-10" />
                               <div className="font-medium text-foreground mb-2 flex items-center gap-2 whitespace-nowrap overflow-hidden">
@@ -763,6 +770,7 @@ export default function CarrierDashboard() {
                                 <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                 <span className="truncate">{load.destination_city}, {load.destination_country}</span>
                                 <ProximityBadge distanceKm={load.destKm} tier={load.destTier} label="Distance from your route's destination" />
+                                {expired && <PassedBadge />}
                               </div>
                               <div className="text-sm text-muted-foreground mb-3">
                                 {load.pallets} pallets · {formatDateRange(load.pickup_date_from, load.pickup_date_to)}
@@ -773,7 +781,7 @@ export default function CarrierDashboard() {
                                 </span>
                               </div>
                             </Link>
-                          ))}
+                          );})}
                         </div>
                         {availableLoads.length > 8 && (
                           <Button variant="outline" className="w-full mt-4" asChild>
@@ -820,24 +828,29 @@ export default function CarrierDashboard() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {routes.map((route) => (
-                          <div 
+                        {routes.map((route) => {
+                          const expired = isRouteExpired(route);
+                          return (
+                          <div
                             key={route.id}
-                            className="p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                            className={`p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors${expired ? ' opacity-70' : ''}`}
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div className="font-medium text-foreground">
                                 {route.origin_city}, {route.origin_country} → {route.destination_city}, {route.destination_country}
                               </div>
-                              <Badge variant={route.status === 'active' ? 'default' : 'secondary'}>
-                                {route.status === 'active' ? 'Active' : 'Planned'}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                {expired && <PassedBadge />}
+                                <Badge variant={route.status === 'active' ? 'default' : 'secondary'}>
+                                  {route.status === 'active' ? 'Active' : 'Planned'}
+                                </Badge>
+                              </div>
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {route.available_pallets} pallets · {formatDateRange(route.departure_date_from, route.departure_date_to)}
                             </div>
                           </div>
-                        ))}
+                        );})}
                       </div>
                     )}
                   </CardContent>

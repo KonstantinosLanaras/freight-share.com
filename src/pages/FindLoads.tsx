@@ -37,6 +37,8 @@ import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BookmarkButton } from '@/components/BookmarkButton';
+import { isLoadExpired } from '@/lib/expiryUtils';
+import { PassedBadge } from '@/components/PassedBadge';
 
 
 interface Load {
@@ -225,6 +227,11 @@ export default function FindLoads() {
     // proximity suggestions belong only in the CarrierDashboard widget.
     return matchesOrigin && matchesDestination && matchesCargo && matchesArriveBy;
   }).sort((a, b) => {
+    // Passed loads sink to the bottom regardless of sort order, rather
+    // than being hidden.
+    const aExpired = isLoadExpired(a.pickup_date_to);
+    const bExpired = isLoadExpired(b.pickup_date_to);
+    if (aExpired !== bExpired) return aExpired ? 1 : -1;
     switch (sortBy) {
       case 'price_asc': {
         const ap = a.price ?? Number.POSITIVE_INFINITY;
@@ -425,9 +432,10 @@ export default function FindLoads() {
               const compatibility = getLoadCompatibility(load);
               const isIncompatible = compatibility && !compatibility.isMatch;
               const proximity = getLoadProximity(load);
+              const expired = isLoadExpired(load.pickup_date_to);
 
               return (
-                <Card key={load.id} className={`relative hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''}`}>
+                <Card key={load.id} className={`relative hover:shadow-md transition-shadow ${isIncompatible ? 'border-destructive/30 opacity-75' : ''} ${expired ? 'opacity-70' : ''}`}>
                   <BookmarkButton id={load.id} className="absolute top-3 right-3 z-10" />
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
@@ -436,6 +444,7 @@ export default function FindLoads() {
                           <Badge className="bg-primary/10 text-primary">
                             {load.cargo_type}
                           </Badge>
+                          {expired && <PassedBadge />}
                           {compatibility && (
                             <TooltipProvider>
                               <Tooltip>
