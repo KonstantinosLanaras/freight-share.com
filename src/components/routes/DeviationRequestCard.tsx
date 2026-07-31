@@ -77,6 +77,8 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
   const { isDemoMode } = useDemoMode();
   const { confirmBypass, dialog: betaBypassDialog } = useBetaBypassConfirm();
   const [counterOfferOpen, setCounterOfferOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [counterOffer, setCounterOffer] = useState({
     price: '',
@@ -155,20 +157,24 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
     await finalize();
   };
 
-  const handleReject = async () => {
+  const handleReject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rejectReason.trim()) return;
     setIsSubmitting(true);
     try {
       const { error } = await supabase
         .from('deviation_requests')
-        .update({ 
+        .update({
           status: 'rejected',
-          carrier_response: 'Request rejected'
+          carrier_response: rejectReason.trim(),
         })
         .eq('id', request.id);
 
       if (error) throw error;
 
       toast.success('Request rejected');
+      setRejectDialogOpen(false);
+      setRejectReason('');
       onUpdate?.();
     } catch (error: any) {
       console.error('Error rejecting request:', error);
@@ -301,11 +307,11 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Counter
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex-1 text-destructive hover:text-destructive"
-                onClick={handleReject}
+                onClick={() => setRejectDialogOpen(true)}
                 disabled={isSubmitting}
               >
                 <XCircle className="h-4 w-4 mr-2" />
@@ -359,6 +365,38 @@ export function DeviationRequestCard({ request, isCarrier, onUpdate }: Deviation
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Counter Offer'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Request</DialogTitle>
+            <DialogDescription>
+              Let the shipper know why, e.g. "too far from my planned route" or a scheduling conflict.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleReject} className="space-y-4">
+            <div>
+              <Label htmlFor="rejectReason">Reason <span className="text-destructive">*</span></Label>
+              <Textarea
+                id="rejectReason"
+                placeholder="e.g., This pickup is too far from my planned route"
+                className="mt-1"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setRejectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="destructive" disabled={isSubmitting || !rejectReason.trim()}>
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject Request'}
               </Button>
             </DialogFooter>
           </form>

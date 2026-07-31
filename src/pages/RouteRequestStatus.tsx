@@ -129,7 +129,7 @@ export default function RouteRequestStatus() {
         source: { kind: 'route_request', routeRequestId: request.id },
         shipperId: user.id,
         carrierId: request.carrier_id,
-        finalPrice: request.offer_price ?? request.counter_offer_price ?? 0,
+        finalPrice: request.counter_offer_price ?? request.offer_price ?? 0,
         insuranceDecision,
         shouldSimulatePayment: shouldSimulatePayment(),
       });
@@ -138,7 +138,7 @@ export default function RouteRequestStatus() {
         recipientUserId: request.carrier_id,
         fromName: 'The shipper',
         route: route ? `${route.origin_city}, ${route.origin_country} → ${route.destination_city}, ${route.destination_country}` : undefined,
-        price: request.offer_price ?? request.counter_offer_price,
+        price: request.counter_offer_price ?? request.offer_price,
         pallets: request.pallets,
         cargoType: request.goods_type,
         weightKg: request.weight_kg,
@@ -158,7 +158,7 @@ export default function RouteRequestStatus() {
 
       const paymentUrl = await triggerShipmentPayment({
         shipmentId,
-        amount: request.offer_price ?? request.counter_offer_price ?? 0,
+        amount: request.counter_offer_price ?? request.offer_price ?? 0,
         description: route ? `${route.origin_city} → ${route.destination_city} · ${request.pallets} pallets · ${request.goods_type}` : `Route request ${request.id}`,
         carrierId: request.carrier_id,
       });
@@ -360,7 +360,7 @@ export default function RouteRequestStatus() {
         onConfirm={handleProceedToPayment}
         isLoading={paymentLoading}
         cargoType={request.goods_type}
-        price={request.offer_price ?? request.counter_offer_price ?? 0}
+        price={request.counter_offer_price ?? request.offer_price ?? 0}
         weightKg={request.weight_kg}
         carrierInsurance={carrierInsurance || undefined}
         isDemoMode={shouldSimulatePayment()}

@@ -239,7 +239,7 @@ export default function OffersShipper() {
           recipientUserId: req.carrier_id,
           fromName: 'The shipper',
           route: req.route ? `${req.route.origin_city}, ${req.route.origin_country} → ${req.route.destination_city}, ${req.route.destination_country}` : undefined,
-          price: req.offer_price,
+          price: req.counter_offer_price ?? req.offer_price,
           pallets: req.pallets_requested,
           cargoType: req.goods_type,
           weightKg: req.weight_kg,
