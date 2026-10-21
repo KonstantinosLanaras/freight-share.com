@@ -16,13 +16,14 @@ Deno.serve(async (req) => {
   let body: any
   try { body = await req.json() } catch { return json({ error: 'invalid_json' }, 400) }
 
+  const d = body?.templateData ?? body
   const templateData = {
-    fullName: str(body?.fullName, 200),
-    companyName: str(body?.companyName, 200),
-    role: str(body?.role, 100),
-    email: str(body?.email, 255),
-    phone: str(body?.phone, 50),
-    challenge: str(body?.challenge, 2000),
+    fullName: str(d?.fullName, 200),
+    companyName: str(d?.companyName, 200),
+    role: str(d?.role, 100),
+    email: str(d?.email, 255),
+    phone: str(d?.phone, 50),
+    challenge: str(d?.challenge, 2000),
   }
   if (!templateData.fullName || !templateData.email) return json({ error: 'missing_fields' }, 400)
 
