@@ -17,7 +17,7 @@ async def main():
    await page.goto('http://localhost:8080'+path)
    for refresh in [False, True]:
     if refresh: await page.reload()
-    await page.get_by_role('heading',name=('Carrier Verifications' if path == '/admin' else 'User Management'),exact=True).wait_for()
+    await page.get_by_role('heading',name=('Carrier Verifications' if path == '/admin' else 'Users'),exact=True).wait_for()
     assert page.url == 'http://localhost:8080'+path, page.url
     print('PASS',path,'refresh' if refresh else 'direct link')
   await page.screenshot(path='/tmp/browser/admin/verified.png')
