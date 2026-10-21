@@ -61,9 +61,8 @@ export const EarlyAccess = () => {
       }
 
       // Fire-and-forget notification email to the FreightShare team (contact@freight-share.com)
-      supabase.functions.invoke('send-transactional-email', {
+      supabase.functions.invoke('notify-early-access', {
         body: {
-          templateName: 'early-access-notification',
           idempotencyKey: `early-access-${parsed.data.email}-${Date.now()}`,
           templateData: {
             fullName: parsed.data.fullName,
