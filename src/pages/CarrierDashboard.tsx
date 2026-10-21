@@ -599,6 +599,8 @@ export default function CarrierDashboard() {
                   </Button>
                   <CarrierVerificationForm onSuccess={() => {
                     setShowVerificationForm(false);
+                    // Optimistically update to pending so the banner shows immediately
+                    setProfile(prev => prev ? { ...prev, verification_status: 'pending' } : prev);
                     fetchData();
                   }} />
                 </div>

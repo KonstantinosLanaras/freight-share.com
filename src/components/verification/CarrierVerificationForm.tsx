@@ -71,17 +71,8 @@ export function CarrierVerificationForm({ onSuccess }: CarrierVerificationFormPr
     setIsSubmitting(true);
 
     try {
-      // Upload document to storage
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('verification-documents')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Update profile with verification details
+      // Set profile to pending first so the "awaiting approval" banner
+      // appears immediately — even if the document upload later fails.
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -93,6 +84,16 @@ export function CarrierVerificationForm({ onSuccess }: CarrierVerificationFormPr
         .eq('id', user.id);
 
       if (profileError) throw profileError;
+
+      // Upload document to storage
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
 
       // Create verification record
       const { error: verificationError } = await supabase
