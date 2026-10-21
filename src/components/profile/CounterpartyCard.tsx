@@ -125,8 +125,8 @@ export function CounterpartyCard({
           )}
         </div>
       </div>
-      {showLink && variant === 'card' && (
-        <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+      {showLink && (
+        <ExternalLink className={cn('text-muted-foreground shrink-0', variant === 'inline' ? 'h-3.5 w-3.5' : 'h-4 w-4')} />
       )}
     </>
   );
@@ -135,6 +135,8 @@ export function CounterpartyCard({
     'flex items-center gap-3',
     variant === 'card' &&
       'p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors',
+    variant === 'inline' && showLink &&
+      'rounded px-1 -mx-1 hover:bg-accent/40 transition-colors cursor-pointer',
     className
   );
 

@@ -363,7 +363,9 @@ export default function OffersShipper() {
                                 </div>
                               )}
                             </div>
-                            <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
+                            <Button size="sm" variant="outline" className="flex-shrink-0 mt-1 gap-1.5">
+                              View Details <ArrowRight className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -422,7 +424,9 @@ export default function OffersShipper() {
                                 </span>
                               </div>
                             </div>
-                            <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
+                            <Button size="sm" variant="default" className="flex-shrink-0 mt-1 gap-1.5">
+                              View Offer <ArrowRight className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
