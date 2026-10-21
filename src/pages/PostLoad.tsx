@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CityCombobox } from '@/components/CityCombobox';
 import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,8 +54,14 @@ export default function PostLoad() {
     destinationLng: null as number | null,
     pickupDateStart: '',
     pickupDateEnd: '',
+    pickupTimeFrom: '',
+    pickupTimeTo: '',
+    pickupFlexibility: 'flexible' as 'flexible' | 'window' | 'exact',
     deliveryDateStart: '',
     deliveryDateEnd: '',
+    deliveryTimeFrom: '',
+    deliveryTimeTo: '',
+    deliveryFlexibility: 'flexible' as 'flexible' | 'window' | 'exact',
     pallets: '',
     cargoType: 'general',
     fixedPrice: '',
@@ -94,8 +100,14 @@ export default function PostLoad() {
         destinationLng: data.destination_lng,
         pickupDateStart: data.pickup_date_from || '',
         pickupDateEnd: data.pickup_date_to || '',
+        pickupTimeFrom: (data as any).pickup_time_from || '',
+        pickupTimeTo: (data as any).pickup_time_to || '',
+        pickupFlexibility: ((data as any).pickup_flexibility || 'flexible') as 'flexible' | 'window' | 'exact',
         deliveryDateStart: data.delivery_date_from || '',
         deliveryDateEnd: data.delivery_date_to || '',
+        deliveryTimeFrom: (data as any).delivery_time_from || '',
+        deliveryTimeTo: (data as any).delivery_time_to || '',
+        deliveryFlexibility: ((data as any).delivery_flexibility || 'flexible') as 'flexible' | 'window' | 'exact',
         pallets: String(data.pallets || ''),
         cargoType: data.cargo_type || 'general',
         fixedPrice: data.price ? String(data.price) : '',
@@ -175,8 +187,14 @@ export default function PostLoad() {
         destination_lng: formData.destinationLng,
         pickup_date_from: formData.pickupDateStart,
         pickup_date_to: formData.pickupDateEnd,
+        ...(formData.pickupFlexibility !== 'flexible' && formData.pickupTimeFrom ? { pickup_time_from: formData.pickupTimeFrom } : {}),
+        ...(formData.pickupFlexibility !== 'flexible' && formData.pickupTimeTo ? { pickup_time_to: formData.pickupTimeTo } : {}),
+        pickup_flexibility: formData.pickupFlexibility,
         delivery_date_from: formData.deliveryDateStart,
         delivery_date_to: formData.deliveryDateEnd,
+        ...(formData.deliveryFlexibility !== 'flexible' && formData.deliveryTimeFrom ? { delivery_time_from: formData.deliveryTimeFrom } : {}),
+        ...(formData.deliveryFlexibility !== 'flexible' && formData.deliveryTimeTo ? { delivery_time_to: formData.deliveryTimeTo } : {}),
+        delivery_flexibility: formData.deliveryFlexibility,
         pallets: spaceType === 'epe' ? parseInt(spaceValue) || 0 : 0,
         cargo_type: formData.cargoType as any,
         pricing_type: (pricingMode === 'fixed' ? 'fixed' : 'open_to_offers') as any,
@@ -322,67 +340,114 @@ export default function PostLoad() {
             </CardContent>
           </Card>
 
-          {/* Dates */}
+          {/* Dates & Times */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
                 Scheduling
               </CardTitle>
-              <CardDescription>Specify your pickup and delivery windows</CardDescription>
+              <CardDescription>Set your pickup and delivery windows, including time of day and flexibility</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="pickupDateStart">Pickup From</Label>
-                  <Input
-                    id="pickupDateStart"
-                    type="date"
-                    className="mt-1"
-                    value={formData.pickupDateStart}
-                    onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+              {/* Pickup */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-foreground">Pickup</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="pickupDateStart">Earliest date</Label>
+                    <Input id="pickupDateStart" type="date" className="mt-1" value={formData.pickupDateStart}
+                      onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value })} required disabled={isSubmitting} />
+                  </div>
+                  <div>
+                    <Label htmlFor="pickupDateEnd">Latest date</Label>
+                    <Input id="pickupDateEnd" type="date" className="mt-1" value={formData.pickupDateEnd}
+                      onChange={(e) => setFormData({ ...formData, pickupDateEnd: e.target.value })} required disabled={isSubmitting} />
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="pickupDateEnd">Pickup Until</Label>
-                  <Input
-                    id="pickupDateEnd"
-                    type="date"
-                    className="mt-1"
-                    value={formData.pickupDateEnd}
-                    onChange={(e) => setFormData({ ...formData, pickupDateEnd: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+                  <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Time flexibility</Label>
+                  <Select value={formData.pickupFlexibility} onValueChange={(v) => setFormData({ ...formData, pickupFlexibility: v as any })} disabled={isSubmitting}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="flexible">Flexible — any time of day</SelectItem>
+                      <SelectItem value="window">Specific time window</SelectItem>
+                      <SelectItem value="exact">Exact time (to be agreed)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+                {formData.pickupFlexibility === 'window' && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="pickupTimeFrom">Window opens</Label>
+                      <Input id="pickupTimeFrom" type="time" className="mt-1" value={formData.pickupTimeFrom}
+                        onChange={(e) => setFormData({ ...formData, pickupTimeFrom: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                    <div>
+                      <Label htmlFor="pickupTimeTo">Window closes</Label>
+                      <Input id="pickupTimeTo" type="time" className="mt-1" value={formData.pickupTimeTo}
+                        onChange={(e) => setFormData({ ...formData, pickupTimeTo: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                  </div>
+                )}
+                {formData.pickupFlexibility === 'exact' && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
+                    The exact pickup time will be agreed between shipper and carrier after the booking is confirmed.
+                  </p>
+                )}
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="deliveryDateStart">Delivery From</Label>
-                  <Input
-                    id="deliveryDateStart"
-                    type="date"
-                    className="mt-1"
-                    value={formData.deliveryDateStart}
-                    onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+
+              <div className="border-t border-border" />
+
+              {/* Delivery */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-foreground">Delivery</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="deliveryDateStart">Earliest date</Label>
+                    <Input id="deliveryDateStart" type="date" className="mt-1" value={formData.deliveryDateStart}
+                      onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value })} required disabled={isSubmitting} />
+                  </div>
+                  <div>
+                    <Label htmlFor="deliveryDateEnd">Latest date</Label>
+                    <Input id="deliveryDateEnd" type="date" className="mt-1" value={formData.deliveryDateEnd}
+                      onChange={(e) => setFormData({ ...formData, deliveryDateEnd: e.target.value })} required disabled={isSubmitting} />
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="deliveryDateEnd">Delivery Until</Label>
-                  <Input
-                    id="deliveryDateEnd"
-                    type="date"
-                    className="mt-1"
-                    value={formData.deliveryDateEnd}
-                    onChange={(e) => setFormData({ ...formData, deliveryDateEnd: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
+                  <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Time flexibility</Label>
+                  <Select value={formData.deliveryFlexibility} onValueChange={(v) => setFormData({ ...formData, deliveryFlexibility: v as any })} disabled={isSubmitting}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="flexible">Flexible — any time of day</SelectItem>
+                      <SelectItem value="window">Specific time window</SelectItem>
+                      <SelectItem value="exact">Exact time (to be agreed)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+                {formData.deliveryFlexibility === 'window' && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="deliveryTimeFrom">Window opens</Label>
+                      <Input id="deliveryTimeFrom" type="time" className="mt-1" value={formData.deliveryTimeFrom}
+                        onChange={(e) => setFormData({ ...formData, deliveryTimeFrom: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                    <div>
+                      <Label htmlFor="deliveryTimeTo">Window closes</Label>
+                      <Input id="deliveryTimeTo" type="time" className="mt-1" value={formData.deliveryTimeTo}
+                        onChange={(e) => setFormData({ ...formData, deliveryTimeTo: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                  </div>
+                )}
+                {formData.deliveryFlexibility === 'exact' && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
+                    The exact delivery time will be agreed between shipper and carrier after the booking is confirmed.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
