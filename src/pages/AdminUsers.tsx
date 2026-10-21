@@ -31,7 +31,8 @@ interface Row {
 }
 
 export default function AdminUsers() {
-  const { user, role, loading: authLoading } = useAuth();
+  const { user, roles, loading: authLoading } = useAuth();
+  const isAdmin = roles.includes("admin");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -56,11 +57,11 @@ export default function AdminUsers() {
     setLoading(false);
   };
 
-  useEffect(() => { if (role === "admin") load(); }, [role]);
+  useEffect(() => { if (!authLoading && isAdmin) load(); }, [authLoading, isAdmin]);
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
   if (!user) return <Navigate to="/auth?mode=login" replace />;
-  if (role !== "admin") return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
 
   const toggleVerified = async (r: Row) => {
     const next = !r.admin_verified;
