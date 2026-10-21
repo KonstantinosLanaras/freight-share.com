@@ -1,0 +1,2 @@
+- [ ] Fix admin access redirect while account roles load.
+- [ ] Verify the admin page with the requested admin account.

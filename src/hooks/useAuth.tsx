@@ -28,27 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [activeRole, setActiveRoleState] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRoles = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-    
-    if (!error && data && data.length > 0) {
-      const fetchedRoles = data.map(d => d.role as AppRole);
-      setRoles(fetchedRoles);
-      
-      // If no active role set yet, or current active role isn't in the list, pick first
-      setActiveRoleState(prev => {
-        if (prev && fetchedRoles.includes(prev)) return prev;
-        return fetchedRoles[0];
-      });
-    } else {
-      setRoles([]);
-      setActiveRoleState(null);
-    }
-  };
-
   const setActiveRole = (role: AppRole) => {
     if (roles.includes(role)) {
       setActiveRoleState(role);
@@ -56,33 +35,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let disposed = false;
+    let requestVersion = 0;
+    let authEventReceived = false;
+
+    const restoreSession = async (nextSession: Session | null) => {
+      const version = ++requestVersion;
+      setLoading(true);
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (!nextSession?.user) {
+        setRoles([]);
+        setActiveRoleState(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', nextSession.user.id);
+        if (disposed || version !== requestVersion) return;
+        const fetchedRoles = error ? [] : (data ?? []).map(d => d.role as AppRole);
+        setRoles(fetchedRoles);
+        setActiveRoleState(prev => prev && fetchedRoles.includes(prev) ? prev : fetchedRoles[0] ?? null);
+      } catch {
+        if (disposed || version !== requestVersion) return;
+        setRoles([]);
+        setActiveRoleState(null);
+      } finally {
+        if (!disposed && version === requestVersion) setLoading(false);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserRoles(session.user.id);
-          }, 0);
-        } else {
-          setRoles([]);
-          setActiveRoleState(null);
-        }
-        setLoading(false);
+        authEventReceived = true;
+        // Wait for roles before exposing the session to protected routes.
+        setLoading(true);
+        setTimeout(() => {
+          if (!disposed) void restoreSession(session);
+        }, 0);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserRoles(session.user.id);
-      }
-      setLoading(false);
+      if (!disposed && !authEventReceived) void restoreSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      disposed = true;
+      requestVersion++;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (
