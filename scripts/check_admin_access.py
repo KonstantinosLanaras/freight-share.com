@@ -19,6 +19,7 @@ async def main():
     if refresh: await page.reload()
     await page.get_by_role('heading',name=('Carrier Verifications' if path == '/admin' else 'Users'),exact=True).wait_for()
     assert page.url == 'http://localhost:8080'+path, page.url
+    if path == '/admin/users': await page.get_by_role('cell',name='k.lanaras@freight-share.com',exact=True).wait_for()
     print('PASS',path,'refresh' if refresh else 'direct link')
   await page.screenshot(path='/tmp/browser/admin/verified.png')
   await b.close()
