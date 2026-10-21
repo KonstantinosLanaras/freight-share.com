@@ -15,7 +15,7 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "Freight-share.com"
+const SITE_NAME = "FreightShare"
 const SENDER_DOMAIN = "notify.freight-share.com"
 const ROOT_DOMAIN = "freight-share.com"
 const FROM_DOMAIN = "notify.freight-share.com"
