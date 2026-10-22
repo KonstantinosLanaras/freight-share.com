@@ -3,11 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Package, 
-  Plus, 
-  TrendingUp, 
-  CheckCircle, 
+import {
+  Package,
+  Plus,
+  TrendingUp,
+  CheckCircle,
   Truck,
   ArrowRight,
   Bell,
@@ -27,7 +27,9 @@ import {
   Inbox,
   Bookmark,
   Home,
-  Wallet
+  Wallet,
+  AlertTriangle,
+  Send,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -475,8 +477,8 @@ export default function CarrierDashboard() {
                 to="/dashboard/carrier/requests"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
-                <Inbox className="h-5 w-5" />
-                Route Requests
+                <Send className="h-5 w-5" />
+                Offers & Requests
                 {stats.pendingRequests > 0 && (
                   <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
                 )}
@@ -635,6 +637,32 @@ export default function CarrierDashboard() {
                 </Card>
               )}
 
+
+              {/* Insurance Reminder Banner */}
+              {profile && !carrierInsurance && (
+                <Card className="mb-8 border-l-4 border-l-warning bg-warning/5">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-warning/20">
+                          <AlertTriangle className="h-5 w-5 text-warning" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">Insurance documents required</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Upload your transport insurance certificate to accept shipments and build trust with shippers.
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="border-warning/40 hover:bg-warning/10 shrink-0" asChild>
+                        <Link to="/dashboard/carrier/insurance">
+                          Upload Insurance <ArrowRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
