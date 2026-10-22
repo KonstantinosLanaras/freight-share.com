@@ -63,18 +63,41 @@ serve(async (req) => {
     );
 
     switch (event.type) {
-      case "checkout.session.completed":
+      case "checkout.session.completed": {
+        // Backup server-to-server confirmation. Also updates payment_reference
+        // from the session ID (cs_...) to the PaymentIntent ID (pi_...) so
+        // release-payment can capture it even if the user closed the tab before
+        // being redirected back (which would have skipped verify-shipment-payment).
+        const session = event.data.object as Stripe.Checkout.Session;
+        const shipmentId = session.metadata?.shipment_id;
+        if (shipmentId) {
+          const paymentIntentId = typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : (session.payment_intent as any)?.id ?? null;
+          const update: Record<string, unknown> = {
+            payment_status: "paid",
+            updated_at: new Date().toISOString(),
+          };
+          if (paymentIntentId) update.payment_reference = paymentIntentId;
+          await supabase.from("shipments").update(update).eq("id", shipmentId);
+          log("Shipment marked paid", { shipmentId, paymentIntentId });
+        }
+        break;
+      }
       case "payment_intent.succeeded": {
-        const obj = event.data.object as Stripe.Checkout.Session | Stripe.PaymentIntent;
-        const shipmentId =
-          (obj as any).metadata?.shipment_id ??
-          ((obj as Stripe.Checkout.Session).metadata?.shipment_id);
+        // With manual capture this event fires when release-payment captures
+        // the held funds. release-payment already sets status = 'completed', so
+        // only update here as a guard for the edge case where that DB write
+        // fails after the Stripe capture call succeeds.
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const shipmentId = pi.metadata?.shipment_id;
         if (shipmentId) {
           await supabase
             .from("shipments")
             .update({ payment_status: "paid", updated_at: new Date().toISOString() })
-            .eq("id", shipmentId);
-          log("Shipment marked paid", { shipmentId });
+            .eq("id", shipmentId)
+            .eq("payment_status", "pending"); // only update if still pending; never overwrite 'completed'
+          log("payment_intent.succeeded: guarded update", { shipmentId });
         }
         break;
       }
