@@ -40,6 +40,9 @@ export interface ShipmentDocumentData {
     conditionNotes: string | null;
     createdAt: string;
   } | null;
+  status?: string;
+  timestamps?: { status: string; created_at: string }[];
+  attachedDocuments?: { file_name: string; document_type: string }[];
 }
 
 function partyLines(party: PartyDetails): string[] {
@@ -215,4 +218,197 @@ export function generateInvoiceDocument(data: ShipmentDocumentData): void {
   doc.text(disclaimer, marginX, y);
 
   doc.save(`Invoice-${data.shipmentId.slice(0, 8)}.pdf`);
+}
+
+const DOC_TYPE_DISPLAY: Record<string, string> = {
+  cargo_insurance: 'Cargo Insurance Certificate',
+  cmr: 'CMR Consignment Note',
+  customs: 'Customs Documents',
+  invoice: 'Invoice / Receipt',
+  other: 'Other',
+};
+
+const STATUS_DISPLAY: Record<string, string> = {
+  accepted: 'Booking accepted',
+  paid: 'Payment received',
+  picked_up: 'Goods picked up',
+  delivered: 'Goods delivered',
+  completed: 'Completed — payment released',
+  cancelled: 'Cancelled',
+};
+
+/**
+ * Generates a single comprehensive transaction record combining parties,
+ * route, financial summary, status timeline, and list of attached documents.
+ * Intended for company bookkeeping — not a certified legal document.
+ */
+export function generateTransactionRecord(data: ShipmentDocumentData): void {
+  const doc = new jsPDF();
+  const W = 180;  // usable width (210 - 2×15)
+  const mX = 15;
+  let y = 15;
+
+  const checkPage = (needed = 10) => {
+    if (y + needed > 280) { doc.addPage(); y = 15; }
+  };
+
+  const rule = () => {
+    checkPage(6);
+    doc.setDrawColor(220);
+    doc.line(mX, y, mX + W, y);
+    y += 5;
+  };
+
+  const sectionTitle = (title: string) => {
+    checkPage(12);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100);
+    doc.text(title.toUpperCase(), mX, y);
+    doc.setTextColor(0);
+    y += 6;
+  };
+
+  const row = (label: string, value: string, bold = false) => {
+    checkPage(6);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, mX + 2, y);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.text(value, mX + 80, y);
+    doc.setFont('helvetica', 'normal');
+    y += 5;
+  };
+
+  // ── Header ──────────────────────────────────────────────────────────────
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Transaction Record', mX, y);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120);
+  doc.text('FreightShare', mX + W, y, { align: 'right' });
+  doc.setTextColor(0);
+  y += 7;
+  doc.setFontSize(9);
+  doc.text(`Reference: TXN-${data.shipmentId.slice(0, 8).toUpperCase()}`, mX, y);
+  doc.text(`Generated: ${format(new Date(), 'PP')}`, mX + W, y, { align: 'right' });
+  y += 5;
+  const statusLabel = data.status ? (STATUS_DISPLAY[data.status] ?? data.status).toUpperCase() : '';
+  if (statusLabel) {
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Status: ${statusLabel}`, mX, y);
+    doc.setFont('helvetica', 'normal');
+    y += 5;
+  }
+  y += 3;
+  rule();
+
+  // ── Parties ──────────────────────────────────────────────────────────────
+  sectionTitle('Parties');
+  const partyCol = (label: string, party: PartyDetails, x: number, startY: number) => {
+    let py = startY;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100);
+    doc.text(label, x, py); py += 5;
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'bold');
+    doc.text(party.company || party.name, x, py); py += 4.5;
+    doc.setFont('helvetica', 'normal');
+    if (party.company && party.name) { doc.text(`Contact: ${party.name}`, x, py); py += 4.5; }
+    if (party.address) {
+      const wrapped = doc.splitTextToSize(party.address, 85);
+      doc.text(wrapped, x, py); py += wrapped.length * 4.5;
+    }
+    if (party.vatNumber) { doc.text(`VAT: ${party.vatNumber}`, x, py); py += 4.5; }
+    return py;
+  };
+  const leftBottom = partyCol('SHIPPER', data.shipper, mX, y);
+  const rightBottom = partyCol('CARRIER', data.carrier, mX + 95, y);
+  y = Math.max(leftBottom, rightBottom) + 5;
+  rule();
+
+  // ── Shipment Details ──────────────────────────────────────────────────────
+  sectionTitle('Shipment Details');
+  row('Origin', `${data.load.originCity}, ${data.load.originCountry}`);
+  row('Destination', `${data.load.destinationCity}, ${data.load.destinationCountry}`);
+  row('Pickup date', format(new Date(data.load.pickupDateFrom), 'PP'));
+  row('Delivery date', format(new Date(data.load.deliveryDateFrom), 'PP'));
+  row('Cargo type', data.load.cargoType);
+  row('Pallets', String(data.load.pallets));
+  row('Gross weight', `${data.load.weightKg} kg`);
+  if (data.declaredCargoValueEur) {
+    row('Declared cargo value', `€${data.declaredCargoValueEur.toLocaleString()}`);
+  }
+  y += 2;
+  rule();
+
+  // ── Financial Summary ─────────────────────────────────────────────────────
+  sectionTitle('Financial Summary');
+  const fee = data.platformFeeAmount ?? 0;
+  const payout = data.carrierPayoutAmount ?? (data.finalPrice - fee);
+  row('Transport fee (charged to shipper)', `€${data.finalPrice.toLocaleString()}`, true);
+  row('FreightShare platform fee (2%)', `€${fee.toLocaleString()}`);
+  row('Carrier payout', `€${payout.toLocaleString()}`);
+  y += 2;
+  rule();
+
+  // ── Status Timeline ───────────────────────────────────────────────────────
+  if (data.timestamps && data.timestamps.length > 0) {
+    sectionTitle('Status Timeline');
+    for (const ts of data.timestamps) {
+      checkPage(6);
+      const label = STATUS_DISPLAY[ts.status] ?? ts.status;
+      const dateStr = format(new Date(ts.created_at), 'PP p');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`✓  ${label}`, mX + 2, y);
+      doc.setTextColor(120);
+      doc.text(dateStr, mX + W, y, { align: 'right' });
+      doc.setTextColor(0);
+      y += 5;
+    }
+    y += 2;
+    rule();
+  }
+
+  // ── Attached Documents ────────────────────────────────────────────────────
+  sectionTitle('Attached Documents');
+  if (data.attachedDocuments && data.attachedDocuments.length > 0) {
+    for (const attached of data.attachedDocuments) {
+      checkPage(6);
+      const typeLabel = DOC_TYPE_DISPLAY[attached.document_type] ?? attached.document_type;
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`•  ${attached.file_name}`, mX + 2, y);
+      doc.setTextColor(120);
+      doc.text(typeLabel, mX + W, y, { align: 'right' });
+      doc.setTextColor(0);
+      y += 5;
+    }
+  } else {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120);
+    doc.text('No documents attached to this shipment.', mX + 2, y);
+    doc.setTextColor(0);
+    y += 5;
+  }
+  y += 5;
+
+  // ── Disclaimer ────────────────────────────────────────────────────────────
+  checkPage(20);
+  doc.setFontSize(7.5);
+  doc.setTextColor(150);
+  const disclaimer = doc.splitTextToSize(
+    'This transaction record is generated from data entered by the parties on FreightShare and from platform payment records. ' +
+    'FreightShare acts as a technical facilitator only — the transport contract is between the Shipper and Carrier. ' +
+    'This document does not constitute a certified CMR consignment note, VAT invoice, or customs declaration. ' +
+    'Review all fields for accuracy and confirm with qualified counsel for jurisdiction-specific regulatory requirements.',
+    W
+  );
+  doc.text(disclaimer, mX, y);
+
+  doc.save(`TransactionRecord-${data.shipmentId.slice(0, 8)}.pdf`);
 }
