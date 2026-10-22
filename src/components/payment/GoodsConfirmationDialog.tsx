@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   ShieldCheck, AlertTriangle, FileText, Loader2, Package,
-  ShieldAlert, Info, Euro, Shield, ChevronDown, ChevronUp, FlaskConical
+  Info, Euro, Shield, ChevronDown, ChevronUp, FlaskConical, Paperclip
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
@@ -34,16 +34,8 @@ interface GoodsConfirmationDialogProps {
 }
 
 export interface InsuranceDecision {
-  addInsurance: boolean;
   declaredCargoValue: number | null;
-  estimatedPremium: number | null;
-  carrierLiabilityEstimate: number | null;
-  coverageGap: number | null;
 }
-
-// Flat premium rate for MVP
-const INSURANCE_PREMIUM_RATE = 0.015; // 1.5% of declared cargo value
-const MIN_PREMIUM = 25; // Minimum premium €25
 
 export function GoodsConfirmationDialog({
   open,
@@ -59,10 +51,7 @@ export function GoodsConfirmationDialog({
   const [goodsConfirmed, setGoodsConfirmed] = useState(false);
   const [responsibilityConfirmed, setResponsibilityConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-
-  // Insurance product state
   const [declaredCargoValue, setDeclaredCargoValue] = useState('');
-  const [addInsurance, setAddInsurance] = useState<boolean | null>(null);
   const [showCoverageDetails, setShowCoverageDetails] = useState(false);
 
   const isExpired = carrierInsurance
@@ -70,43 +59,27 @@ export function GoodsConfirmationDialog({
     : false;
   const hasValidInsurance = carrierInsurance && !isExpired;
 
-  // Calculate coverage gap and premium
-  const insuranceCalc = useMemo(() => {
+  const coverageInfo = useMemo(() => {
     const cargoValue = parseFloat(declaredCargoValue);
     if (!cargoValue || cargoValue <= 0) return null;
-
+    const cmrCap = weightKg * CMR_LIABILITY_EUR_PER_KG;
     const carrierLiabilityEstimate = hasValidInsurance
-      ? Math.min(carrierInsurance!.coverage_limit_eur, weightKg * CMR_LIABILITY_EUR_PER_KG)
-      : weightKg * CMR_LIABILITY_EUR_PER_KG;
-
+      ? Math.min(carrierInsurance!.coverage_limit_eur, cmrCap)
+      : cmrCap;
     const coverageGap = Math.max(0, cargoValue - carrierLiabilityEstimate);
-    const estimatedPremium = coverageGap > 0
-      ? Math.max(MIN_PREMIUM, Math.round(cargoValue * INSURANCE_PREMIUM_RATE * 100) / 100)
-      : 0;
-
-    return { carrierLiabilityEstimate, coverageGap, estimatedPremium };
+    return { carrierLiabilityEstimate, coverageGap };
   }, [declaredCargoValue, weightKg, hasValidInsurance, carrierInsurance]);
 
-  const hasGap = insuranceCalc && insuranceCalc.coverageGap > 0;
-  const insuranceDecisionMade = addInsurance !== null || !hasGap;
+  const gapPercent = coverageInfo && parseFloat(declaredCargoValue) > 0
+    ? Math.round((coverageInfo.carrierLiabilityEstimate / parseFloat(declaredCargoValue)) * 100)
+    : 0;
 
-  const allChecked = goodsConfirmed && responsibilityConfirmed && termsAccepted && insuranceDecisionMade;
+  const allChecked = goodsConfirmed && responsibilityConfirmed && termsAccepted;
 
   const handleConfirm = () => {
     if (!allChecked) return;
-    const cargoValue = parseFloat(declaredCargoValue) || null;
-    onConfirm({
-      addInsurance: addInsurance === true,
-      declaredCargoValue: cargoValue,
-      estimatedPremium: addInsurance && insuranceCalc ? insuranceCalc.estimatedPremium : null,
-      carrierLiabilityEstimate: insuranceCalc?.carrierLiabilityEstimate ?? null,
-      coverageGap: insuranceCalc?.coverageGap ?? null,
-    });
+    onConfirm({ declaredCargoValue: parseFloat(declaredCargoValue) || null });
   };
-
-  const gapPercent = insuranceCalc && parseFloat(declaredCargoValue) > 0
-    ? Math.round((insuranceCalc.carrierLiabilityEstimate / parseFloat(declaredCargoValue)) * 100)
-    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,7 +90,7 @@ export function GoodsConfirmationDialog({
             Confirm & Proceed to Payment
           </DialogTitle>
           <DialogDescription>
-            Review details, select protection, and accept terms before payment.
+            Review details and accept terms before payment.
           </DialogDescription>
         </DialogHeader>
 
@@ -125,13 +98,13 @@ export function GoodsConfirmationDialog({
           <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs">
             <FlaskConical className="h-3.5 w-3.5 text-warning shrink-0" />
             <span className="text-warning-foreground">
-              <strong>Beta</strong> — Payment will be simulated. Insurance selection is fully functional for demonstration.
+              <strong>Beta</strong> — Payment will be simulated.
             </span>
           </div>
         )}
 
         <div className="space-y-5 py-4">
-          {/* ── Transaction Summary ── */}
+          {/* Transaction Summary */}
           <div className="p-4 rounded-lg bg-muted/50 border border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -146,20 +119,18 @@ export function GoodsConfirmationDialog({
             </div>
           </div>
 
-          {/* ── INSURANCE PRODUCT SECTION ── */}
-          <div className="rounded-lg border-2 border-primary/20 overflow-hidden">
-            {/* Header */}
-            <div className="bg-primary/5 px-4 py-3 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Cargo Protection</h3>
-              <Badge variant="outline" className="ml-auto text-xs border-primary/30 text-primary">Optional</Badge>
+          {/* CMR Liability Information */}
+          <div className="rounded-lg border border-border overflow-hidden">
+            <div className="bg-muted/40 px-4 py-3 flex items-center gap-2">
+              <Shield className="h-5 w-5 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Carrier Liability</h3>
+              <Badge variant="outline" className="ml-auto text-xs">Informational</Badge>
             </div>
 
             <div className="p-4 space-y-4">
-              {/* Step 1: Declared cargo value */}
               <div className="space-y-2">
                 <Label htmlFor="cargo-value" className="text-sm font-medium">
-                  What is the total value of your cargo?
+                  What is the total value of your cargo? <span className="text-muted-foreground font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
                   <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -171,21 +142,17 @@ export function GoodsConfirmationDialog({
                     placeholder="e.g. 15000"
                     className="pl-10"
                     value={declaredCargoValue}
-                    onChange={(e) => {
-                      setDeclaredCargoValue(e.target.value);
-                      setAddInsurance(null);
-                    }}
+                    onChange={(e) => setDeclaredCargoValue(e.target.value)}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Used to calculate your coverage gap — not shared with the carrier.
+                  Helps you understand how much of your cargo is covered by carrier CMR liability.
                 </p>
               </div>
 
-              {/* Step 2: Coverage gap visualisation */}
-              {insuranceCalc && parseFloat(declaredCargoValue) > 0 && (
+              {coverageInfo && parseFloat(declaredCargoValue) > 0 && (
                 <div className="space-y-3">
-                  {/* Visual gap bar */}
+                  {/* Coverage bar */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>Carrier liability</span>
@@ -199,17 +166,16 @@ export function GoodsConfirmationDialog({
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="font-medium text-primary">
-                        €{insuranceCalc.carrierLiabilityEstimate.toLocaleString()} covered
+                        €{coverageInfo.carrierLiabilityEstimate.toLocaleString()} carrier liability
                       </span>
-                      {insuranceCalc.coverageGap > 0 && (
+                      {coverageInfo.coverageGap > 0 && (
                         <span className="font-medium text-destructive">
-                          €{insuranceCalc.coverageGap.toLocaleString()} uncovered
+                          €{coverageInfo.coverageGap.toLocaleString()} above carrier limit
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Expandable detail */}
                   <button
                     type="button"
                     onClick={() => setShowCoverageDetails(!showCoverageDetails)}
@@ -223,141 +189,58 @@ export function GoodsConfirmationDialog({
                   {showCoverageDetails && (
                     <div className="text-xs text-muted-foreground p-3 rounded bg-muted/50 border border-border space-y-1">
                       <p>
-                        Under CMR convention, carrier liability is capped at ~€{CMR_LIABILITY_EUR_PER_KG}/kg
+                        Under the CMR Convention, carrier liability is capped at ~€{CMR_LIABILITY_EUR_PER_KG}/kg
                         ({weightKg} kg = €{(weightKg * CMR_LIABILITY_EUR_PER_KG).toLocaleString()}).
                       </p>
                       {hasValidInsurance && (
                         <p>
-                          This carrier's insurance covers up to €{carrierInsurance!.coverage_limit_eur.toLocaleString()}
+                          This carrier's transport insurance covers up to €{carrierInsurance!.coverage_limit_eur.toLocaleString()}
                           {' '}via {carrierInsurance!.provider_name}
                           {carrierInsurance!.status === 'verified' && ' (verified)'}.
                         </p>
                       )}
-                      <p>Carrier liability is <strong>fault-based</strong> — it only applies if the carrier is at fault for loss or damage.</p>
+                      <p>Carrier liability is <strong>fault-based</strong> — it only applies if the carrier caused the loss or damage.</p>
                     </div>
                   )}
 
-                  {/* Step 3: Insurance decision */}
-                  {hasGap ? (
-                    <div className="space-y-2">
-                      {/* Add Insurance option */}
-                      <button
-                        type="button"
-                        onClick={() => setAddInsurance(true)}
-                        className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                          addInsurance === true
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/40'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            addInsurance === true ? 'border-primary bg-primary' : 'border-muted-foreground'
-                          }`}>
-                            {addInsurance === true && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-foreground">Add Cargo Protection</span>
-                              <span className="text-sm font-bold text-primary">
-                                + €{insuranceCalc.estimatedPremium.toLocaleString()}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Illustrative all-risk coverage up to €{parseFloat(declaredCargoValue).toLocaleString()} declared value, covering loss, damage, and extraordinary events.
-                            </p>
-                            <p className="text-xs text-warning mt-1">
-                              Not a binding insurance policy — no licensed insurer currently underwrites this cover, and no premium is charged for it. FreightShare cannot pay a claim against it. For real coverage above the carrier's liability limit, arrange cargo insurance directly with a licensed insurer.
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-
-                      {/* Decline option */}
-                      <button
-                        type="button"
-                        onClick={() => setAddInsurance(false)}
-                        className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                          addInsurance === false
-                            ? 'border-border bg-muted/30'
-                            : 'border-border hover:border-muted-foreground/40'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            addInsurance === false ? 'border-foreground bg-foreground' : 'border-muted-foreground'
-                          }`}>
-                            {addInsurance === false && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-background" />
-                            )}
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium text-foreground">Continue without protection</span>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              You accept the risk for the uncovered €{insuranceCalc.coverageGap.toLocaleString()}.
-                              Carrier liability is limited and fault-based.
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-
-                      {/* Declined warning */}
-                      {addInsurance === false && (
-                        <div className="flex items-start gap-2 p-2.5 rounded bg-destructive/5 border border-destructive/20">
-                          <AlertTriangle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
-                          <p className="text-xs text-destructive/80">
-                            If your cargo is lost or damaged beyond carrier fault, you will bear the full cost of the uncovered amount.
-                          </p>
-                        </div>
-                      )}
+                  {/* Gap advisory */}
+                  {coverageInfo.coverageGap > 0 ? (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/5 border border-warning/20">
+                      <Paperclip className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p className="font-medium text-foreground">
+                          €{coverageInfo.coverageGap.toLocaleString()} of your cargo value exceeds carrier liability.
+                        </p>
+                        <p>
+                          If this amount matters to you, arrange your own cargo insurance with a licensed insurer before shipping.
+                          You can attach your policy document directly to this shipment after booking.
+                        </p>
+                      </div>
                     </div>
                   ) : (
-                    /* No gap — cargo value within carrier liability */
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
                       <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <p className="text-xs text-muted-foreground">
-                        Your declared cargo value is within the carrier's liability limit. Additional insurance is not needed for this shipment.
+                        Your declared cargo value is within the carrier's liability limit.
                       </p>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* No value entered yet */}
               {(!declaredCargoValue || parseFloat(declaredCargoValue) <= 0) && (
                 <div className="flex items-start gap-2 p-2.5 rounded bg-muted/50 border border-border">
                   <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
                   <p className="text-xs text-muted-foreground">
-                    Enter your cargo value to see if you need additional protection.
+                    Enter your cargo value above to see how it compares to carrier CMR liability.
+                    You can also attach your cargo insurance document to the shipment after booking.
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ── Updated total if insurance selected ── */}
-          {addInsurance && insuranceCalc && (
-            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-              <div className="space-y-1.5 text-sm">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Transport cost (charged)</span>
-                  <span>€{price}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Cargo protection premium (illustrative, not charged)</span>
-                  <span>€{insuranceCalc.estimatedPremium.toLocaleString()}</span>
-                </div>
-                <div className="border-t border-primary/20 pt-1.5 flex justify-between font-bold text-foreground">
-                  <span>You'll be charged</span>
-                  <span>€{price.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Confirmations ── */}
+          {/* Confirmations */}
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
               <Checkbox
@@ -422,13 +305,11 @@ export function GoodsConfirmationDialog({
             ) : isDemoMode ? (
               <>
                 <FlaskConical className="h-4 w-4 mr-2" />
-                Simulate Payment
-                <span className="ml-1">· €{price.toLocaleString()}</span>
+                Simulate Payment · €{price.toLocaleString()}
               </>
             ) : (
               <>
-                Proceed to Payment
-                <span className="ml-1">· €{price.toLocaleString()}</span>
+                Proceed to Payment · €{price.toLocaleString()}
               </>
             )}
           </Button>

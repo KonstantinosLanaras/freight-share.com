@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, Package, Truck, MapPin, Calendar, Euro, MessageSquare,
   CheckCircle, Clock, FileText, Star, User, HelpCircle, Navigation,
-  AlertTriangle, Loader2, FlaskConical, Download
+  AlertTriangle, Loader2, FlaskConical, Download, Upload, Paperclip, X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -188,6 +188,8 @@ export default function ShipmentDetails() {
   const [timestamps, setTimestamps] = useState<{ status: string; created_at: string }[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRecord[]>([]);
   const [evidenceDialog, setEvidenceDialog] = useState<{ open: boolean; kind: 'pickup' | 'delivery' }>({ open: false, kind: 'pickup' });
+  const [documents, setDocuments] = useState<{ id: string; file_name: string; file_path: string; document_type: string; uploaded_by: string; created_at: string }[]>([]);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   // Best-effort: registered_address/vat_number are on profiles, not the
   // public_profiles view, so RLS may return these as null for a
   // counterparty -- the document generators degrade gracefully either way.
@@ -289,11 +291,84 @@ export default function ShipmentDetails() {
       });
       setShipperParty(toParty(extended.find((p) => p.id === shipmentData.shipper_id), shipperRes.data));
       setCarrierParty(toParty(extended.find((p) => p.id === shipmentData.carrier_id), carrierRes.data));
+
+      // Fetch shipment documents
+      const { data: docsData } = await (supabase as any)
+        .from('shipment_documents')
+        .select('id, file_name, file_path, document_type, uploaded_by, created_at')
+        .eq('shipment_id', id!)
+        .order('created_at', { ascending: true });
+      setDocuments(docsData || []);
     } catch (error) {
       console.error('Error fetching shipment:', error);
       toast.error('Failed to load shipment details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !shipment || !user) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('File must be under 10 MB'); return; }
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowed.includes(file.type)) { toast.error('Only PDF, JPEG, or PNG files are accepted'); return; }
+
+    setUploadingDoc(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${shipment.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('shipment-documents')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { error: dbError } = await (supabase as any)
+        .from('shipment_documents')
+        .insert({
+          shipment_id: shipment.id,
+          uploaded_by: user.id,
+          document_type: 'other',
+          file_name: file.name,
+          file_path: filePath,
+        });
+      if (dbError) throw dbError;
+
+      toast.success('Document uploaded');
+      // Refresh documents list
+      const { data: docsData } = await (supabase as any)
+        .from('shipment_documents')
+        .select('id, file_name, file_path, document_type, uploaded_by, created_at')
+        .eq('shipment_id', shipment.id)
+        .order('created_at', { ascending: true });
+      setDocuments(docsData || []);
+    } catch (err) {
+      toast.error(getSafeErrorMessage(err, 'Failed to upload document'));
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDocumentDownload = async (doc: { file_name: string; file_path: string }) => {
+    const { data, error } = await supabase.storage
+      .from('shipment-documents')
+      .createSignedUrl(doc.file_path, 60);
+    if (error || !data?.signedUrl) { toast.error('Could not generate download link'); return; }
+    const a = document.createElement('a');
+    a.href = data.signedUrl;
+    a.download = doc.file_name;
+    a.click();
+  };
+
+  const handleDocumentDelete = async (docId: string, filePath: string) => {
+    try {
+      await supabase.storage.from('shipment-documents').remove([filePath]);
+      await (supabase as any).from('shipment_documents').delete().eq('id', docId);
+      setDocuments((prev) => prev.filter((d) => d.id !== docId));
+      toast.success('Document removed');
+    } catch (err) {
+      toast.error(getSafeErrorMessage(err, 'Failed to remove document'));
     }
   };
 
@@ -853,6 +928,67 @@ export default function ShipmentDetails() {
                     Message {role === 'carrier' ? 'Shipper' : 'Carrier'}
                   </Link>
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Shipment Documents */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Paperclip className="h-4 w-4 text-muted-foreground" />
+                  Documents
+                </CardTitle>
+                <label className="cursor-pointer">
+                  <Button size="sm" variant="outline" asChild disabled={uploadingDoc}>
+                    <span>
+                      {uploadingDoc ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      Attach
+                    </span>
+                  </Button>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={handleDocumentUpload}
+                    disabled={uploadingDoc}
+                  />
+                </label>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {documents.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No documents attached. Either party can upload cargo insurance certificates, CMR notes, or other relevant files.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 border border-border text-sm">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="flex-1 truncate text-foreground">{doc.file_name}</span>
+                        <button
+                          onClick={() => handleDocumentDownload(doc)}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          title="Download"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </button>
+                        {doc.uploaded_by === user?.id && (
+                          <button
+                            onClick={() => handleDocumentDelete(doc.id, doc.file_path)}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                            title="Remove"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
