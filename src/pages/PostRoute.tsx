@@ -420,6 +420,7 @@ export default function PostRoute() {
                     required
                     disabled={isSubmitting}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">Recorded as a committed date. Changes should be agreed via messages.</p>
                 </div>
               </div>
             </CardContent>
@@ -561,6 +562,7 @@ export default function PostRoute() {
                     required
                     disabled={isSubmitting}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">Recorded as a committed date. Changes should be agreed via messages.</p>
                 </div>
               </div>
             </CardContent>

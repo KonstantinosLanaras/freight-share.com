@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CityCombobox } from '@/components/CityCombobox';
 import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale, Clock } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +38,8 @@ export default function PostLoad() {
   const [loadingExisting, setLoadingExisting] = useState(isEditMode);
   const [pricingMode, setPricingMode] = useState<'fixed' | 'guided' | 'open'>('fixed');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pickupSameDay, setPickupSameDay] = useState(false);
+  const [deliverySameDay, setDeliverySameDay] = useState(false);
   const [spaceType, setSpaceType] = useState<SpaceType>('epe');
   const [spaceValue, setSpaceValue] = useState('');
   const [dimensions, setDimensions] = useState({ lengthCm: '', widthCm: '', heightCm: '' });
@@ -127,6 +130,12 @@ export default function PostLoad() {
         heightCm: data.height_cm ? String(data.height_cm) : '',
       });
       setWeightKg(data.weight_kg ? String(data.weight_kg) : '');
+      if (data.pickup_date_from && data.pickup_date_to && data.pickup_date_from === data.pickup_date_to) {
+        setPickupSameDay(true);
+      }
+      if (data.delivery_date_from && data.delivery_date_to && data.delivery_date_from === data.delivery_date_to) {
+        setDeliverySameDay(true);
+      }
       setLoadingExisting(false);
     })();
   }, [isEditMode, editId, user, navigate]);
@@ -175,6 +184,10 @@ export default function PostLoad() {
           widthCm: parseFloat(dimensions.widthCm) || 0,
         } : undefined
       );
+
+      // Ensure same-day selections store identical start/end dates
+      if (pickupSameDay) formData.pickupDateEnd = formData.pickupDateStart;
+      if (deliverySameDay) formData.deliveryDateEnd = formData.deliveryDateStart;
 
       const payload = {
         origin_city: formData.originCity,
@@ -353,18 +366,51 @@ export default function PostLoad() {
               {/* Pickup */}
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Pickup</p>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="pickupDateStart">Earliest date</Label>
-                    <Input id="pickupDateStart" type="date" className="mt-1" value={formData.pickupDateStart}
-                      onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value })} required disabled={isSubmitting} />
-                  </div>
-                  <div>
-                    <Label htmlFor="pickupDateEnd">Latest date</Label>
-                    <Input id="pickupDateEnd" type="date" className="mt-1" value={formData.pickupDateEnd}
-                      onChange={(e) => setFormData({ ...formData, pickupDateEnd: e.target.value })} required disabled={isSubmitting} />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="pickupSameDay"
+                    checked={pickupSameDay}
+                    onCheckedChange={(checked) => {
+                      setPickupSameDay(checked === true);
+                      if (checked && formData.pickupDateStart) {
+                        setFormData({ ...formData, pickupDateEnd: formData.pickupDateStart });
+                      }
+                    }}
+                    disabled={isSubmitting}
+                  />
+                  <label htmlFor="pickupSameDay" className="text-sm text-muted-foreground cursor-pointer select-none">
+                    Same day pickup (exact date)
+                  </label>
                 </div>
+                {pickupSameDay ? (
+                  <>
+                    <div>
+                      <Label htmlFor="pickupDateStart">Pickup date <span className="text-destructive">*</span></Label>
+                      <Input id="pickupDateStart" type="date" className="mt-1" value={formData.pickupDateStart}
+                        onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value, pickupDateEnd: e.target.value })}
+                        required disabled={isSubmitting} />
+                    </div>
+                    <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-800">
+                        This exact date is recorded on the shipment. Both parties are accountable to it. If scheduling changes, agree an alternative via private messages.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="pickupDateStart">Earliest date</Label>
+                      <Input id="pickupDateStart" type="date" className="mt-1" value={formData.pickupDateStart}
+                        onChange={(e) => setFormData({ ...formData, pickupDateStart: e.target.value })} required disabled={isSubmitting} />
+                    </div>
+                    <div>
+                      <Label htmlFor="pickupDateEnd">Latest date</Label>
+                      <Input id="pickupDateEnd" type="date" className="mt-1" value={formData.pickupDateEnd}
+                        onChange={(e) => setFormData({ ...formData, pickupDateEnd: e.target.value })} required disabled={isSubmitting} />
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Time flexibility</Label>
                   <Select value={formData.pickupFlexibility} onValueChange={(v) => setFormData({ ...formData, pickupFlexibility: v as any })} disabled={isSubmitting}>
@@ -374,7 +420,7 @@ export default function PostLoad() {
                     <SelectContent>
                       <SelectItem value="flexible">Flexible — any time of day</SelectItem>
                       <SelectItem value="window">Specific time window</SelectItem>
-                      <SelectItem value="exact">Exact time (to be agreed)</SelectItem>
+                      <SelectItem value="exact">Exact time</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -393,9 +439,19 @@ export default function PostLoad() {
                   </div>
                 )}
                 {formData.pickupFlexibility === 'exact' && (
-                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
-                    The exact pickup time will be agreed between shipper and carrier after the booking is confirmed.
-                  </p>
+                  <>
+                    <div>
+                      <Label htmlFor="pickupTimeFrom">Exact pickup time</Label>
+                      <Input id="pickupTimeFrom" type="time" className="mt-1 max-w-[160px]" value={formData.pickupTimeFrom}
+                        onChange={(e) => setFormData({ ...formData, pickupTimeFrom: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                    <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-800">
+                        This exact time is recorded on the shipment. Both parties are accountable to it. If scheduling changes, agree an alternative via private messages.
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -404,18 +460,51 @@ export default function PostLoad() {
               {/* Delivery */}
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Delivery</p>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="deliveryDateStart">Earliest date</Label>
-                    <Input id="deliveryDateStart" type="date" className="mt-1" value={formData.deliveryDateStart}
-                      onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value })} required disabled={isSubmitting} />
-                  </div>
-                  <div>
-                    <Label htmlFor="deliveryDateEnd">Latest date</Label>
-                    <Input id="deliveryDateEnd" type="date" className="mt-1" value={formData.deliveryDateEnd}
-                      onChange={(e) => setFormData({ ...formData, deliveryDateEnd: e.target.value })} required disabled={isSubmitting} />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="deliverySameDay"
+                    checked={deliverySameDay}
+                    onCheckedChange={(checked) => {
+                      setDeliverySameDay(checked === true);
+                      if (checked && formData.deliveryDateStart) {
+                        setFormData({ ...formData, deliveryDateEnd: formData.deliveryDateStart });
+                      }
+                    }}
+                    disabled={isSubmitting}
+                  />
+                  <label htmlFor="deliverySameDay" className="text-sm text-muted-foreground cursor-pointer select-none">
+                    Same day delivery (exact date)
+                  </label>
                 </div>
+                {deliverySameDay ? (
+                  <>
+                    <div>
+                      <Label htmlFor="deliveryDateStart">Delivery date <span className="text-destructive">*</span></Label>
+                      <Input id="deliveryDateStart" type="date" className="mt-1" value={formData.deliveryDateStart}
+                        onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value, deliveryDateEnd: e.target.value })}
+                        required disabled={isSubmitting} />
+                    </div>
+                    <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-800">
+                        This exact date is recorded on the shipment. Both parties are accountable to it. If scheduling changes, agree an alternative via private messages.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="deliveryDateStart">Earliest date</Label>
+                      <Input id="deliveryDateStart" type="date" className="mt-1" value={formData.deliveryDateStart}
+                        onChange={(e) => setFormData({ ...formData, deliveryDateStart: e.target.value })} required disabled={isSubmitting} />
+                    </div>
+                    <div>
+                      <Label htmlFor="deliveryDateEnd">Latest date</Label>
+                      <Input id="deliveryDateEnd" type="date" className="mt-1" value={formData.deliveryDateEnd}
+                        onChange={(e) => setFormData({ ...formData, deliveryDateEnd: e.target.value })} required disabled={isSubmitting} />
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Time flexibility</Label>
                   <Select value={formData.deliveryFlexibility} onValueChange={(v) => setFormData({ ...formData, deliveryFlexibility: v as any })} disabled={isSubmitting}>
@@ -425,7 +514,7 @@ export default function PostLoad() {
                     <SelectContent>
                       <SelectItem value="flexible">Flexible — any time of day</SelectItem>
                       <SelectItem value="window">Specific time window</SelectItem>
-                      <SelectItem value="exact">Exact time (to be agreed)</SelectItem>
+                      <SelectItem value="exact">Exact time</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -444,9 +533,19 @@ export default function PostLoad() {
                   </div>
                 )}
                 {formData.deliveryFlexibility === 'exact' && (
-                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
-                    The exact delivery time will be agreed between shipper and carrier after the booking is confirmed.
-                  </p>
+                  <>
+                    <div>
+                      <Label htmlFor="deliveryTimeFrom">Exact delivery time</Label>
+                      <Input id="deliveryTimeFrom" type="time" className="mt-1 max-w-[160px]" value={formData.deliveryTimeFrom}
+                        onChange={(e) => setFormData({ ...formData, deliveryTimeFrom: e.target.value })} disabled={isSubmitting} />
+                    </div>
+                    <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-800">
+                        This exact time is recorded on the shipment. Both parties are accountable to it. If scheduling changes, agree an alternative via private messages.
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
             </CardContent>
