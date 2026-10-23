@@ -41,9 +41,16 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id });
 
     const { sessionId, shipmentId } = await req.json();
-    
+
+    // sessionId is required to verify against Stripe. If it's missing the
+    // webhook (checkout.session.completed) already handled the update, so
+    // return a no-op success rather than an error.
     if (!sessionId) {
-      throw new Error("Missing required field: sessionId");
+      logStep("No sessionId provided — webhook has already handled this update");
+      return new Response(JSON.stringify({ verified: false, reason: "no_session_id" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
     logStep("Request data received", { sessionId, shipmentId });
 

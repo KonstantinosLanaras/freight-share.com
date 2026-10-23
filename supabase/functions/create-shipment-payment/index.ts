@@ -122,7 +122,11 @@ serve(async (req) => {
         shipper_id: user.id,
         carrier_id: carrierId || '',
       },
-      success_url: `${req.headers.get("origin")}/shipment/${shipmentId}?payment=success`,
+      // {CHECKOUT_SESSION_ID} is a Stripe template variable -- it is
+      // replaced with the real session ID in the redirect URL, allowing
+      // verify-shipment-payment to retrieve and confirm the session on
+      // the client side as a backup to the webhook.
+      success_url: `${req.headers.get("origin")}/shipment/${shipmentId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/shipment/${shipmentId}?payment=cancelled`,
     });
 

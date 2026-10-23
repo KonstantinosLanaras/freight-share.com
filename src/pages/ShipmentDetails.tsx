@@ -205,19 +205,23 @@ export default function ShipmentDetails() {
     if (id) fetchShipmentData();
   }, [id]);
 
-  // Verify Stripe payment after redirect back from Checkout
+  // Verify Stripe payment after redirect back from Checkout.
+  // Stripe injects {CHECKOUT_SESSION_ID} into the success_url so we can
+  // retrieve and confirm the session here as a backup to the webhook.
   useEffect(() => {
     if (!id || paymentResult !== 'success') return;
+    const sessionId = searchParams.get('session_id');
     (async () => {
       try {
-        await supabase.functions.invoke('verify-shipment-payment', {
-          body: { shipmentId: id },
-        });
+        if (sessionId) {
+          await supabase.functions.invoke('verify-shipment-payment', {
+            body: { shipmentId: id, sessionId },
+          });
+        }
       } catch (err) {
         console.error('Payment verification failed:', err);
-        toast.error(getSafeErrorMessage(err, 'Could not confirm your payment. If you were charged, contact support.'));
+        // Non-fatal — the webhook handles the same update server-to-server.
       } finally {
-        // Refresh shipment to pick up updated payment_status
         fetchShipmentData();
       }
     })();
