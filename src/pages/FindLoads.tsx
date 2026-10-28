@@ -92,6 +92,7 @@ export default function FindLoads() {
   const [sortBy, setSortBy] = useState<string>('newest');
   const [carrierRoute, setCarrierRoute] = useState<CarrierRoute | null>(null);
   const [showCompatibleOnly, setShowCompatibleOnly] = useState(false);
+  const [myOfferLoadIds, setMyOfferLoadIds] = useState<Set<string>>(new Set());
   const { user } = useAuth();
 
 
@@ -140,6 +141,14 @@ export default function FindLoads() {
 
       if (error) throw error;
       setLoads(data || []);
+
+      if (user) {
+        const { data: myOffers } = await supabase
+          .from('offers')
+          .select('load_id')
+          .eq('carrier_id', user.id);
+        setMyOfferLoadIds(new Set((myOffers || []).map((o: any) => o.load_id)));
+      }
     } catch (error) {
       console.error('Error fetching loads:', error);
       toast.error('Failed to load — please try refreshing');
@@ -225,10 +234,12 @@ export default function FindLoads() {
     // badge (see getLoadProximity below) but must never hide a load here --
     // this is the exhaustive "browse everything, then filter" page. Route-
     // proximity suggestions belong only in the CarrierDashboard widget.
+    // Hide expired loads unless the carrier has already interacted with them
+    if (isLoadExpired(load.pickup_date_to) && !myOfferLoadIds.has(load.id)) return false;
+
     return matchesOrigin && matchesDestination && matchesCargo && matchesArriveBy;
   }).sort((a, b) => {
-    // Passed loads sink to the bottom regardless of sort order, rather
-    // than being hidden.
+    // Interacted-but-expired loads sink to the bottom
     const aExpired = isLoadExpired(a.pickup_date_to);
     const bExpired = isLoadExpired(b.pickup_date_to);
     if (aExpired !== bExpired) return aExpired ? 1 : -1;

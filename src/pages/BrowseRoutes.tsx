@@ -88,11 +88,12 @@ export default function BrowseRoutes() {
   });
   const [searchOriginCity, setSearchOriginCity] = useState<CityOption | null>(null);
   const [searchDestinationCity, setSearchDestinationCity] = useState<CityOption | null>(null);
+  const [myRequestRouteIds, setMyRequestRouteIds] = useState<Set<string>>(new Set());
   const { user } = useAuth();
 
   useEffect(() => {
     fetchRoutes();
-  }, []);
+  }, [user]);
 
   const fetchRoutes = async () => {
     try {
@@ -123,6 +124,14 @@ export default function BrowseRoutes() {
       }));
 
       setRoutes(routesWithCarriers as Route[]);
+
+      if (user) {
+        const { data: myRequests } = await supabase
+          .from('route_requests')
+          .select('route_id')
+          .eq('shipper_id', user.id);
+        setMyRequestRouteIds(new Set((myRequests || []).map((r: any) => r.route_id)));
+      }
     } catch (error) {
       console.error('Error fetching routes:', error);
       toast.error('Failed to load — please try refreshing');
@@ -172,9 +181,12 @@ export default function BrowseRoutes() {
       const { destTier } = getRouteProximity(route);
       if (!destTier) return false;
     }
+    // Hide expired routes unless the shipper has already interacted with them
+    if (isRouteExpired(route) && !myRequestRouteIds.has(route.id)) return false;
+
     return true;
   }).sort((a, b) => {
-    // Passed routes sink to the bottom rather than being hidden.
+    // Interacted-but-expired routes sink to the bottom
     const aExpired = isRouteExpired(a);
     const bExpired = isRouteExpired(b);
     if (aExpired !== bExpired) return aExpired ? 1 : -1;

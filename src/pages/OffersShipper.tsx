@@ -24,13 +24,14 @@ import { isProfileVerified } from '@/lib/verificationUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
 import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 
-type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined';
+type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined' | 'expired';
 
 const statusPill: Record<StatusKey, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300',
   accepted: 'bg-success/15 text-success',
   countered: 'bg-primary/15 text-primary',
   declined: 'bg-muted text-muted-foreground',
+  expired: 'bg-muted text-muted-foreground',
 };
 
 const statusLabel: Record<StatusKey, string> = {
@@ -38,19 +39,23 @@ const statusLabel: Record<StatusKey, string> = {
   accepted: 'Accepted',
   countered: 'Countered',
   declined: 'Declined',
+  expired: 'Expired',
 };
 
+const todayIso = () => new Date().toISOString().split('T')[0];
+
 // Map route_request status -> normalized status
-function mapRequestStatus(s: string): StatusKey {
+function mapRequestStatus(s: string, shipmentDate?: string): StatusKey {
   if (s === 'accepted') return 'accepted';
   if (s === 'in_discussion') return 'countered';
   if (s === 'rejected' || s === 'expired' || s === 'cancelled') return 'declined';
+  if (shipmentDate && shipmentDate < todayIso()) return 'expired';
   return 'pending';
 }
 
-function mapOfferStatus(is_accepted: boolean, declined?: boolean): StatusKey {
+function mapOfferStatus(is_accepted: boolean, loadPickupDateTo?: string): StatusKey {
   if (is_accepted) return 'accepted';
-  if (declined) return 'declined';
+  if (loadPickupDateTo && loadPickupDateTo < todayIso()) return 'expired';
   return 'pending';
 }
 
@@ -318,7 +323,7 @@ export default function OffersShipper() {
               ) : (
                 <div className="space-y-3">
                   {made.map((r) => {
-                    const s = mapRequestStatus(r.status);
+                    const s = mapRequestStatus(r.status, r.shipment_date);
                     return (
                       <Card
                         key={r.id}
@@ -386,7 +391,7 @@ export default function OffersShipper() {
               ) : (
                 <div className="space-y-3">
                   {received.map((o) => {
-                    const s = mapOfferStatus(o.is_accepted);
+                    const s = mapOfferStatus(o.is_accepted, o.load?.pickup_date_to);
                     return (
                       <Card
                         key={o.id}
@@ -481,7 +486,7 @@ function EmptyState({ icon, title, description, cta }: any) {
 }
 
 function MadeDetail({ req, onAcceptCounter, onDecline, onProceed }: any) {
-  const s = mapRequestStatus(req.status);
+  const s = mapRequestStatus(req.status, req.shipment_date);
   return (
     <>
       <SheetHeader>
@@ -534,13 +539,16 @@ function MadeDetail({ req, onAcceptCounter, onDecline, onProceed }: any) {
         {s === 'pending' && (
           <Button variant="outline" onClick={() => onDecline(req.id)}>Cancel Offer</Button>
         )}
+        {s === 'expired' && (
+          <p className="text-sm text-muted-foreground">The requested shipment date has passed. No action required.</p>
+        )}
       </div>
     </>
   );
 }
 
 function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
-  const s = mapOfferStatus(offer.is_accepted);
+  const s = mapOfferStatus(offer.is_accepted, offer.load?.pickup_date_to);
   return (
     <>
       <SheetHeader>
@@ -584,6 +592,9 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
           <Button asChild>
             <Link to={`/load/${offer.load_id}`}>Open Load</Link>
           </Button>
+        )}
+        {s === 'expired' && (
+          <p className="text-sm text-muted-foreground">The pickup date for this load has passed. No action required.</p>
         )}
       </div>
     </>
