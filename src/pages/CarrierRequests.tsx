@@ -25,11 +25,18 @@ const requestStatusConfig: Record<string, { label: string; color: string }> = {
 const todayIso = () => new Date().toISOString().split('T')[0];
 
 const offerStatusLabel = (isAccepted: boolean, pickupDateTo?: string) => {
-  if (isAccepted) return { label: 'Accepted', color: 'bg-success/10 text-success' };
   if (pickupDateTo && pickupDateTo < todayIso()) {
     return { label: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' };
   }
+  if (isAccepted) return { label: 'Accepted', color: 'bg-success/10 text-success' };
   return { label: 'Pending', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' };
+};
+
+const requestStatusLabel = (req: any) => {
+  if (req.shipment_date && req.shipment_date < todayIso()) {
+    return { label: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' };
+  }
+  return requestStatusConfig[req.status] || requestStatusConfig.sent;
 };
 
 export default function CarrierRequests() {
@@ -209,11 +216,12 @@ export default function CarrierRequests() {
               ) : (
                 <div className="space-y-4">
                   {requests.map((req) => {
-                    const st = requestStatusConfig[req.status] || requestStatusConfig.sent;
+                    const st = requestStatusLabel(req);
+                    const isExpired = st.label === 'Expired';
                     return (
                       <Card
                         key={req.id}
-                        className={`hover:shadow-md transition-shadow cursor-pointer ${req.status === 'sent' ? 'border-l-4 border-l-amber-400' : ''}${['expired', 'cancelled', 'rejected'].includes(req.status) ? ' opacity-60' : ''}`}
+                        className={`hover:shadow-md transition-shadow cursor-pointer ${req.status === 'sent' && !isExpired ? 'border-l-4 border-l-amber-400' : ''}${isExpired || ['cancelled', 'rejected'].includes(req.status) ? ' opacity-60' : ''}`}
                         onClick={() => navigate(`/dashboard/carrier/requests/${req.id}`)}
                       >
                         <CardContent className="p-5">

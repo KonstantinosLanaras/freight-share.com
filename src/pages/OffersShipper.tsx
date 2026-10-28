@@ -44,16 +44,16 @@ const todayIso = () => new Date().toISOString().split('T')[0];
 
 // Map route_request status -> normalized status
 function mapRequestStatus(s: string, shipmentDate?: string): StatusKey {
+  if (shipmentDate && shipmentDate < todayIso()) return 'expired';
   if (s === 'accepted') return 'accepted';
   if (s === 'in_discussion') return 'countered';
   if (s === 'rejected' || s === 'expired' || s === 'cancelled') return 'declined';
-  if (shipmentDate && shipmentDate < todayIso()) return 'expired';
   return 'pending';
 }
 
 function mapOfferStatus(is_accepted: boolean, loadPickupDateTo?: string): StatusKey {
-  if (is_accepted) return 'accepted';
   if (loadPickupDateTo && loadPickupDateTo < todayIso()) return 'expired';
+  if (is_accepted) return 'accepted';
   return 'pending';
 }
 
