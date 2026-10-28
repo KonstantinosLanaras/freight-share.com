@@ -81,6 +81,10 @@ export default function CarrierInsuranceSetup() {
       toast.error('Please fill in all required fields');
       return;
     }
+    if (!file && !existingInsurance?.document_url) {
+      toast.error('Please upload your policy document');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -165,8 +169,8 @@ export default function CarrierInsuranceSetup() {
         <div className="bg-muted/50 rounded-lg p-4 mb-6 flex gap-3">
           <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Liability vs. cargo insurance</p>
-            <p>This is your <strong>transport liability policy</strong> — it covers your legal responsibility as a carrier under CMR. Cargo protection for individual shipments is offered separately to shippers during checkout.</p>
+            <p className="font-medium text-foreground mb-1">Why we require this</p>
+            <p>This is your <strong>transport liability policy</strong> — it covers your legal responsibility as a carrier under CMR (up to ~€10/kg). Shippers need confidence you can settle a claim. Your policy document is verified before you can accept paid shipments.</p>
           </div>
         </div>
 
@@ -255,7 +259,7 @@ export default function CarrierInsuranceSetup() {
               </div>
 
               <div>
-                <Label>Upload Policy Document (optional)</Label>
+                <Label>Upload Policy Document <span className="text-destructive">*</span></Label>
                 <div className="mt-1">
                   <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="flex flex-col items-center justify-center py-4">
@@ -299,7 +303,7 @@ export default function CarrierInsuranceSetup() {
 
         {/* Legal disclaimer */}
         <p className="text-xs text-muted-foreground text-center mt-6 italic">
-          This is your carrier liability policy. Per-shipment cargo protection is handled separately and offered to shippers during the transaction flow.
+          FreightShare does not broker insurance. This declaration is for verification purposes only — shippers are advised to arrange their own cargo insurance for value above the CMR liability cap.
         </p>
       </main>
     </div>
