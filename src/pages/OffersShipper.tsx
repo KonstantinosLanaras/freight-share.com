@@ -74,7 +74,10 @@ export default function OffersShipper() {
 
   useEffect(() => {
     if (!user) return;
+    const now = Date.now();
     setLastViewed(Number(localStorage.getItem(lastViewedKey) || 0));
+    // Mark as viewed immediately so the badge clears when you open the page
+    localStorage.setItem(lastViewedKey, String(now));
     fetchData();
   }, [user]);
 

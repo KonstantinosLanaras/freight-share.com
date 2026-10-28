@@ -3,8 +3,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Counts shipper offers (route_requests updated by the carrier, and offers received on my loads)
- * that arrived after the user last opened the /offers/shipper page.
+ * Counts route_request updates where the carrier responded (counter, accept, reject)
+ * since the shipper last opened the /offers/shipper page.
+ * Load-offer notifications live separately in useShipperLoadsUnread.
  */
 export function useShipperOffersUnread() {
   const { user } = useAuth();
@@ -18,36 +19,19 @@ export function useShipperOffersUnread() {
       const lastViewed = Number(localStorage.getItem(`offers-shipper-last-viewed-${user.id}`) || 0);
       const sinceIso = new Date(lastViewed).toISOString();
 
-      // 1) Updates to my route_requests where carrier acted (status != 'sent')
-      const { data: reqs } = await supabase
+      // Route requests I made where the carrier has since responded
+      const { count: n } = await supabase
         .from('route_requests')
-        .select('id, status, updated_at')
+        .select('id', { count: 'exact', head: true })
         .eq('shipper_id', user.id)
         .neq('status', 'sent')
         .gt('updated_at', sinceIso);
 
-      // 2) New offers on my loads
-      const { data: myLoads } = await supabase
-        .from('loads')
-        .select('id')
-        .eq('shipper_id', user.id);
-      const loadIds = (myLoads || []).map((l: any) => l.id);
-
-      let offerCount = 0;
-      if (loadIds.length) {
-        const { data: offs } = await supabase
-          .from('offers')
-          .select('id, created_at')
-          .in('load_id', loadIds)
-          .gt('created_at', sinceIso);
-        offerCount = offs?.length || 0;
-      }
-
-      if (!cancelled) setCount((reqs?.length || 0) + offerCount);
+      if (!cancelled) setCount(n || 0);
     };
 
     compute();
-    const t = setInterval(compute, 30000);
+    const t = setInterval(compute, 30_000);
     return () => { cancelled = true; clearInterval(t); };
   }, [user]);
 

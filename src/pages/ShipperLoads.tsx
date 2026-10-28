@@ -33,6 +33,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { exportLoadsToCSV, printLoads } from '@/lib/exportUtils';
+import { loadsLastViewedKey } from '@/hooks/useShipperLoadsUnread';
 
 interface Load {
   id: string;
@@ -73,6 +74,8 @@ export default function ShipperLoads() {
   useEffect(() => {
     if (user) {
       fetchLoads();
+      // Clear the "My Loads" unread badge
+      localStorage.setItem(loadsLastViewedKey(user.id), String(Date.now()));
     }
   }, [user]);
 

@@ -43,6 +43,7 @@ import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { isLoadExpired, isRouteExpired } from '@/lib/expiryUtils';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useCarrierRequestsUnread } from '@/hooks/useCarrierRequestsUnread';
 import { PassedBadge } from '@/components/PassedBadge';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
@@ -144,6 +145,7 @@ export default function CarrierDashboard() {
   const [connectingPayouts, setConnectingPayouts] = useState(false);
   const { user, signOut } = useAuth();
   const unreadMessages = useUnreadMessages();
+  const requestsUnread = useCarrierRequestsUnread();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -483,9 +485,9 @@ export default function CarrierDashboard() {
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <Send className="h-5 w-5" />
-                Offers & Requests
-                {stats.pendingRequests > 0 && (
-                  <Badge className="ml-auto bg-primary text-primary-foreground text-xs h-5 w-5 p-0 justify-center">{stats.pendingRequests}</Badge>
+                <span className="flex-1">Offers &amp; Requests</span>
+                {requestsUnread > 0 && (
+                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{requestsUnread}</Badge>
                 )}
               </Link>
             </div>

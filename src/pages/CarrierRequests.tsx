@@ -10,6 +10,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { carrierRequestsLastViewedKey } from '@/hooks/useCarrierRequestsUnread';
 
 const requestStatusConfig: Record<string, { label: string; color: string }> = {
   sent: { label: 'New', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
@@ -39,7 +40,11 @@ export default function CarrierRequests() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) fetchAll();
+    if (user) {
+      fetchAll();
+      // Clear the "Offers & Requests" unread badge
+      localStorage.setItem(carrierRequestsLastViewedKey(user.id), String(Date.now()));
+    }
   }, [user]);
 
   const fetchAll = async () => {
