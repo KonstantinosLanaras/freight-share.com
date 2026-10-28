@@ -96,7 +96,7 @@ export default function CarrierRequests() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">My Offers & Requests</h1>
+              <h1 className="text-xl font-heading font-bold text-foreground">My Offers</h1>
               <p className="text-sm text-muted-foreground">Offers you've made on loads and incoming route requests</p>
             </div>
           </div>

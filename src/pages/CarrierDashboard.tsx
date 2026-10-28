@@ -25,7 +25,6 @@ import {
   Clock,
   XCircle,
   Inbox,
-  Bookmark,
   Home,
   Wallet,
   AlertTriangle,
@@ -440,7 +439,7 @@ export default function CarrierDashboard() {
               Share Route
             </Link>
 
-            {/* Group 2: My Shipments, My Routes, Saved Loads */}
+            {/* Group 2: My Shipments, My Routes, My Offers */}
             <div className="pt-3 mt-3 border-t border-sidebar-border">
               <Link
                 to="/dashboard/carrier/shipments"
@@ -457,11 +456,14 @@ export default function CarrierDashboard() {
                 My Routes
               </Link>
               <Link
-                to="/saved-loads"
+                to="/dashboard/carrier/requests"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
-                <Bookmark className="h-5 w-5" />
-                Saved Loads
+                <Send className="h-5 w-5" />
+                <span className="flex-1">My Offers</span>
+                {requestsUnread > 0 && (
+                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{requestsUnread}</Badge>
+                )}
               </Link>
             </div>
 
@@ -478,16 +480,6 @@ export default function CarrierDashboard() {
                 <span className="flex-1">Messages</span>
                 {unreadMessages > 0 && (
                   <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{unreadMessages}</Badge>
-                )}
-              </Link>
-              <Link
-                to="/dashboard/carrier/requests"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              >
-                <Send className="h-5 w-5" />
-                <span className="flex-1">Offers &amp; Requests</span>
-                {requestsUnread > 0 && (
-                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{requestsUnread}</Badge>
                 )}
               </Link>
             </div>
