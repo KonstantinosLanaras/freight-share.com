@@ -24,12 +24,15 @@ const requestStatusConfig: Record<string, { label: string; color: string }> = {
 
 const todayIso = () => new Date().toISOString().split('T')[0];
 
-const offerStatusLabel = (isAccepted: boolean, pickupDateTo?: string) => {
+const amber = 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300';
+
+const offerStatusLabel = (isAccepted: boolean, pickupDateTo?: string, isPaid?: boolean, isCompleted?: boolean) => {
+  if (isCompleted) return { label: 'Completed', color: 'bg-success/10 text-success' };
   if (pickupDateTo && pickupDateTo < todayIso()) {
     return { label: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' };
   }
-  if (isAccepted) return { label: 'Accepted', color: 'bg-success/10 text-success' };
-  return { label: 'Pending', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' };
+  if (isAccepted && isPaid) return { label: 'Accepted / In Transit', color: amber };
+  return { label: 'Pending', color: amber };
 };
 
 const requestStatusLabel = (req: any) => {
@@ -86,7 +89,17 @@ export default function CarrierRequests() {
         shipper: profileMap.get(r.shipper_id),
       })));
 
-      setOffers(offersRes.data || []);
+      const offersData = offersRes.data || [];
+      const offerIds = offersData.map((o: any) => o.id);
+      const { data: shipmentsData } = offerIds.length
+        ? await supabase.from('shipments').select('offer_id, payment_status, status').in('offer_id', offerIds)
+        : { data: [] as any[] };
+      const shipmentMap = new Map((shipmentsData || []).map((s: any) => [s.offer_id, s]));
+
+      setOffers(offersData.map((o: any) => ({
+        ...o,
+        shipment: shipmentMap.get(o.id) || null,
+      })));
     } catch {
       // errors handled by empty state
     } finally {
@@ -154,11 +167,13 @@ export default function CarrierRequests() {
               ) : (
                 <div className="space-y-3">
                   {offers.map((offer) => {
-                    const s = offerStatusLabel(offer.is_accepted, offer.loads?.pickup_date_to);
+                    const isPaid = offer.shipment?.payment_status === 'paid' || offer.shipment?.payment_status === 'completed';
+                    const isCompleted = offer.shipment?.status === 'completed' || offer.shipment?.status === 'delivered';
+                    const s = offerStatusLabel(offer.is_accepted, offer.loads?.pickup_date_to, isPaid, isCompleted);
                     return (
                       <Card
                         key={offer.id}
-                        className={`hover:shadow-md transition-shadow cursor-pointer${offerStatusLabel(offer.is_accepted, offer.loads?.pickup_date_to).label === 'Expired' ? ' opacity-60' : ''}`}
+                        className={`hover:shadow-md transition-shadow cursor-pointer${s.label === 'Expired' ? ' opacity-60' : ''}`}
                         onClick={() => navigate(`/load/${offer.load_id}`)}
                       >
                         <CardContent className="p-5">

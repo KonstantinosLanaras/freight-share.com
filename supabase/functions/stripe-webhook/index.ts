@@ -81,6 +81,57 @@ serve(async (req) => {
           if (paymentIntentId) update.payment_reference = paymentIntentId;
           await supabase.from("shipments").update(update).eq("id", shipmentId);
           log("Shipment marked paid", { shipmentId, paymentIntentId });
+
+          // Send payment-confirmed email to shipper
+          try {
+            const { data: shipment } = await supabase
+              .from("shipments")
+              .select("shipper_id, carrier_id, final_price, load_id")
+              .eq("id", shipmentId)
+              .maybeSingle();
+            if (shipment?.shipper_id && shipment?.load_id) {
+              const { data: load } = await supabase
+                .from("loads")
+                .select("origin_city, destination_city, pickup_date_from, pallets, cargo_type")
+                .eq("id", shipment.load_id)
+                .maybeSingle();
+              const { data: carrierProf } = await supabase
+                .from("public_profiles")
+                .select("full_name, company_name")
+                .eq("id", shipment.carrier_id)
+                .maybeSingle();
+              const { data: shipperAuth } = await supabase.auth.admin.getUserById(shipment.shipper_id);
+              const { data: shipperProf } = await supabase
+                .from("public_profiles")
+                .select("full_name, company_name")
+                .eq("id", shipment.shipper_id)
+                .maybeSingle();
+              if (shipperAuth?.user?.email) {
+                const { sendAndLog } = await import("../_shared/email-log.ts");
+                await sendAndLog("payment-confirmed", shipperAuth.user.email, {
+                  idempotencyKey: `payment-confirmed-${shipmentId}`,
+                  templateData: {
+                    recipientName: (shipperProf as any)?.company_name || (shipperProf as any)?.full_name,
+                    carrierName: (carrierProf as any)?.company_name || (carrierProf as any)?.full_name || "Your carrier",
+                    route: load ? `${load.origin_city} → ${load.destination_city}` : undefined,
+                    price: shipment.final_price,
+                    pallets: load?.pallets,
+                    cargoType: load?.cargo_type,
+                    pickupDate: load?.pickup_date_from
+                      ? new Date(load.pickup_date_from + "T00:00:00Z").toLocaleDateString("en-GB", {
+                          day: "numeric", month: "short", year: "numeric",
+                        })
+                      : undefined,
+                    actionUrl: "https://freight-share.com/dashboard/shipper/shipments",
+                  },
+                });
+                log("Payment-confirmed email sent", { shipmentId, to: shipperAuth.user.email });
+              }
+            }
+          } catch (emailErr) {
+            // Non-fatal — payment is already recorded, email failure must not roll back
+            log("Payment-confirmed email failed (non-fatal)", { shipmentId, error: String(emailErr) });
+          }
         }
         break;
       }

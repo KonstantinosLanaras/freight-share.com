@@ -22,22 +22,28 @@ import { isProfileVerified } from '@/lib/verificationUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
 import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 
-type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined' | 'expired';
+type StatusKey = 'pending' | 'accepted' | 'in_transit' | 'completed' | 'countered' | 'declined' | 'expired';
+
+const amber = 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300';
 
 const statusPill: Record<StatusKey, string> = {
-  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
-  accepted: 'bg-success/15 text-success',
-  countered: 'bg-primary/15 text-primary',
-  declined: 'bg-muted text-muted-foreground',
-  expired: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
+  pending:    amber,
+  accepted:   amber,                                    // carrier accepted bid, not yet paid
+  in_transit: amber,                                    // paid, awaiting delivery confirmation
+  completed:  'bg-success/15 text-success',             // delivery confirmed — the only green state
+  countered:  'bg-primary/15 text-primary',
+  declined:   'bg-muted text-muted-foreground',
+  expired:    'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
 };
 
 const statusLabel: Record<StatusKey, string> = {
-  pending: 'Pending',
-  accepted: 'Accepted',
-  countered: 'Countered',
-  declined: 'Declined',
-  expired: 'Expired',
+  pending:    'Pending',
+  accepted:   'Accepted',
+  in_transit: 'Accepted / In Transit',
+  completed:  'Completed',
+  countered:  'Countered',
+  declined:   'Declined',
+  expired:    'Expired',
 };
 
 const todayIso = () => new Date().toISOString().split('T')[0];
@@ -51,9 +57,16 @@ function mapRequestStatus(s: string, shipmentDate?: string): StatusKey {
   return 'pending';
 }
 
-function mapOfferStatus(is_accepted: boolean, loadPickupDateTo?: string): StatusKey {
+function mapOfferStatus(
+  is_accepted: boolean,
+  loadPickupDateTo?: string,
+  isPaid?: boolean,
+  isCompleted?: boolean,
+): StatusKey {
+  // Completed delivery always wins — even if the date has passed
+  if (isCompleted) return 'completed';
   if (loadPickupDateTo && loadPickupDateTo < todayIso()) return 'expired';
-  if (is_accepted) return 'accepted';
+  if (is_accepted && isPaid) return 'in_transit';
   return 'pending';
 }
 
@@ -143,11 +156,18 @@ export default function OffersShipper() {
         : { data: [] as any[] };
       const recCarrierMap = new Map((recCarriers || []).map((p: any) => [p.id, p]));
 
+      const offerIds = (rec || []).map((o: any) => o.id);
+      const { data: shipments } = offerIds.length
+        ? await supabase.from('shipments').select('offer_id, payment_status, status').in('offer_id', offerIds)
+        : { data: [] as any[] };
+      const shipmentMap = new Map((shipments || []).map((s: any) => [s.offer_id, s]));
+
       setReceived(
         (rec || []).map((o: any) => ({
           ...o,
           load: loadMap.get(o.load_id),
           carrier: recCarrierMap.get(o.carrier_id),
+          shipment: shipmentMap.get(o.id) || null,
         }))
       );
     } catch (e) {
@@ -366,7 +386,9 @@ export default function OffersShipper() {
               ) : (
                 <div className="space-y-3">
                   {received.map((o) => {
-                    const s = mapOfferStatus(o.is_accepted, o.load?.pickup_date_to);
+                    const isPaid = o.shipment?.payment_status === 'paid' || o.shipment?.payment_status === 'completed';
+                    const isCompleted = o.shipment?.status === 'completed' || o.shipment?.status === 'delivered';
+                    const s = mapOfferStatus(o.is_accepted, o.load?.pickup_date_to, isPaid, isCompleted);
                     return (
                       <Card
                         key={o.id}
@@ -523,7 +545,9 @@ function MadeDetail({ req, onAcceptCounter, onDecline, onProceed }: any) {
 }
 
 function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
-  const s = mapOfferStatus(offer.is_accepted, offer.load?.pickup_date_to);
+  const isPaid = offer.shipment?.payment_status === 'paid' || offer.shipment?.payment_status === 'completed';
+  const isCompleted = offer.shipment?.status === 'completed' || offer.shipment?.status === 'delivered';
+  const s = mapOfferStatus(offer.is_accepted, offer.load?.pickup_date_to, isPaid, isCompleted);
   return (
     <>
       <SheetHeader>
@@ -563,9 +587,9 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
             </Button>
           </>
         )}
-        {s === 'accepted' && (
+        {(s === 'in_transit' || s === 'completed') && (
           <Button asChild>
-            <Link to={`/load/${offer.load_id}`}>Open Load</Link>
+            <Link to={`/load/${offer.load_id}`}>Open Shipment</Link>
           </Button>
         )}
         {s === 'expired' && (

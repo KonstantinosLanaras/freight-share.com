@@ -53,16 +53,23 @@ interface Load {
   offer_count?: number;
 }
 
+const amber = 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300';
+
 const statusConfig: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: 'bg-muted text-muted-foreground' },
-  posted: { label: 'Posted', color: 'bg-blue-100 text-blue-800' },
-  accepted: { label: 'Accepted', color: 'bg-green-100 text-green-800' },
-  paid: { label: 'Paid', color: 'bg-emerald-100 text-emerald-800' },
-  picked_up: { label: 'Picked Up', color: 'bg-purple-100 text-purple-800' },
-  delivered: { label: 'Delivered', color: 'bg-success text-success-foreground' },
-  completed: { label: 'Completed', color: 'bg-success text-success-foreground' },
-  cancelled: { label: 'Cancelled', color: 'bg-destructive/10 text-destructive' },
+  draft:      { label: 'Draft',                  color: 'bg-muted text-muted-foreground' },
+  posted:     { label: 'Posted',                  color: 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300' },
+  accepted:   { label: 'Accepted',                color: amber },
+  paid:       { label: 'Accepted / In Transit',   color: amber },
+  picked_up:  { label: 'Accepted / In Transit',   color: amber },
+  delivered:  { label: 'Completed',               color: 'bg-success/15 text-success' },
+  completed:  { label: 'Completed',               color: 'bg-success/15 text-success' },
+  cancelled:  { label: 'Cancelled',               color: 'bg-muted text-muted-foreground' },
+  expired:    { label: 'Expired',                 color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' },
 };
+
+const todayIso = () => new Date().toISOString().split('T')[0];
+const isExpiredLoad = (l: Load) =>
+  ['posted', 'accepted'].includes(l.status) && l.pickup_date_to < todayIso();
 
 export default function ShipperLoads() {
   const [loads, setLoads] = useState<Load[]>([]);
@@ -130,8 +137,10 @@ export default function ShipperLoads() {
   };
 
   const draftLoads = loads.filter(l => l.status === 'draft');
-  const activeLoads = loads.filter(l => ['posted', 'accepted'].includes(l.status));
-  const pastLoads = loads.filter(l => ['paid', 'picked_up', 'delivered', 'completed', 'cancelled'].includes(l.status));
+  const activeLoads = loads.filter(l => ['posted', 'accepted'].includes(l.status) && !isExpiredLoad(l));
+  const pastLoads = loads.filter(l =>
+    ['paid', 'picked_up', 'delivered', 'completed', 'cancelled'].includes(l.status) || isExpiredLoad(l)
+  );
 
   const handleExportCSV = () => {
     const exportData = pastLoads.map(load => ({
@@ -162,11 +171,12 @@ export default function ShipperLoads() {
   };
 
   const renderLoadCard = (load: Load, showActions = true) => {
-    const status = statusConfig[load.status] || statusConfig.posted;
+    const effectiveStatus = isExpiredLoad(load) ? 'expired' : load.status;
+    const status = statusConfig[effectiveStatus] || statusConfig.posted;
 
     return (
       <Link key={load.id} to={`/load/${load.id}`} className="block">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className={`hover:shadow-md transition-shadow cursor-pointer${effectiveStatus === 'expired' ? ' opacity-60' : ''}`}>
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
               <div className="flex-1">
