@@ -16,9 +16,7 @@ import { useDemoMode } from '@/hooks/useDemoMode';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { notifyOfferAccepted } from '@/lib/notify';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
-import { deductRoutePallets } from '@/lib/routeCapacity';
 import { checkCarrierInsurance, insuranceCheckMessage, CMR_LIABILITY_EUR_PER_KG } from '@/lib/insuranceUtils';
 import { isProfileVerified } from '@/lib/verificationUtils';
 import { complianceGatesEnforced } from '@/lib/complianceGating';
@@ -27,11 +25,11 @@ import { useBetaBypassConfirm } from '@/hooks/useBetaBypassConfirm';
 type StatusKey = 'pending' | 'accepted' | 'countered' | 'declined' | 'expired';
 
 const statusPill: Record<StatusKey, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300',
+  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
   accepted: 'bg-success/15 text-success',
   countered: 'bg-primary/15 text-primary',
   declined: 'bg-muted text-muted-foreground',
-  expired: 'bg-muted text-muted-foreground',
+  expired: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
 };
 
 const statusLabel: Record<StatusKey, string> = {
@@ -168,48 +166,22 @@ export default function OffersShipper() {
 
   const acceptOfferReceived = async (offerId: string) => {
     const offer = received.find((o) => o.id === offerId);
+    if (!offer) return;
+
     const enforced = complianceGatesEnforced(isDemoMode);
-    const bypassReasons: string[] = [];
 
     if (!(await isProfileVerified(user?.id))) {
       if (enforced) return toast.error('Complete your business verification before accepting offers.');
-      bypassReasons.push('Your business verification would normally be required before accepting offers.');
     }
-    const requiredCoverage = offer?.load?.weight_kg ? offer.load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
-    const insuranceCheck = await checkCarrierInsurance(offer?.carrier_id, requiredCoverage);
-    if (!insuranceCheck.ok) {
-      if (enforced) return toast.error(insuranceCheckMessage(insuranceCheck));
-      bypassReasons.push(insuranceCheckMessage(insuranceCheck));
+    const requiredCoverage = offer.load?.weight_kg ? offer.load.weight_kg * CMR_LIABILITY_EUR_PER_KG : undefined;
+    const insuranceCheck = await checkCarrierInsurance(offer.carrier_id, requiredCoverage);
+    if (!insuranceCheck.ok && enforced) {
+      return toast.error(insuranceCheckMessage(insuranceCheck));
     }
-    const finalize = async () => {
-      const { error } = await supabase.from('offers').update({ is_accepted: true }).eq('id', offerId);
-      if (error) return toast.error('Failed to accept offer');
-      await deductRoutePallets(offer?.route_id, offer?.load?.pallets);
-      if (offer?.carrier_id) {
-        const load = offer.load;
-        notifyOfferAccepted({
-          recipientUserId: offer.carrier_id,
-          fromName: 'The shipper',
-          route: load ? `${load.origin_city}, ${load.origin_country} → ${load.destination_city}, ${load.destination_country}` : undefined,
-          price: offer.price,
-          pallets: load?.pallets,
-          cargoType: load?.cargo_type,
-          weightKg: load?.weight_kg,
-          pickupDate: load?.pickup_date_from ? format(new Date(load.pickup_date_from), 'MMM d, yyyy') : undefined,
-          actionUrl: `${window.location.origin}/dashboard/carrier`,
-          idempotencyKey: `offer-accept-${offerId}`,
-        });
-      }
-      toast.success('Offer accepted');
-      setSelected(null);
-      fetchData();
-    };
 
-    if (bypassReasons.length > 0) {
-      confirmBypass(bypassReasons, finalize);
-      return;
-    }
-    await finalize();
+    // Navigate to the load page where the full acceptance + payment flow lives
+    setSelected(null);
+    navigate(`/load/${offer.load_id}`);
   };
 
   const declineOfferReceived = async (offerId: string) => {
@@ -327,7 +299,7 @@ export default function OffersShipper() {
                     return (
                       <Card
                         key={r.id}
-                        className="hover:shadow-md transition-shadow cursor-pointer"
+                        className={`hover:shadow-md transition-shadow cursor-pointer${s === 'expired' || s === 'declined' ? ' opacity-60' : ''}`}
                         onClick={() => setSelected({ kind: 'made', data: r })}
                       >
                         <CardContent className="p-5">
@@ -395,7 +367,7 @@ export default function OffersShipper() {
                     return (
                       <Card
                         key={o.id}
-                        className="hover:shadow-md transition-shadow cursor-pointer"
+                        className={`hover:shadow-md transition-shadow cursor-pointer${s === 'expired' ? ' opacity-60' : ''}`}
                         onClick={() => setSelected({ kind: 'received', data: o })}
                       >
                         <CardContent className="p-5">
@@ -581,7 +553,7 @@ function ReceivedDetail({ offer, onAccept, onCounter, onDecline }: any) {
       <div className="mt-8 flex flex-wrap gap-2">
         {s === 'pending' && (
           <>
-            <Button onClick={() => onAccept(offer.id)}>Accept</Button>
+            <Button onClick={() => onAccept(offer.id)}>Accept &amp; Pay</Button>
             <Button variant="outline" onClick={() => onCounter(offer)}>Counter</Button>
             <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => onDecline(offer.id)}>
               Decline

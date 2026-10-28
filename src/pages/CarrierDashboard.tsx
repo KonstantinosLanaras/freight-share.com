@@ -42,6 +42,7 @@ import { BookmarkButton } from '@/components/BookmarkButton';
 import { haversineKm, getProximityTier } from '@/lib/geoUtils';
 import { ProximityBadge } from '@/components/compatibility/ProximityBadge';
 import { isLoadExpired, isRouteExpired } from '@/lib/expiryUtils';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { PassedBadge } from '@/components/PassedBadge';
 import { checkLoadRouteMatch } from '@/lib/matchingUtils';
 import type { CargoType, VehicleType } from '@/lib/cargoVehicleCompatibility';
@@ -142,6 +143,7 @@ export default function CarrierDashboard() {
   const [stats, setStats] = useState({ activeRoutes: 0, matchedLoads: 0, completed: 0, totalEarned: 0, pendingRequests: 0 });
   const [connectingPayouts, setConnectingPayouts] = useState(false);
   const { user, signOut } = useAuth();
+  const unreadMessages = useUnreadMessages();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -471,7 +473,10 @@ export default function CarrierDashboard() {
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <MessageSquare className="h-5 w-5" />
-                Messages
+                <span className="flex-1">Messages</span>
+                {unreadMessages > 0 && (
+                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{unreadMessages}</Badge>
+                )}
               </Link>
               <Link
                 to="/dashboard/carrier/requests"

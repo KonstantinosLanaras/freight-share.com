@@ -12,18 +12,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const requestStatusConfig: Record<string, { label: string; color: string }> = {
-  sent: { label: 'New', color: 'bg-primary/10 text-primary' },
-  viewed: { label: 'Viewed', color: 'bg-accent/10 text-accent' },
-  in_discussion: { label: 'In Discussion', color: 'bg-accent/10 text-accent' },
+  sent: { label: 'New', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
+  viewed: { label: 'Viewed', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
+  in_discussion: { label: 'In Discussion', color: 'bg-primary/10 text-primary' },
   accepted: { label: 'Accepted', color: 'bg-success/10 text-success' },
-  rejected: { label: 'Rejected', color: 'bg-destructive/10 text-destructive' },
-  expired: { label: 'Expired', color: 'bg-muted text-muted-foreground' },
+  rejected: { label: 'Rejected', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' },
+  expired: { label: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' },
   cancelled: { label: 'Cancelled', color: 'bg-muted text-muted-foreground' },
 };
 
-const offerStatusLabel = (isAccepted: boolean) =>
-  isAccepted ? { label: 'Accepted', color: 'bg-success/10 text-success' }
-             : { label: 'Pending', color: 'bg-primary/10 text-primary' };
+const todayIso = () => new Date().toISOString().split('T')[0];
+
+const offerStatusLabel = (isAccepted: boolean, pickupDateTo?: string) => {
+  if (isAccepted) return { label: 'Accepted', color: 'bg-success/10 text-success' };
+  if (pickupDateTo && pickupDateTo < todayIso()) {
+    return { label: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' };
+  }
+  return { label: 'Pending', color: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' };
+};
 
 export default function CarrierRequests() {
   const { user } = useAuth();
@@ -46,7 +52,7 @@ export default function CarrierRequests() {
           .order('created_at', { ascending: false }),
         supabase
           .from('offers')
-          .select('*, loads(origin_city, destination_city, pickup_date_from, cargo_type)')
+          .select('*, loads(origin_city, destination_city, pickup_date_from, pickup_date_to, cargo_type)')
           .eq('carrier_id', user!.id)
           .order('created_at', { ascending: false }),
       ]);
@@ -136,12 +142,12 @@ export default function CarrierRequests() {
               ) : (
                 <div className="space-y-3">
                   {offers.map((offer) => {
-                    const s = offerStatusLabel(offer.is_accepted);
+                    const s = offerStatusLabel(offer.is_accepted, offer.loads?.pickup_date_to);
                     return (
                       <Card
                         key={offer.id}
-                        className="hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/dashboard/carrier/loads/${offer.load_id}`)}
+                        className={`hover:shadow-md transition-shadow cursor-pointer${offerStatusLabel(offer.is_accepted, offer.loads?.pickup_date_to).label === 'Expired' ? ' opacity-60' : ''}`}
+                        onClick={() => navigate(`/load/${offer.load_id}`)}
                       >
                         <CardContent className="p-5">
                           <div className="flex items-start justify-between gap-4">
@@ -202,7 +208,7 @@ export default function CarrierRequests() {
                     return (
                       <Card
                         key={req.id}
-                        className={`hover:shadow-md transition-shadow cursor-pointer ${req.status === 'sent' ? 'border-l-4 border-l-primary' : ''}`}
+                        className={`hover:shadow-md transition-shadow cursor-pointer ${req.status === 'sent' ? 'border-l-4 border-l-amber-400' : ''}${['expired', 'cancelled', 'rejected'].includes(req.status) ? ' opacity-60' : ''}`}
                         onClick={() => navigate(`/dashboard/carrier/requests/${req.id}`)}
                       >
                         <CardContent className="p-5">

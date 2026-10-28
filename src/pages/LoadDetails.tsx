@@ -706,9 +706,12 @@ export default function LoadDetails() {
                                     <span className="text-foreground font-medium">
                                       Carrier liability coverage up to €{offer.carrier_insurance.coverage_limit_eur.toLocaleString()}
                                     </span>
-                                    <Badge variant="outline" className="text-xs text-primary border-primary/30">
-                                      {offer.carrier_insurance.status === 'verified' ? 'Verified' : 'Provided'}
-                                    </Badge>
+                                    <Badge
+                                    variant="outline"
+                                    className={`text-xs ${offer.carrier_insurance.status === 'verified' ? 'text-success border-success/40' : 'text-amber-700 border-amber-400/50'}`}
+                                  >
+                                    {offer.carrier_insurance.status === 'verified' ? 'Verified' : 'Pending review'}
+                                  </Badge>
                                   </div>
                                 ) : insuranceExpired ? (
                                   <span className="text-destructive text-sm">Carrier insurance expired</span>

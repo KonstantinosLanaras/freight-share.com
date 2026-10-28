@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { messagesLastViewedKey } from '@/hooks/useUnreadMessages';
 
 interface Shipment {
   id: string;
@@ -37,6 +38,11 @@ export default function Messages() {
       }
     }
   }, [user, shipmentId]);
+
+  // Clear the unread badge when user opens Messages
+  useEffect(() => {
+    if (user) localStorage.setItem(messagesLastViewedKey(user.id), String(Date.now()));
+  }, [user]);
 
   const fetchShipment = async () => {
     if (!shipmentId) return;

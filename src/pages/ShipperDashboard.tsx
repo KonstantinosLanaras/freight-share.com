@@ -27,6 +27,7 @@ import {
   Handshake
 } from 'lucide-react';
 import { useShipperOffersUnread } from '@/hooks/useShipperOffersUnread';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -148,6 +149,7 @@ export default function ShipperDashboard() {
   const { user, signOut } = useAuth();
   const { isDemoMode } = useDemoMode();
   const offersUnread = useShipperOffersUnread();
+  const unreadMessages = useUnreadMessages();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -501,7 +503,10 @@ export default function ShipperDashboard() {
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <MessageSquare className="h-5 w-5" />
-                Messages
+                <span className="flex-1">Messages</span>
+                {unreadMessages > 0 && (
+                  <Badge className="h-5 px-1.5 bg-primary text-primary-foreground">{unreadMessages}</Badge>
+                )}
               </Link>
             </div>
           </nav>
