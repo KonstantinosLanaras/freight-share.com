@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Package, 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Package,
   Truck,
   User,
   LogOut,
@@ -18,7 +19,8 @@ import {
   FileText,
   CheckCircle,
   XCircle,
-  Eye
+  Eye,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +35,26 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+
+interface InsuranceReview {
+  id: string;
+  carrier_id: string;
+  provider_name: string;
+  policy_number: string | null;
+  coverage_type: string;
+  coverage_limit_eur: number;
+  expiration_date: string;
+  document_url: string | null;
+  status: string;
+  rejection_reason: string | null;
+  created_at: string;
+  profiles: {
+    full_name: string | null;
+    company_name: string | null;
+    email: string;
+    legal_company_name: string | null;
+  };
+}
 
 interface CarrierVerification {
   id: string;
@@ -55,11 +77,13 @@ interface CarrierVerification {
 export default function AdminPanel() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [verifications, setVerifications] = useState<CarrierVerification[]>([]);
+  const [insuranceReviews, setInsuranceReviews] = useState<InsuranceReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState<CarrierVerification | null>(null);
+  const [selectedInsurance, setSelectedInsurance] = useState<InsuranceReview | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [stats, setStats] = useState({ pending: 0, verified: 0, rejected: 0, totalUsers: 0 });
+  const [stats, setStats] = useState({ pending: 0, verified: 0, rejected: 0, totalUsers: 0, insurancePending: 0 });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -111,7 +135,28 @@ export default function AdminPanel() {
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      setStats({ pending, verified, rejected, totalUsers: totalUsers || 0 });
+      // Fetch insurance reviews
+      const { data: insuranceData } = await supabase
+        .from('carrier_insurance')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const insuranceWithProfiles: InsuranceReview[] = [];
+      for (const ins of insuranceData || []) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, company_name, email, legal_company_name')
+          .eq('id', ins.carrier_id)
+          .maybeSingle();
+        insuranceWithProfiles.push({
+          ...ins,
+          profiles: profileData || { full_name: null, company_name: null, email: '', legal_company_name: null },
+        } as InsuranceReview);
+      }
+      setInsuranceReviews(insuranceWithProfiles);
+
+      const insurancePending = insuranceWithProfiles.filter(i => i.status === 'pending').length;
+      setStats({ pending, verified, rejected, totalUsers: totalUsers || 0, insurancePending });
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load verification data');
@@ -193,6 +238,50 @@ export default function AdminPanel() {
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleApproveInsurance = async (ins: InsuranceReview) => {
+    setProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('carrier_insurance')
+        .update({ status: 'verified', reviewed_at: new Date().toISOString(), reviewed_by: user?.id, rejection_reason: null })
+        .eq('id', ins.id);
+      if (error) throw error;
+      toast.success('Insurance verified');
+      setSelectedInsurance(null);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to approve');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleRejectInsurance = async (ins: InsuranceReview) => {
+    if (!rejectionReason.trim()) { toast.error('Please provide a rejection reason'); return; }
+    setProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('carrier_insurance')
+        .update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: user?.id, rejection_reason: rejectionReason })
+        .eq('id', ins.id);
+      if (error) throw error;
+      toast.success('Insurance rejected');
+      setSelectedInsurance(null);
+      setRejectionReason('');
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reject');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const openInsuranceDocument = async (path: string) => {
+    const { data } = await supabase.storage.from('insurance-documents').createSignedUrl(path, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    else toast.error('Failed to load document');
   };
 
   const handleSignOut = async () => {
@@ -334,10 +423,10 @@ export default function AdminPanel() {
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
-                  Carrier Verifications
+                  Admin Panel
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Review and approve carrier verification requests.
+                  Review carrier verifications and insurance documents.
                 </p>
               </div>
 
@@ -400,64 +489,249 @@ export default function AdminPanel() {
                 </Card>
               </div>
 
-              {/* Verifications List */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>All Verification Requests</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {verifications.length === 0 ? (
-                    <div className="text-center py-12">
-                      <ShieldCheck className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">No verifications yet</h3>
-                      <p className="text-muted-foreground">Carrier verification requests will appear here</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {verifications.map((verification) => (
-                        <div 
-                          key={verification.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-carrier/10 flex items-center justify-center shrink-0">
-                              <Truck className="h-5 w-5 text-carrier" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-foreground">
-                                {verification.profiles?.legal_company_name || verification.profiles?.company_name || 'Unknown Company'}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {verification.profiles?.email} · VAT: {verification.profiles?.vat_number || 'N/A'}
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {documentTypeLabels[verification.document_type]} · Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy')}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <VerificationBadge status={verification.status} size="sm" showTooltip={false} />
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => setSelectedVerification(verification)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Review
-                            </Button>
-                          </div>
+              <Tabs defaultValue="verifications">
+                <TabsList className="mb-6">
+                  <TabsTrigger value="verifications" className="gap-2">
+                    Carrier Verifications
+                    {stats.pending > 0 && (
+                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">{stats.pending}</Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="insurance" className="gap-2">
+                    Insurance Reviews
+                    {stats.insurancePending > 0 && (
+                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">{stats.insurancePending}</Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Verifications Tab */}
+                <TabsContent value="verifications">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>All Verification Requests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {verifications.length === 0 ? (
+                        <div className="text-center py-12">
+                          <ShieldCheck className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-foreground mb-2">No verifications yet</h3>
+                          <p className="text-muted-foreground">Carrier verification requests will appear here</p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                      ) : (
+                        <div className="space-y-4">
+                          {verifications.map((verification) => (
+                            <div
+                              key={verification.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                            >
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-carrier/10 flex items-center justify-center shrink-0">
+                                  <Truck className="h-5 w-5 text-carrier" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-foreground">
+                                    {verification.profiles?.legal_company_name || verification.profiles?.company_name || 'Unknown Company'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {verification.profiles?.email} · VAT: {verification.profiles?.vat_number || 'N/A'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {documentTypeLabels[verification.document_type]} · Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <VerificationBadge status={verification.status} size="sm" showTooltip={false} />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedVerification(verification)}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Review
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Insurance Reviews Tab */}
+                <TabsContent value="insurance">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Insurance Document Reviews</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {insuranceReviews.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Shield className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-foreground mb-2">No insurance submissions yet</h3>
+                          <p className="text-muted-foreground">Carrier insurance documents will appear here once submitted</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {insuranceReviews.map((ins) => (
+                            <div
+                              key={ins.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                            >
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                  <Shield className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-foreground">
+                                    {ins.profiles?.legal_company_name || ins.profiles?.company_name || 'Unknown Company'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {ins.profiles?.email} · {ins.provider_name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    €{ins.coverage_limit_eur.toLocaleString()} coverage · Expires {format(new Date(ins.expiration_date), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge
+                                  variant={ins.status === 'verified' ? 'default' : ins.status === 'rejected' ? 'destructive' : 'secondary'}
+                                  className={ins.status === 'verified' ? 'bg-success text-success-foreground' : ''}
+                                >
+                                  {ins.status === 'verified' ? 'Verified' : ins.status === 'rejected' ? 'Rejected' : 'Pending'}
+                                </Badge>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => { setSelectedInsurance(ins); setRejectionReason(''); }}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Review
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </div>
       </main>
 
-      {/* Review Dialog */}
+      {/* Insurance Review Dialog */}
+      <Dialog open={!!selectedInsurance} onOpenChange={() => { setSelectedInsurance(null); setRejectionReason(''); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Review Insurance Document</DialogTitle>
+            <DialogDescription>
+              Verify the carrier's transport liability insurance policy.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedInsurance && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Carrier</div>
+                  <div className="font-medium">
+                    {selectedInsurance.profiles?.legal_company_name || selectedInsurance.profiles?.company_name || 'Unknown'}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Provider</div>
+                    <div className="font-medium">{selectedInsurance.provider_name}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Policy Number</div>
+                    <div className="font-medium">{selectedInsurance.policy_number || '—'}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Coverage Limit</div>
+                    <div className="font-medium">€{selectedInsurance.coverage_limit_eur.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Expires</div>
+                    <div className="font-medium">{format(new Date(selectedInsurance.expiration_date), 'MMM d, yyyy')}</div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Coverage Type</div>
+                  <div className="font-medium capitalize">{selectedInsurance.coverage_type.replace(/_/g, ' ')}</div>
+                </div>
+              </div>
+
+              {selectedInsurance.document_url && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => openInsuranceDocument(selectedInsurance.document_url!)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Policy Document
+                </Button>
+              )}
+
+              {selectedInsurance.status === 'pending' && (
+                <>
+                  <div className="border-t pt-4">
+                    <div className="text-sm font-medium mb-2">Rejection Reason (if rejecting)</div>
+                    <Textarea
+                      placeholder="Explain why the document is being rejected..."
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => handleRejectInsurance(selectedInsurance)}
+                      disabled={processing}
+                    >
+                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
+                      Reject
+                    </Button>
+                    <Button
+                      variant="default"
+                      className="flex-1 bg-success hover:bg-success/90"
+                      onClick={() => handleApproveInsurance(selectedInsurance)}
+                      disabled={processing}
+                    >
+                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {selectedInsurance.status === 'rejected' && selectedInsurance.rejection_reason && (
+                <div className="bg-destructive/10 rounded-lg p-4">
+                  <div className="text-sm font-medium text-destructive mb-1">Rejection Reason</div>
+                  <div className="text-sm">{selectedInsurance.rejection_reason}</div>
+                </div>
+              )}
+
+              {selectedInsurance.status === 'verified' && (
+                <div className="bg-success/10 rounded-lg p-4 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-success" />
+                  <div className="text-sm font-medium text-success">Verified — carrier can accept paid shipments</div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Carrier Verification Review Dialog */}
       <Dialog open={!!selectedVerification} onOpenChange={() => setSelectedVerification(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

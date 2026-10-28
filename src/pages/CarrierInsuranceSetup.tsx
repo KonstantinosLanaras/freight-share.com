@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, ShieldCheck, Loader2, Upload, FileText, Info } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Loader2, Upload, FileText, Info, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -108,7 +108,10 @@ export default function CarrierInsuranceSetup() {
         coverage_limit_eur: parseFloat(formData.coverageLimitEur),
         expiration_date: formData.expirationDate,
         document_url: documentUrl,
-        status: 'provided',
+        status: 'pending',
+        reviewed_at: null,
+        reviewed_by: null,
+        rejection_reason: null,
       };
 
       if (existingInsurance) {
@@ -173,6 +176,39 @@ export default function CarrierInsuranceSetup() {
             <p>This is your <strong>transport liability policy</strong> — it covers your legal responsibility as a carrier under CMR (up to ~€10/kg). Shippers need confidence you can settle a claim. Your policy document is verified before you can accept paid shipments.</p>
           </div>
         </div>
+
+        {existingInsurance?.status === 'pending' && (
+          <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mb-6">
+            <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-800">Under review</p>
+              <p className="text-amber-700 mt-0.5">Your document has been submitted and is awaiting admin verification. You'll be able to accept paid shipments once approved.</p>
+            </div>
+          </div>
+        )}
+
+        {existingInsurance?.status === 'rejected' && (
+          <div className="flex items-start gap-3 rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3 mb-6">
+            <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-destructive">Document rejected</p>
+              {existingInsurance.rejection_reason && (
+                <p className="text-destructive/80 mt-0.5">{existingInsurance.rejection_reason}</p>
+              )}
+              <p className="text-muted-foreground mt-1">Please upload a corrected document and resubmit.</p>
+            </div>
+          </div>
+        )}
+
+        {existingInsurance?.status === 'verified' && (
+          <div className="flex items-start gap-3 rounded-lg bg-success/10 border border-success/30 px-4 py-3 mb-6">
+            <ShieldCheck className="h-5 w-5 text-success shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-success">Verified</p>
+              <p className="text-muted-foreground mt-0.5">Your insurance is verified. You can update details below if your policy changes.</p>
+            </div>
+          </div>
+        )}
 
         <Card>
           <CardHeader>
