@@ -22,7 +22,15 @@ const addDays = (base: string, n: number): string => {
   return d.toISOString().split('T')[0]
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  const cronSecret = Deno.env.get('CRON_SECRET')
+  if (cronSecret) {
+    const auth = req.headers.get('authorization') ?? ''
+    if (auth !== `Bearer ${cronSecret}`) {
+      return json({ error: 'unauthorized' }, 401)
+    }
+  }
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceKey) return json({ error: 'server_config' }, 500)
