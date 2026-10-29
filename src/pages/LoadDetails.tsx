@@ -34,6 +34,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { CounterpartyCard } from '@/components/profile/CounterpartyCard';
+import { MarketPricePanel } from '@/components/market/MarketPricePanel';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -604,6 +605,14 @@ export default function LoadDetails() {
                     <p className="text-sm">{load.notes}</p>
                   </div>
                 )}
+                <MarketPricePanel
+                  originCity={load.origin_city}
+                  originCountry={load.origin_country}
+                  destinationCity={load.destination_city}
+                  destinationCountry={load.destination_country}
+                  pallets={load.pallets}
+                  mode="load"
+                />
               </CardContent>
             </Card>
 

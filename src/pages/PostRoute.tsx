@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CityCombobox } from '@/components/CityCombobox';
 import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { ArrowLeft, Truck, MapPin, Calendar, Plus, X, Package, Loader2, Info, Scale } from 'lucide-react';
+import { MarketPricePanel } from '@/components/market/MarketPricePanel';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -649,6 +650,13 @@ export default function PostRoute() {
                 />
               </div>
 
+              <MarketPricePanel
+                originCity={formData.originCity}
+                originCountry={formData.originCountry}
+                destinationCity={formData.destinationCity}
+                destinationCountry={formData.destinationCountry}
+                mode="route"
+              />
             </CardContent>
           </Card>
 

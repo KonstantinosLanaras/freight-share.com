@@ -43,6 +43,7 @@ import { vehicleTypeLabels } from '@/lib/cargoVehicleCompatibility';
 import { DeviationRequestForm } from '@/components/routes/DeviationRequestForm';
 import { InsuranceSummaryCard } from '@/components/insurance/InsuranceSummaryCard';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import { MarketPricePanel } from '@/components/market/MarketPricePanel';
 
 type RouteStatus = 'planned' | 'active' | 'completed' | 'cancelled';
 
@@ -325,6 +326,13 @@ export default function RouteDetails() {
                     </div>
                   </div>
                 )}
+                <MarketPricePanel
+                  originCity={route.origin_city}
+                  originCountry={route.origin_country}
+                  destinationCity={route.destination_city}
+                  destinationCountry={route.destination_country}
+                  mode="route"
+                />
               </CardContent>
             </Card>
 

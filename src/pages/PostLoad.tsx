@@ -11,6 +11,7 @@ import { countryNameFromCode, countryCodeToFlag } from '@/lib/countryCodes';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Package, MapPin, Calendar, Euro, FileText, Loader2, Scale, Clock, AlertCircle } from 'lucide-react';
+import { MarketPricePanel } from '@/components/market/MarketPricePanel';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -696,6 +697,15 @@ export default function PostLoad() {
                   )}
                 </div>
               )}
+
+              <MarketPricePanel
+                originCity={formData.originCity}
+                originCountry={formData.originCountry}
+                destinationCity={formData.destinationCity}
+                destinationCountry={formData.destinationCountry}
+                pallets={formData.pallets ? Number(formData.pallets) : undefined}
+                mode="load"
+              />
             </CardContent>
           </Card>
 
