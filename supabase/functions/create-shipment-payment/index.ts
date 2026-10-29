@@ -69,12 +69,38 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Check if a Stripe customer exists for this user
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing Stripe customer", { customerId });
+    // Resolve or create a persistent Stripe Customer for this shipper so that
+    // saved payment methods survive across checkout sessions.
+    const { data: shipperProfile } = await supabaseClient
+      .from('profiles')
+      .select('stripe_customer_id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    let customerId = shipperProfile?.stripe_customer_id as string | null;
+
+    if (!customerId) {
+      // Fall back to email lookup in case the column was added after the
+      // customer was first created (e.g. existing test accounts).
+      const existing = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (existing.data.length > 0) {
+        customerId = existing.data[0].id;
+        logStep("Found existing Stripe customer by email", { customerId });
+      } else {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { supabase_user_id: user.id },
+        });
+        customerId = customer.id;
+        logStep("Created new Stripe customer", { customerId });
+      }
+      // Persist so subsequent calls skip the lookup entirely.
+      await supabaseClient
+        .from('profiles')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', user.id);
+    } else {
+      logStep("Reusing saved Stripe customer", { customerId });
     }
 
     // Create a Checkout session for the shipment payment
@@ -110,6 +136,7 @@ serve(async (req) => {
         transfer_data: {
           destination: carrierAccountId,
         },
+        setup_future_usage: 'off_session', // Save card for future shipment payments
         metadata: {
           shipment_id: shipmentId,
           shipper_id: user.id,

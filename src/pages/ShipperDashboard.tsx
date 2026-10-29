@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Package, 
-  Plus, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
+  Package,
+  Plus,
+  TrendingUp,
+  Clock,
+  CheckCircle,
   Truck,
   ArrowRight,
   Bell,
@@ -24,7 +24,8 @@ import {
   XCircle,
   Shuffle,
   Home,
-  Handshake
+  Handshake,
+  CreditCard
 } from 'lucide-react';
 import { useShipperOffersUnread } from '@/hooks/useShipperOffersUnread';
 import { useShipperLoadsUnread } from '@/hooks/useShipperLoadsUnread';
@@ -95,6 +96,7 @@ interface Profile {
   full_name: string | null;
   company_name: string | null;
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | null;
+  stripe_customer_id: string | null;
 }
 
 interface PickupRequest {
@@ -145,6 +147,7 @@ export default function ShipperDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [connectingBilling, setConnectingBilling] = useState(false);
   const [stats, setStats] = useState({ active: 0, pending: 0, completed: 0, totalSpent: 0, pickupRequests: 0 });
 
   const { user, signOut } = useAuth();
@@ -170,7 +173,7 @@ export default function ShipperDashboard() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, company_name, verification_status')
+        .select('full_name, company_name, verification_status, stripe_customer_id')
         .eq('id', user.id)
         .maybeSingle();
       
@@ -312,6 +315,26 @@ export default function ShipperDashboard() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleConnectBilling = async () => {
+    if (!user) return;
+    setConnectingBilling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-billing-portal', {
+        body: { returnUrl: `${window.location.origin}/dashboard/shipper` },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No portal URL returned');
+      }
+    } catch (err) {
+      console.error('Error opening billing portal:', err);
+      toast.error('Could not open billing settings. Please try again.');
+      setConnectingBilling(false);
+    }
   };
 
   // A carrier's counter-offer supersedes the shipper's originally
@@ -592,6 +615,35 @@ export default function ShipperDashboard() {
                       <Button variant="default" onClick={() => setShowVerificationForm(true)}>
                         <ShieldCheck className="h-4 w-4 mr-2" />
                         Add Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Payment Details Banner */}
+              {profile && !profile.stripe_customer_id && !showVerificationForm && (
+                <Card className="mb-6 border-l-4 border-l-accent bg-accent/5">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/20">
+                          <CreditCard className="h-5 w-5 text-accent" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">Save your payment details</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Add a card so you're ready to pay instantly when you accept a carrier offer.
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" onClick={handleConnectBilling} disabled={connectingBilling} className="shrink-0">
+                        {connectingBilling ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CreditCard className="h-4 w-4 mr-2" />
+                        )}
+                        Add Payment Method
                       </Button>
                     </div>
                   </CardContent>

@@ -171,7 +171,11 @@ export default function CarrierDashboard() {
         if (data?.onboarded) {
           toast.success('Payout account connected — you can now accept paid shipments.');
         } else if (connectParam === 'return') {
-          toast('Payout setup isn\'t complete yet — you can finish it any time from the dashboard.');
+          const due: string[] = data?.currentlyDue ?? [];
+          const hint = due.length > 0
+            ? ` Stripe still needs: ${due.slice(0, 3).join(', ')}${due.length > 3 ? ` +${due.length - 3} more` : ''}.`
+            : '';
+          toast(`Payout setup isn't complete yet — click "Resume Setup" to finish.${hint}`);
         }
       } catch (err) {
         console.error('Error checking connect status:', err);
@@ -617,9 +621,15 @@ export default function CarrierDashboard() {
                           <Wallet className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground mb-1">Connect your payout account</h3>
+                          <h3 className="font-semibold text-foreground mb-1">
+                            {profile.stripe_connect_account_id
+                              ? 'Finish your payout account setup'
+                              : 'Connect your payout account'}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
-                            Set up Stripe to receive payment for shipments. You can't be paid for a delivery until this is complete.
+                            {profile.stripe_connect_account_id
+                              ? 'Stripe needs a bit more information before you can receive payments. Click "Resume Setup" to complete the remaining steps.'
+                              : "Set up Stripe to receive payment for shipments. You can't be paid for a delivery until this is complete."}
                           </p>
                         </div>
                       </div>
@@ -629,7 +639,7 @@ export default function CarrierDashboard() {
                         ) : (
                           <Wallet className="h-4 w-4 mr-2" />
                         )}
-                        Connect Payouts
+                        {profile.stripe_connect_account_id ? 'Resume Setup' : 'Connect Payouts'}
                       </Button>
                     </div>
                   </CardContent>
