@@ -74,12 +74,31 @@ interface CarrierVerification {
   };
 }
 
+interface ShipperVerification {
+  id: string;
+  shipper_id: string;
+  document_type: string;
+  document_url: string;
+  submitted_at: string;
+  status: 'unverified' | 'pending' | 'verified' | 'rejected';
+  rejection_reason: string | null;
+  profiles: {
+    full_name: string | null;
+    company_name: string | null;
+    email: string;
+    legal_company_name: string | null;
+    vat_number: string | null;
+  };
+}
+
 export default function AdminPanel() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [verifications, setVerifications] = useState<CarrierVerification[]>([]);
+  const [shipperVerifications, setShipperVerifications] = useState<ShipperVerification[]>([]);
   const [insuranceReviews, setInsuranceReviews] = useState<InsuranceReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState<CarrierVerification | null>(null);
+  const [selectedShipperVerification, setSelectedShipperVerification] = useState<ShipperVerification | null>(null);
   const [selectedInsurance, setSelectedInsurance] = useState<InsuranceReview | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -135,6 +154,27 @@ export default function AdminPanel() {
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
+      // Fetch shipper verifications
+      const { data: shipperVerifData } = await supabase
+        .from('shipper_verifications')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      const shipperVerifWithProfiles: ShipperVerification[] = [];
+      for (const v of shipperVerifData || []) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, company_name, email, legal_company_name, vat_number')
+          .eq('id', v.shipper_id)
+          .maybeSingle();
+        shipperVerifWithProfiles.push({
+          ...v,
+          profiles: profileData || { full_name: null, company_name: null, email: '', legal_company_name: null, vat_number: null },
+        } as ShipperVerification);
+      }
+      setShipperVerifications(shipperVerifWithProfiles);
+      const shipperPending = shipperVerifWithProfiles.filter(v => v.status === 'pending').length;
+
       // Fetch insurance reviews
       const { data: insuranceData } = await supabase
         .from('carrier_insurance')
@@ -156,7 +196,7 @@ export default function AdminPanel() {
       setInsuranceReviews(insuranceWithProfiles);
 
       const insurancePending = insuranceWithProfiles.filter(i => i.status === 'pending' || i.status === 'provided').length;
-      setStats({ pending, verified, rejected, totalUsers: totalUsers || 0, insurancePending });
+      setStats({ pending: pending + shipperPending, verified, rejected, totalUsers: totalUsers || 0, insurancePending });
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load verification data');
@@ -235,6 +275,54 @@ export default function AdminPanel() {
     } catch (error: any) {
       console.error('Error rejecting:', error);
       toast.error(error.message || 'Failed to reject verification');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleApproveShipper = async (v: ShipperVerification) => {
+    setProcessing(true);
+    try {
+      const { error: vErr } = await supabase
+        .from('shipper_verifications')
+        .update({ status: 'verified', reviewed_at: new Date().toISOString(), reviewed_by: user?.id })
+        .eq('id', v.id);
+      if (vErr) throw vErr;
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ verification_status: 'verified' })
+        .eq('id', v.shipper_id);
+      if (pErr) throw pErr;
+      toast.success('Shipper verified successfully');
+      setSelectedShipperVerification(null);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to approve');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleRejectShipper = async (v: ShipperVerification) => {
+    if (!rejectionReason.trim()) { toast.error('Please provide a rejection reason'); return; }
+    setProcessing(true);
+    try {
+      const { error: vErr } = await supabase
+        .from('shipper_verifications')
+        .update({ status: 'rejected', rejection_reason: rejectionReason, reviewed_at: new Date().toISOString(), reviewed_by: user?.id })
+        .eq('id', v.id);
+      if (vErr) throw vErr;
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ verification_status: 'rejected' })
+        .eq('id', v.shipper_id);
+      if (pErr) throw pErr;
+      toast.success('Shipper verification rejected');
+      setSelectedShipperVerification(null);
+      setRejectionReason('');
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reject');
     } finally {
       setProcessing(false);
     }
@@ -493,8 +581,14 @@ export default function AdminPanel() {
                 <TabsList className="mb-6">
                   <TabsTrigger value="verifications" className="gap-2">
                     Carrier Verifications
-                    {stats.pending > 0 && (
-                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">{stats.pending}</Badge>
+                    {verifications.filter(v => v.status === 'pending').length > 0 && (
+                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">{verifications.filter(v => v.status === 'pending').length}</Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="shipper-verifications" className="gap-2">
+                    Shipper Verifications
+                    {shipperVerifications.filter(v => v.status === 'pending').length > 0 && (
+                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">{shipperVerifications.filter(v => v.status === 'pending').length}</Badge>
                     )}
                   </TabsTrigger>
                   <TabsTrigger value="insurance" className="gap-2">
@@ -547,6 +641,61 @@ export default function AdminPanel() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => setSelectedVerification(verification)}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Review
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Shipper Verifications Tab */}
+                <TabsContent value="shipper-verifications">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Shipper Verification Requests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {shipperVerifications.length === 0 ? (
+                        <div className="text-center py-12">
+                          <ShieldCheck className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-foreground mb-2">No shipper verifications yet</h3>
+                          <p className="text-muted-foreground">Shipper verification requests will appear here</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {shipperVerifications.map((v) => (
+                            <div
+                              key={v.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                            >
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                  <Package className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-foreground">
+                                    {v.profiles?.legal_company_name || v.profiles?.company_name || 'Unknown Company'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {v.profiles?.email} · VAT: {v.profiles?.vat_number || 'N/A'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {documentTypeLabels[v.document_type] ?? v.document_type} · Submitted {format(new Date(v.submitted_at), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <VerificationBadge status={v.status} size="sm" showTooltip={false} />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => { setSelectedShipperVerification(v); setRejectionReason(''); }}
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
                                   Review
@@ -624,6 +773,95 @@ export default function AdminPanel() {
           )}
         </div>
       </main>
+
+      {/* Shipper Verification Dialog */}
+      <Dialog open={!!selectedShipperVerification} onOpenChange={() => { setSelectedShipperVerification(null); setRejectionReason(''); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Review Shipper Verification</DialogTitle>
+            <DialogDescription>Verify the shipper's business registration document.</DialogDescription>
+          </DialogHeader>
+          {selectedShipperVerification && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Company</div>
+                  <div className="font-medium">
+                    {selectedShipperVerification.profiles?.legal_company_name || selectedShipperVerification.profiles?.company_name || 'Unknown'}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Email</div>
+                    <div className="font-medium text-sm">{selectedShipperVerification.profiles?.email}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">VAT Number</div>
+                    <div className="font-medium">{selectedShipperVerification.profiles?.vat_number || '—'}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Document Type</div>
+                    <div className="font-medium">{documentTypeLabels[selectedShipperVerification.document_type] ?? selectedShipperVerification.document_type}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Submitted</div>
+                    <div className="font-medium">{format(new Date(selectedShipperVerification.submitted_at), 'MMM d, yyyy')}</div>
+                  </div>
+                </div>
+              </div>
+              {selectedShipperVerification.document_url && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={async () => {
+                    const { data } = await supabase.storage.from('verification-documents').createSignedUrl(selectedShipperVerification.document_url, 3600);
+                    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                    else toast.error('Failed to load document');
+                  }}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Document
+                </Button>
+              )}
+              {selectedShipperVerification.status === 'pending' && (
+                <>
+                  <div className="border-t pt-4">
+                    <div className="text-sm font-medium mb-2">Rejection Reason (if rejecting)</div>
+                    <Textarea
+                      placeholder="Explain why the document is being rejected..."
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <Button variant="destructive" className="flex-1" onClick={() => handleRejectShipper(selectedShipperVerification)} disabled={processing}>
+                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
+                      Reject
+                    </Button>
+                    <Button variant="default" className="flex-1 bg-success hover:bg-success/90" onClick={() => handleApproveShipper(selectedShipperVerification)} disabled={processing}>
+                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              )}
+              {selectedShipperVerification.status === 'verified' && (
+                <div className="bg-success/10 rounded-lg p-4 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-success" />
+                  <div className="text-sm font-medium text-success">Verified</div>
+                </div>
+              )}
+              {selectedShipperVerification.status === 'rejected' && selectedShipperVerification.rejection_reason && (
+                <div className="bg-destructive/10 rounded-lg p-4">
+                  <div className="text-sm font-medium text-destructive mb-1">Rejection Reason</div>
+                  <div className="text-sm">{selectedShipperVerification.rejection_reason}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Insurance Review Dialog */}
       <Dialog open={!!selectedInsurance} onOpenChange={() => { setSelectedInsurance(null); setRejectionReason(''); }}>
