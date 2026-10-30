@@ -98,12 +98,14 @@ export function CarrierVerificationForm({ onSuccess }: CarrierVerificationFormPr
       // Create verification record
       const { error: verificationError } = await supabase
         .from('carrier_verifications')
-        .insert({
+        .upsert({
           carrier_id: user.id,
           document_type: formData.documentType,
           document_url: filePath,
           status: 'pending',
-        });
+          submitted_at: new Date().toISOString(),
+          rejection_reason: null,
+        }, { onConflict: 'carrier_id' });
 
       if (verificationError) throw verificationError;
 

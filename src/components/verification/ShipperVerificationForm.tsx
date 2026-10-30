@@ -94,12 +94,14 @@ export function ShipperVerificationForm({ onSuccess }: ShipperVerificationFormPr
 
       const { error: verificationError } = await supabase
         .from('shipper_verifications')
-        .insert({
+        .upsert({
           shipper_id: user.id,
           document_type: formData.documentType,
           document_url: filePath,
           status: 'pending',
-        });
+          submitted_at: new Date().toISOString(),
+          rejection_reason: null,
+        }, { onConflict: 'shipper_id' });
 
       if (verificationError) throw verificationError;
 
