@@ -123,6 +123,7 @@ export default function LoadDetails() {
   // Offer form
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
+  const [offerMode, setOfferMode] = useState<'accept' | 'counter' | null>(null);
   const [submittingOffer, setSubmittingOffer] = useState(false);
   const [carrierExistingOffer, setCarrierExistingOffer] = useState<Offer | null>(null);
 
@@ -289,6 +290,7 @@ export default function LoadDetails() {
     setSelectedOffer(null);
     setOfferAmount('');
     setOfferMessage('');
+    setOfferMode(null);
     setCounterAmount('');
     setCounterMessage('');
   };
@@ -983,41 +985,92 @@ export default function LoadDetails() {
               </div>
               {load.price && (
                 <div className="mt-2 text-foreground">
-                  Listed price: <span className="font-bold">€{load.price}</span>
+                  Listed price: <span className="font-bold">€{load.price.toLocaleString()}</span>
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="offer-amount">Your Offer (€)</Label>
-              <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="offer-amount"
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  placeholder="Enter your price"
-                  className="pl-10"
-                  value={offerAmount}
-                  onChange={(e) => setOfferAmount(e.target.value)}
+            {/* Step 1: choose mode */}
+            {!offerMode && (
+              <div className="grid grid-cols-2 gap-3">
+                {load.price && (
+                  <button
+                    type="button"
+                    onClick={() => { setOfferMode('accept'); setOfferAmount(String(load.price)); }}
+                    className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-success/40 bg-success/5 hover:bg-success/10 transition-colors text-center"
+                  >
+                    <CheckCircle className="h-6 w-6 text-success" />
+                    <span className="font-semibold text-foreground text-sm">Accept Listed Price</span>
+                    <span className="text-xs text-muted-foreground">€{load.price.toLocaleString()}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setOfferMode('counter')}
+                  className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-center"
+                >
+                  <Euro className="h-6 w-6 text-primary" />
+                  <span className="font-semibold text-foreground text-sm">Counter Offer</span>
+                  <span className="text-xs text-muted-foreground">Propose your price</span>
+                </button>
+              </div>
+            )}
+
+            {/* Step 2a: accept confirmation */}
+            {offerMode === 'accept' && (
+              <div className="p-4 rounded-lg bg-success/10 border border-success/30 flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-success shrink-0" />
+                <div>
+                  <div className="font-semibold text-foreground">Accepting at €{load.price?.toLocaleString()}</div>
+                  <button type="button" className="text-xs text-muted-foreground underline mt-0.5" onClick={() => { setOfferMode(null); setOfferAmount(''); }}>
+                    Change
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2b: counter offer price input */}
+            {offerMode === 'counter' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="offer-amount">Your Price (€)</Label>
+                  <button type="button" className="text-xs text-muted-foreground underline" onClick={() => { setOfferMode(null); setOfferAmount(''); }}>
+                    Back
+                  </button>
+                </div>
+                <div className="relative">
+                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="offer-amount"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="Enter your price"
+                    className="pl-10"
+                    value={offerAmount}
+                    onChange={(e) => setOfferAmount(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Message — shown once a mode is chosen */}
+            {offerMode && (
+              <div className="space-y-2">
+                <Label htmlFor="offer-message">Message to Shipper (optional)</Label>
+                <Textarea
+                  id="offer-message"
+                  placeholder="Add a note about your vehicle, availability..."
+                  rows={3}
+                  value={offerMessage}
+                  onChange={(e) => setOfferMessage(e.target.value)}
+                  maxLength={500}
                 />
               </div>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="offer-message">Message to Shipper (optional)</Label>
-              <Textarea
-                id="offer-message"
-                placeholder="Add a note about your offer, vehicle, availability..."
-                rows={3}
-                value={offerMessage}
-                onChange={(e) => setOfferMessage(e.target.value)}
-                maxLength={500}
-              />
-            </div>
-
-            {isDemoMode && (
+            {isDemoMode && offerMode && (
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning-foreground flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
                 <span>Beta — This offer will be created in the database and visible to the shipper.</span>
@@ -1029,19 +1082,21 @@ export default function LoadDetails() {
             <Button variant="outline" onClick={resetFlow} disabled={submittingOffer}>
               Cancel
             </Button>
-            <Button onClick={handleSubmitOffer} disabled={!offerAmount || submittingOffer}>
-              {submittingOffer ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit Offer
-                </>
-              )}
-            </Button>
+            {offerMode && (
+              <Button onClick={handleSubmitOffer} disabled={!offerAmount || submittingOffer}>
+                {submittingOffer ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    {offerMode === 'accept' ? 'Confirm Offer' : 'Submit Counter Offer'}
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
