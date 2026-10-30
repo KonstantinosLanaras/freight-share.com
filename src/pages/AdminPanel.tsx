@@ -155,7 +155,7 @@ export default function AdminPanel() {
       }
       setInsuranceReviews(insuranceWithProfiles);
 
-      const insurancePending = insuranceWithProfiles.filter(i => i.status === 'pending').length;
+      const insurancePending = insuranceWithProfiles.filter(i => i.status === 'pending' || i.status === 'provided').length;
       setStats({ pending, verified, rejected, totalUsers: totalUsers || 0, insurancePending });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -679,7 +679,7 @@ export default function AdminPanel() {
                 </Button>
               )}
 
-              {selectedInsurance.status === 'pending' && (
+              {(selectedInsurance.status === 'pending' || selectedInsurance.status === 'provided') && (
                 <>
                   <div className="border-t pt-4">
                     <div className="text-sm font-medium mb-2">Rejection Reason (if rejecting)</div>
